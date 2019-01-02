@@ -1,9 +1,9 @@
-\ProvidesPackage{../mymacros}[Custom macros]
+\ProvidesPackage{mymacros}[Custom macros]
 
 \RequirePackage{amsmath, amsfonts, amssymb}
 
 \newcommand{\vtheta}{\boldsymbol{\theta}}
-\newcommand{\Exp}{\mathbb{E}}
+\newcommand{\Exp}{\mathop{\mathbb{E}}}
 \newcommand{\Var}{\mathbb{V}\mathrm{ar}}
 \newcommand{\muo}{\hat{\mu}_{\omega}}
 \newcommand{\mua}{\hat{\mu}_{\alpha}}
@@ -15,7 +15,26 @@
 \newcommand{\params}[2]{\boldsymbol{\theta}_{#1}^{#2}}
 \newcommand{\norm}[2][]{\left\|#2\right\|_{#1}}
 
+%Text
+\RequirePackage{xspace}
+\DeclareRobustCommand{\eg}{e.g.,\@\xspace}
+\DeclareRobustCommand{\ie}{i.e.,\@\xspace}
+\DeclareRobustCommand{\wrt}{w.r.t.\@\xspace}
+\DeclareRobustCommand{\wlg}{w.l.o.g.\@\xspace}
+
+%Calculus
+\newcommand{\Reals}{\mathbb{R}}
+\newcommand{\de}{\mathrm{d}\,}
+\newcommand{\vx}{\boldsymbol{x}}
+\newcommand{\Xspace}{\mathcal{X}}
+
 %RL
+\newcommand{\Sspace}{\mathcal{S}}
+\newcommand{\Aspace}{\mathcal{A}}
+\newcommand{\Tran}{\mathcal{P}}
+\newcommand{\Rew}{\mathcal{R}}
+\newcommand{\Rmax}{R_{\max}}
+\newcommand{\init}{\mu}
 \newcommand{\Task}{\mathcal{M}}
 \newcommand{\policyT}{\pi_{\boldsymbol{\theta}'}}
 \newcommand{\policyB}[1]{\pi_{\boldsymbol{\theta}_{#1}}}

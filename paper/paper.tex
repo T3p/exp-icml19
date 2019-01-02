@@ -22,9 +22,10 @@
 %\usepackage[accepted]{icml2019}
 
 %Custom packages and macros
-\usepackage{../mymacros}
+\usepackage{mymacros}
 \usepackage{lipsum}
 \usepackage{hyperref}
+\usepackage{mathtools}
 
 
 
@@ -36,6 +37,11 @@
 
 \twocolumn[
 \icmltitle{Exploration in Policy Search via Multiple Importance Sampling}
+
+%TITLE IDEAS
+	% Optimistic Policy Search/Optimization via Multiple Importance Sampling
+	% Policy Exploration via Multiple Importance Sampling
+	% Upper Confidence Policy Optimization/Search
 
 % It is OKAY to include author information, even for blind
 % submissions: the style file will automatically remove it for you
@@ -101,8 +107,24 @@
 \end{itemize}
 
 \section{Preliminaries}
-\subsection{Policy search}
-\subsection{Multiple importance sampling}
+In this section we provide an essential background on policy optimization and multiple importance sampling.
+\subsection{Policy optimization}
+In Policy Optimization~\citep{deisenroth2013survey} we seek the policy maximizing the agent's performance on a given RL task. The task is modeled as a continuous Markov Decision Process~\citep[MDP,][]{puterman2014markov} $\Task = \langle\Sspace,\Aspace,\Tran,\Rew,\gamma,\init\rangle$, where $\Sspace\in\Reals^{d_{\Sspace}}$ is the state space; $\Aspace\in\Reals^{d_{\Aspace}}$ is the action space; $\Tran:\Sspace\to\Delta(\Aspace)$ is a Markovian transition kernel, such that, for each time $h$, the next state is drawn as $s_{h+1}\sim\Tran(\cdot|s_h,a_h)$ depending only on the current state and action; $\Rew:\Sspace\times\Aspace\to\Reals$ is a reward signal, such that the next reward $r_{h+1} = \Rew(s_h,a_h)$ is a function of the current state and action; $\gamma\in(0,1]$ is a discount factor; and $\init\in\Delta(\Sspace)$ is the initial state distribution, such that the initial state is drawn as $s_0\sim\mu$. The agent's behavior is modeled as a parametric policy $\pi_{\vtheta}:\Sspace\to\Delta(\Aspace)$, such that the current action is drawn as $a_t\sim\pi_{\vtheta}(\cdot|s_t)$ depending on the current state, where $\vtheta\in\Theta\subseteq\Reals^m$ are the policy parameters. Deterministic policies represent a special case where $\pi_{\vtheta}$ is a Dirac delta function. With abuse of notation, we write $a_h=\pi_{\vtheta}(s_h)$ in this case. We focus on the episodic setting, where the agent's experience is organized into finite trajectories of maximum length $H$, called the task's horizon\footnote{This is \wlg provided the horizon $H$ is sufficiently long for the agent to reach steady optimal behavior}. A trajectory is a sequence of states and action $\tau=[s_0,a_0,s_1,a_1,\dots,s_{H-1},a_{H-1}]$. Every policy $\pi_{\vtheta}$ induces a distribution over trajectories, denoted as $p_{\vtheta}$. We aim to maximize the sum of discounted rewards:
+\begin{align}\label{eq:Rtau}
+	\Rew(\tau) = \sum_{h=0}^{H-1}\gamma^hr_{h+1},
+\end{align}
+in expectation over all sources of randomness.
+In \textit{action-based} policy optimization~\citep{peters2008reinforcement}, the problem is simply to find the performance-maximizing policy parameters:
+\begin{align}\label{eq:Jtheta}
+	\max_{\vtheta\in\Theta} J(\vtheta) \coloneqq \Exp_{\tau\sim p_{\vtheta}}\left[\Rew(\tau)\right].
+\end{align}
+In the action-based paradigm, stochastic policies are typically employed in order to ensure exploration, although deterministic policies have also been used with the addition of exogenous noise~\citep{silver2014deterministic}.
+Instead, in \textit{parameter-based} policy optimization~\citep{sehnke2008policy}, we define a distribution over policy parameters, $\nu_{\vx}\in\Delta(\Theta)$, called \textit{hyperpolicy}, where $\vx\in\Xspace\subseteq\Reals^d$ are the hyperpolicy parameters, or \textit{hyperparameters}. For each episode $t$, policy parameters are drawn as $\vtheta_t\sim\nu_{\vx}$ and the whole trajectory is executed with $\pi_{\vtheta_t}$. In this case, we aim to find the performance-maximizing hyperparameters:
+\begin{align}\label{eq:Jx}
+	\max_{\vx\in\Xspace} \Exp_{\vtheta\sim\nu_{\vx}}\left[J(\vtheta)\right],
+\end{align}
+where $J(\vtheta)$ is now a random variable.
+In the parameter-based paradigm, deterministic policies are typically employed, paired with stochastic hyperpolicies in order to ensure exploration.
 
 \section{Algorithm}
 \begin{itemize}
