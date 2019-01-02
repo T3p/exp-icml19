@@ -126,6 +126,21 @@ Instead, in \textit{parameter-based} policy optimization~\citep{sehnke2008policy
 where $J(\vtheta)$ is now a random variable.
 In the parameter-based paradigm, deterministic policies are typically employed, paired with stochastic hyperpolicies in order to ensure exploration.
 
+\subsection{Multiple importance sampling}
+Importance sampling~\citep{cochran2007sampling,mcbook} is a technique that allows to estimate the expectation of a function under some \textit{target} or \textit{proposal} distribution with samples drawn from a different distribution, called \textit{behavioral}. Multiple importance sampling~\citep{veach_optimally_1995} is a generalization of this technique that allows to employ, for the same estimation, samples drawn from several different behavioral distributions. Let $P$ and $Q$ be probability measures over some $\sigma$-algebra of sample space $\mathcal{Z}$, such that $P\ll Q$ (\ie $P$ is absolutely continuous \wrt $Q$). The importance weight $w_{P/Q}$ is the Radon-Nikodym derivative of $P$ \wrt $Q$, \ie~$w_{P/Q} \equiv \frac{dP}{dQ}$. We focus on the continuous case, where $P$ and $Q$ are the laws of continuous random variables having probability density functions $p$ and $q$, respectively. In this case, the importance weight is equivalent to the likelihood ratio, \ie $w_{P/Q} = \frac{p}{q}$. 
+Given a bounded function $f:\mathcal{Z}\to\Reals$, and a set of samples $z_1,\dots,z_N$ drawn from $Q$, the importance sampling estimator of $\Exp_{z\sim p}\left[f(z)\right]$ is:
+\begin{align}\label{eq:ise}
+	\wh{\mu}_{\text{IS}} = \frac{1}{N}\sum_{i=1}^{N}f(z_i)w_{P/Q}(z_i),
+\end{align}
+which is an unbiased estimator, \ie ${\Exp_{z_i\sim q}\left[\wh{\mu}_{IS}\right] = \Exp_{z\sim p}[f(z)]}$. Now, let $Q_1,\dots,Q_K$ be all probability measures over the same probability space as $P$, and $P\ll Q_i$ for $i=1,\dots,K$. Let $\alpha_1(z),\dots,\alpha_K(z)$ be mixture weights, \ie for all $z\in\mathcal{Z}$, ${\alpha_1(z)+\dots+\alpha_K(z) = 1}$ and $\alpha_k(z)\geq0$ for ${k=1,\dots,K}$. Let $z_{ik}$ be the $i$-th sample drawn from $Q_k$. Given $N_k$ samples from each $Q_k$, the Multiple Importance Sampling estimator (MIS) is:
+\begin{align}\label{eq:mise}
+	\wh{\mu}_{\text{MIS}} = \sum_{k=1}^K\frac{1}{N_k}\sum_{i=1}^{N_k}\alpha_k w_{P/Q_k}(z_{ik})f(z_{ik}),
+\end{align}
+which is also an unbiased estimator of $\Exp_{z\sim p}\left[f(z)\right]$ for any choice of the mixture weights. A common choice of the mixture weights having desirable variance properties is the balance heuristic~\citep{veach_optimally_1995}: 
+\begin{align}
+	a
+\end{align}
+
 \section{Algorithm}
 \begin{itemize}
 	\item OFU principle
