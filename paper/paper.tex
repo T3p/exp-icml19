@@ -27,6 +27,7 @@
 \usepackage{hyperref}
 \usepackage{mathtools}
 \usepackage{amsthm,thmtools,thm-restate}
+\usepackage{mathabx}
 
 %Theorems
 \newtheorem{theorem}{Theorem}
@@ -169,6 +170,13 @@ We denote with $d_{\alpha}(P\|Q) = \exp\{D_{\alpha}(P\|Q)\}$ the exponentiated $
 	where ${N=\sum_{k=1}^{K}N_k}$ is the total number of samples and ${\Phi=\sum_{k=1}^K\frac{N_k}{N}Q_k}$ is a finite mixture.
 \end{restatable}
 %
+
+\subsection{Robust Importance Weighting Estimation}
+In this section, we discuss how to perform a robust importance weighting estimation. It has been recently observed that, in many cases of interest, the plain estimator~\ref{eq:ise} has problematic tail behavior~\cite{metelli_policy_2018}. A common heuristic to address this problem consists in truncate the weight to prevent it from assuming too large values~\cite{ionides2008truncated}:
+\begin{align}\label{eq:ise}
+	\widecheck{\mu}_{\text{IS}} = \frac{1}{N}\sum_{i=1}^{N}f(z_i)\widecheck{w}_{P/Q}(z_i),
+\end{align}
+where $\widecheck{w}_{P/Q}(z_i) = \min \left\{ M_{N}, {w}_{P/Q}(z_i) \right\}$ and $M_N$ is a threshold possibly depending on the number of samples used for the estimation.
 
 \section{Algorithm}
 \begin{itemize}
