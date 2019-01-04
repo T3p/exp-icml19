@@ -26,8 +26,14 @@
 \usepackage{lipsum}
 \usepackage{hyperref}
 \usepackage{mathtools}
+\usepackage{amsthm,thmtools,thm-restate}
 
-
+%Theorems
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{sublemma}{Lemma}[section]
+\newtheorem{assumption}{Assumption}
 
 % The \icmltitle you define below is probably too long as a header.
 % Therefore, a short form for the running title is supplied here:
@@ -127,19 +133,42 @@ where $J(\vtheta)$ is now a random variable.
 In the parameter-based paradigm, deterministic policies are typically employed, paired with stochastic hyperpolicies in order to ensure exploration.
 
 \subsection{Multiple importance sampling}
-Importance sampling~\citep{cochran2007sampling,mcbook} is a technique that allows to estimate the expectation of a function under some \textit{target} or \textit{proposal} distribution with samples drawn from a different distribution, called \textit{behavioral}. Multiple importance sampling~\citep{veach_optimally_1995} is a generalization of this technique that allows to employ, for the same estimation, samples drawn from several different behavioral distributions. Let $P$ and $Q$ be probability measures over some $\sigma$-algebra of sample space $\mathcal{Z}$, such that $P\ll Q$ (\ie $P$ is absolutely continuous \wrt $Q$). The importance weight $w_{P/Q}$ is the Radon-Nikodym derivative of $P$ \wrt $Q$, \ie~$w_{P/Q} \equiv \frac{dP}{dQ}$. We focus on the continuous case, where $P$ and $Q$ are the laws of continuous random variables having probability density functions $p$ and $q$, respectively. In this case, the importance weight is equivalent to the likelihood ratio, \ie $w_{P/Q} = \frac{p}{q}$. 
-Given a bounded function $f:\mathcal{Z}\to\Reals$, and a set of samples $z_1,\dots,z_N$ drawn from $Q$, the importance sampling estimator of $\Exp_{z\sim p}\left[f(z)\right]$ is:
+Importance sampling~\citep{cochran2007sampling,mcbook} is a technique that allows to estimate the expectation of a function under some \textit{target} or \textit{proposal} distribution with samples drawn from a different distribution, called \textit{behavioral}. Multiple importance sampling~\citep{veach_optimally_1995} is a generalization of this technique that allows to employ, for the same estimation, samples drawn from several different behavioral distributions. Let $P$ and $Q$ be probability measures on a measurable space $(\mathcal{Z}, \mathcal{F})$, such that $P\ll Q$ (\ie $P$ is absolutely continuous \wrt $Q$). The importance weight $w_{P/Q}$ is the Radon-Nikodym derivative of $P$ \wrt $Q$, \ie~$w_{P/Q} \equiv \frac{\de P}{\de Q}$. Let $p$ and $q$ be the densities of $P$ and $Q$, respectively, \wrt a reference measure. From the chain rule, $w_{P/Q} = \frac{p}{q}$. In the continuous case, $p$ and $q$ are probability density functions (pdf's) of continuous random variables having laws $P$ and $Q$, respectively, and $w_{P/Q}$ is a likelihood ratio. 
+Given a bounded function $f:\mathcal{Z}\to\Reals$, and a set of \iid outcomes $z_1,\dots,z_N$ sampled from $Q$, the importance sampling estimator of $\mu\coloneqq\Exp_{z\sim p}\left[f(z)\right]$ is:
 \begin{align}\label{eq:ise}
 	\wh{\mu}_{\text{IS}} = \frac{1}{N}\sum_{i=1}^{N}f(z_i)w_{P/Q}(z_i),
 \end{align}
-which is an unbiased estimator, \ie ${\Exp_{z_i\sim q}\left[\wh{\mu}_{IS}\right] = \Exp_{z\sim p}[f(z)]}$. Now, let $Q_1,\dots,Q_K$ be all probability measures over the same probability space as $P$, and $P\ll Q_i$ for $i=1,\dots,K$. Let $\alpha_1(z),\dots,\alpha_K(z)$ be mixture weights, \ie for all $z\in\mathcal{Z}$, ${\alpha_1(z)+\dots+\alpha_K(z) = 1}$ and $\alpha_k(z)\geq0$ for ${k=1,\dots,K}$. Let $z_{ik}$ be the $i$-th sample drawn from $Q_k$. Given $N_k$ samples from each $Q_k$, the Multiple Importance Sampling estimator (MIS) is:
+which is an unbiased estimator, \ie ${\Exp_{z_i\simiid q}\left[\wh{\mu}_{IS}\right] = \mu}$. 
+
+Now, let $Q_1,\dots,Q_K$ be all probability measures over the same probability space as $P$, and $P\ll Q_k$ for $k=1,\dots,K$. Let $\beta_1(z),\dots,\beta_K(z)$ be mixture weights, \ie for all $z\in\mathcal{Z}$, ${\beta_1(z)+\dots+\beta_K(z) = 1}$ and $\beta_k(z)\geq0$ for ${k=1,\dots,K}$. Let $z_{ik}$ denote the $i$-th sample drawn from $Q_k$. Given $N_k$ \iid samples from each $q_k$, the Multiple Importance Sampling estimator (MIS) is:
 \begin{align}\label{eq:mise}
-	\wh{\mu}_{\text{MIS}} = \sum_{k=1}^K\frac{1}{N_k}\sum_{i=1}^{N_k}\alpha_k w_{P/Q_k}(z_{ik})f(z_{ik}),
+	\wh{\mu}_{\text{MIS}} = \sum_{k=1}^K\frac{1}{N_k}\sum_{i=1}^{N_k}\beta_k(z_{ik})w_{P/Q_k}(z_{ik})f(z_{ik}),
 \end{align}
-which is also an unbiased estimator of $\Exp_{z\sim p}\left[f(z)\right]$ for any choice of the mixture weights. A common choice of the mixture weights having desirable variance properties is the balance heuristic~\citep{veach_optimally_1995}: 
-\begin{align}
-	a
+which is also an unbiased estimator of $\mu$ for any valid choice of the mixture weights. A common choice of the mixture weights having desirable variance properties is the balance heuristic~\citep{veach_optimally_1995}: 
+\begin{align}\label{eq:bhw}
+	\beta_k(z) = \frac{N_kq_k(z)}{\sum_{j=1}^{K}N_jq_j(z)},
 \end{align}
+which yields the Balance Heuristic estimator (BH):
+\begin{align}\label{eq:bhe}
+	\wh{\mu}_{\text{BH}} = \sum_{k=1}^K\sum_{i=1}^{N_k}\frac{p(z_{ik})}{\sum_{j=1}^K N_jq_j(z_{ik})}f(z_{ik}).
+\end{align}
+Since (\ref{eq:bhw}) are valid mixture weights, $\wh{\mu}_{\text{BH}}$ is an unbiased estimator of $\mu$. Moreover, its variance is not significantly larger than any other choice of the mixture weights~\citep[][Theorem 1]{veach_optimally_1995}.
+
+To further characterize the variance of this estimator, we need the concept of \Renyi divergence. Given probability measures $P$ and $Q$ on $(\mathcal{Z},\mathcal{F})$, where $P\ll Q$ and $Q$ is $\sigma$-finite, the $\alpha$-\Renyi divergence is defined as:
+\begin{align}\label{eq:renyi}
+	D_{\alpha}(P\|Q) = \frac{1}{\alpha-1}\log\int_{\mathcal{Z}}\left(w_{P/Q}\right)^{\alpha}\de Q,
+\end{align}
+for $\alpha\in[0,\infty]$\footnote{The special cases $\alpha=0,1$ and $\infty$ are defined by taking limits.}.
+We denote with $d_{\alpha}(P\|Q) = \exp\{D_{\alpha}(P\|Q)\}$ the exponentiated $\alpha$-\Renyi divergence. Of particular interest is $D_2$, as the variance of the importance weight is $\Var_{z\sim q}\left[w_{P/Q}(z)\right] = d_2(P\|Q) - 1$, which is a divergence itself~\citep{cortes2010learning}. For this reason, we always mean the $2$-\Renyi divergence when omitting the order $\alpha$. The \Renyi divergence was used by~\citet[][Lemma 4.1]{metelli2018policy} to upper bound the variance of the importance sampling estimator as $\Var_{z_i\simiid q}\left[\wh{\mu}_{\text{IS}}\right]\leq \norm[\infty]{f}^2d_2(P\|Q)$. A similar result can be derived for the BH estimator:
+%
+\begin{restatable}{lemma}{misevarbound}\label{lem:misevarbound}
+	Let $P$ and $Q_k$ be probability measures on the measurable space $(\mathcal{Z},\mathcal{F})$ such that $P\ll Q_k$ and $d_2(P\|Q_k)<\infty$ for $k=1,\dots,K$. Let $f:\mathcal{Z}\to\Reals$ be a bounded function, \ie $\norm[\infty]{f}<\infty$. Let $\wh{\mu}_{\text{BH}}$ be the balance heuristic estimator of $f$, as defined in (\ref{eq:bhe}), using $N_k$ \iid samples from each $Q_k$. Then, the variance of $\wh{\mu}_{\text{BH}}$ can be upper bounded as:
+	\begin{align*}
+		\Var_{z_{ik}\simiid Q_k}\left[\wh{\mu}_{\text{BH}}\right] \leq \norm[\infty]{f}^2\frac{d_2(P\|\Phi)}{N},
+	\end{align*}
+	where ${N=\sum_{k=1}^{K}N_k}$ is the total number of samples and ${\Phi=\sum_{k=1}^K\frac{N_k}{N}Q_k}$ is a finite mixture.
+\end{restatable}
+%
 
 \section{Algorithm}
 \begin{itemize}
@@ -198,6 +227,12 @@ which is also an unbiased estimator of $\Exp_{z\sim p}\left[f(z)\right]$ for any
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 \section{Proofs}
+
+\misevarbound
+%
+\begin{proof}
+	...
+\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
