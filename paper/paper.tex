@@ -28,6 +28,24 @@
 \usepackage{mathtools}
 \usepackage{amsthm,thmtools,thm-restate}
 \usepackage{mathabx}
+\usepackage{dsfont}
+
+%Notes
+\usepackage[colorinlistoftodos, textsize=tiny]{todonotes}
+\definecolor{citrine}{rgb}{0.89, 0.82, 0.04}
+\definecolor{blued}{RGB}{70,197,221}
+%%todo by Marcello
+\newcommand{\todomarc}[1]{\todo[color=orange, inline]{MARCELLO: #1}}
+\newcommand{\todomarcout}[1]{\todo[color=orange]{M: #1}}
+%%todo by Matteo
+\newcommand{\todomat}[1]{\todo[color=green, inline]{MATTEO: #1}}
+\newcommand{\todomatout}[1]{\todo[color=green]{M: #1}}
+%%todo by Alberto
+\newcommand{\todoalb}[1]{\todo[color=blued, inline]{ALBERTO: #1}}
+\newcommand{\todoalbout}[1]{\todo[color=blued]{A: #1}}
+%%todo by Lorenzo
+\newcommand{\todolor}[1]{\todo[color=yellow, inline]{LORENZO: #1}}
+\newcommand{\todolorout}[1]{\todo[color=yellow]{L: #1}}
 
 %Theorems
 \newtheorem{theorem}{Theorem}
@@ -35,6 +53,8 @@
 \newtheorem{corollary}{Corollary}
 \newtheorem{sublemma}{Lemma}[section]
 \newtheorem{assumption}{Assumption}
+
+\allowdisplaybreaks[4]
 
 % The \icmltitle you define below is probably too long as a header.
 % Therefore, a short form for the running title is supplied here:
@@ -171,12 +191,45 @@ We denote with $d_{\alpha}(P\|Q) = \exp\{D_{\alpha}(P\|Q)\}$ the exponentiated $
 \end{restatable}
 %
 
-\subsection{Robust Importance Weighting Estimation}
-In this section, we discuss how to perform a robust importance weighting estimation. It has been recently observed that, in many cases of interest, the plain estimator~\ref{eq:ise} has problematic tail behavior~\cite{metelli_policy_2018}. A common heuristic to address this problem consists in truncate the weight to prevent it from assuming too large values~\cite{ionides2008truncated}:
-\begin{align}\label{eq:ise}
-	\widecheck{\mu}_{\text{IS}} = \frac{1}{N}\sum_{i=1}^{N}f(z_i)\widecheck{w}_{P/Q}(z_i),
+\subsection{Robust Importance Weighted Estimation}
+In this section, we discuss how to perform a robust importance weighting estimation. It has been recently observed that, in many cases of interest, the plain estimator~\eqref{eq:ise} has problematic tail behavior~\cite{metelli_policy_2018}, preventing the use of exponential concentration inequalities.\footnote{Unless we require that $d_{\infty}(P \| \Phi)$ is finite, \ie that the importance weight have finite supremum, there always exists a value $\alpha>1$ such that $d_{\alpha}(P \| \Phi)=+\infty$.} A common heuristic to address this problem consists in truncate the weight to prevent it from assuming too large values~\cite{ionides2008truncated}:
+\begin{align}\label{eq:truncatedise}
+	\widecheck{\mu}_{\text{IS}} = \frac{1}{N}\sum_{i=1}^{N} \min \left\{ M, {w}_{P/Q}(z_i) \right\} f(z_i),
 \end{align}
-where $\widecheck{w}_{P/Q}(z_i) = \min \left\{ M_{N}, {w}_{P/Q}(z_i) \right\}$ and $M_N$ is a threshold possibly depending on the number of samples used for the estimation.
+where $\widecheck{w}_{P/Q}^M(z_i) = $ and $M_N$ is a threshold to limit the magnitude of the importance weight. Similarly, for the multiple importance sampling case, restricting to the BH, we have:
+\begin{align}\label{eq:truncatedmise}
+	\widecheck{\mu}_{\text{BH}} =\frac{1}{N} \sum_{k=1}^K\sum_{i=1}^{N_k} \min \left\{M,  \frac{p(z_{ik})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{ik})} \right\} f(z_{ik}).
+\end{align}
+Clearly, since we are changing the importance weights we introduce a bias term, but reducing the range of the estimation we likely achieve a benefit in terms of variance. In the following, we will present the bias-variance analysis of the estimator and we conclude showing that we are able, using an adaptive truncation, to guarantee an exponential concentration.
+
+\begin{restatable}{lemma}{truncatedbias}\label{lem:truncatedbias}
+	Let $P$ and $\{ Q_k \}_{k=1}^N$ be probability measures on the measurable space $(\mathcal{Z},\mathcal{F})$ such that $P\ll Q_k$ and there exists $\epsilon \in (0,1]$ s.t. $d_{1+\epsilon}(P\|Q_k)<\infty$ for $k=1,\dots,K$. Let $f:\mathcal{Z}\to\Reals_{\ge 0}$ be a bounded non-negative function, \ie $\norm[\infty]{f}<\infty$. Let $\widecheck{\mu}_{\text{BH}}$ be the truncated balance heuristic estimator of $f$, as defined in (\ref{eq:truncatedmise}), using $N_k$ \iid samples from each $Q_k$. Then, the bias of $\widecheck{\mu}_{\text{BH}}$ can be upper bounded as:
+	 \begin{equation}
+         0 \le \mu - \Exp_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}] \le  \|f\|_{\infty} M^{-\epsilon} d_{1+\epsilon}\left( P \| \Phi \right)^{\epsilon},
+    \end{equation}
+    and the variance of $\widecheck{\mu}_{\text{BH}}$ can be bounded as:
+    \begin{equation}
+    \label{eq:variancetruncated}
+         \Var_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}] \le  \|f\|_{\infty}^2 M^{1-\epsilon} \frac{d_{1+\epsilon}\left( P \| \Phi \right)^{\epsilon}}{N},
+    \end{equation}
+	where ${N=\sum_{k=1}^{K}N_k}$ is the total number of samples and ${\Phi=\sum_{k=1}^K\frac{N_k}{N}Q_k}$ is a finite mixture.
+\end{restatable}
+%
+It is worth noting that, when selecting $\epsilon=1$, equation~\eqref{eq:variancetruncated} reduces to Lemma~\ref{lem:misevarbound}, as the truncation operation can only reduce the variance. Clearly, the smaller we choose $M$ the larger would be the bias. Overall, we are interested in mining the joint contribution of bias and variance. Keeping $P$ and $\Phi$ fixed we observe that the bias depend on $M$ only, whereas the variance depends on $M$ and on the number of samples $N$. Intuitively, we may allow larger truncation thresholds $M$ as the number of samples $N$ increases. The following result states that, when using an \emph{adaptive threshold} depending on $N$, we are able to reach exponential concentration.
+\begin{restatable}{theorem}{thrucatedconcentration}\label{lem:thrucatedconcentration}
+	Let $P$ and $\{ Q_k \}_{k=1}^N$ be probability measures on the measurable space $(\mathcal{Z},\mathcal{F})$ such that $P\ll Q_k$ and there exists $\epsilon \in (0,1]$ s.t. $d_{1+\epsilon}(P\|Q_k)<\infty$ for $k=1,\dots,K$. Let $f:\mathcal{Z}\to\Reals_{\ge 0}$ be a bounded non-negative function, \ie $\norm[\infty]{f}<\infty$. Let $\widecheck{\mu}_{\text{BH}}$ be the truncated balance heuristic estimator of $f$, as defined in (\ref{eq:truncatedmise}), using $N_k$ \iid samples from each $Q_k$. 
+	Let $M_N = \left( \frac{N d_{1+\epsilon}\left( P \| \Phi  \right)^{\epsilon} }{\log \frac{1}{\delta}} \right) ^{\frac{1}{1+\epsilon}}$, then with probability at least $1-\delta$:
+    \begin{equation}
+        \widecheck{\mu}_{\text{BH}} \le \mu + \|f\|_{\infty} \left(\sqrt{2} + \frac{1}{3} \right)  \left(\frac{ d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}},
+    \end{equation}
+    and also, with probability at least $1-\delta$:
+    \begin{equation}
+        \widecheck{\mu}_{\text{BH}} \ge \mu - \|f\|_{\infty} \left(\sqrt{2} + \frac{4}{3} \right) \left(\frac{ d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}}.
+    \end{equation}
+\end{restatable}
+
+Our adaptive truncation approach and the consequent concentration results resemble the ones proposed in~\cite{bubeck2013bandits}. However, differently from~\cite{bubeck2013bandits} we do not remove sample with too high value, but we exploit the nature of the importance weighted estimator to just limit the weight magnitude. Indeed, this form of truncation turned out to be very effective in practice.
+
 
 \section{Algorithm}
 \begin{itemize}
@@ -233,13 +286,74 @@ where $\widecheck{w}_{P/Q}(z_i) = \min \left\{ M_{N}, {w}_{P/Q}(z_i) \right\}$ a
 % SUPPLEMENTARY MATERIALS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\onecolumn
 \appendix
 \section{Proofs}
 
-\misevarbound
+\misevarbound*
 %
 \begin{proof}
-	...
+	The proof is similar to Lemma 4.1 of~\cite{metelli2018policy}:
+    \begin{align}
+    \Var_{z_{ik} \simiid Q_k} [\widehat{\mu}_{\text{BH}}]&  = \Var_{z_{ik} \simiid Q_k} \left[ \frac{1}{N} \sum_{k=1}^K \sum_{i=1}^{N_k}  f(z_{ki})\frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right] \\
+    & = \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Var_{z_{ik} \sim Q_k} \left[   f(z_{ki}) \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right] \\
+    & \le \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( f(z_{ki})   \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right)^2 \right]\\
+    & \le \|f\|_{\infty} \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right)^2 \right]\\
+    & = \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \left(\frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right)^2 \right]\\
+    &= \|f\|_{\infty}^2 \frac{d_{2}(P\|\Phi)}{N},\\
+    \end{align}
+    \todoalb{Commentare passaggi}
+\end{proof}
+
+
+\truncatedbias*
+\begin{proof}
+Let us start with the bias term. The first inequality $0 \le \mu - \Exp_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}]$ derives from the fact that $\widehat{\mu}_{\text{BH}} \ge \widecheck{\mu}_{\text{BH}}$, being $f(z) \ge 0$ for all $z$ and observing that $\widehat{\mu}$ is unbiased, \ie $\Exp_{z_{ik} \simiid Q_k}[\widehat{\mu}_{\text{BH}}]=\mu$. For the second inequality, let us consider the following inequalities:
+    \begin{align}
+    \mu - \Exp_{x_i \sim q_i} [\widecheck{\mu}]&  = \Exp_{z_{ik} \simiid Q_k}[\widehat{\mu}_{\text{BH}}] - \Exp_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}] \\
+    & =  \frac{1}{N} \sum_{k=1}^K\sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[  f(z_{ik}) \left( \frac{p(z_{ik})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{ik})} - \min \left\{ M,  \frac{p(z_{ik})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{ik})} \right\} \right) \right]\\    
+    & =   \sum_{k=1}^K \frac{N_k}{N} \Exp_{z_{1k} \sim Q_k} \left[  f(z_{1k}) \left( \frac{p(z_{1k})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{1k})} - \min \left\{ M,  \frac{p(z_{1k})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{1k})} \right\} \right) \right]\\
+     & = \Exp_{z \sim \Phi} \left[  f(z) \left( \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} - \min \left\{ M,  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right\} \right) \right]\\
+    & =  \Exp_{z \sim \Phi} \left[  f(z) \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} - M  \right) \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right]\\
+    & \le \Exp_{z \sim \Phi} \left[  f(z) \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right) \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right]\\
+    & \le \|f\|_{\infty} \Exp_{z \sim \Phi} \left[  \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right) \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right]\\
+    & \le \|f\|_{\infty} \Exp_{z \sim \Phi} \left[  \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right)^{1+\epsilon} \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right)^{-\epsilon} \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right]\\
+    & \le \|f\|_{\infty} \Exp_{z \sim \Phi} \left[  \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right)^{1+\epsilon} \right] M^{-\epsilon}\\
+        & = \|f\|_{\infty} d_{1+\epsilon}(P \| \Phi)^{\epsilon}  M^{-\epsilon},
+    \end{align}
+    \todoalb{Commentare passaggi}
+    For the variance the argument is similar.
+    \begin{align*}
+    \Var_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}]&  = \Var_{z_{ik} \simiid Q_k} \left[ \frac{1}{N} \sum_{k=1}^K \sum_{i=1}^{N_k}  f(z_{ki}) \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right] \\
+    & = \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Var_{z_{ik} \sim Q_k} \left[   f(z_{ki}) \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right] \\
+    & \le \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( f(z_{ki})  \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right)^2 \right]\\
+    & \le \|f\|_{\infty} \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right)^2 \right]\\
+    & = \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \min \left\{ M, \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right\}^2 \right]\\
+    & = \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \min \left\{ M, \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right\}^{1+\epsilon} \min \left\{ M, \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right\}^{1-\epsilon}  \right]\\
+    & \le \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \left( \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right)^{1+\epsilon}  \right] M^{1-\epsilon}\\
+    &= \|f\|_{\infty}^2 M^{1-\epsilon} \frac{d_{1+\epsilon}(P\|\Phi)^{\epsilon}}{N} ,\\
+    \end{align*}
+    \todoalb{Commentare passaggi}
+\end{proof}
+
+\thrucatedconcentration*
+
+\begin{proof}
+Let us start with the first inequality. Observing that all samples $z_{ik}$ are independent and that $\widecheck{\mu}_{\text{BH}} \le M \|f\|_{\infty}$, we can state using Bernstein inequality~\cite{} that with probability at least $1-\delta$ we have:
+    \begin{align}
+         \widecheck{\mu}_{\text{BH}} & \le \Exp_{z_{ik} \sim Q_k} [\widecheck{\mu}_{\text{BH}}] + \sqrt{2 \Var_{z_{ik} \simiid Q_k}[\widecheck{\mu}_{\text{BH}}] \log \frac{1}{\delta}} +\|f\|_{\infty}  \frac{M  \log \frac{1}{\delta}}{3N} \\
+         & \le \mu + \|f\|_{\infty} \sqrt{\frac{2 M^{1-\epsilon} d_{1+\epsilon}\left( P \| \Phi \right)^{\epsilon} \log  \frac{1}{\delta} }{N}} +\|f\|_{\infty} \frac{M \log \frac{1}{\delta}}{3N}\\
+       & = \mu + \|f\|_{\infty}\left(\sqrt{2} + \frac{1}{3} \right)  \left(\frac{d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}},
+    \end{align}
+    For the second inequality we just need to consider the bias as well.
+    \begin{align*}
+         \widecheck{\mu}_{\text{BH}} & \ge  \Exp_{z_{ik} \sim Q_k} [\widecheck{\mu}_{\text{BH}}] - \sqrt{2 \Var_{z_{ik} \simiid Q_k}[\widecheck{\mu}_{\text{BH}}] \log \frac{1}{\delta}} -\|f\|_{\infty}  \frac{M  \log \frac{1}{\delta}}{3N} \\
+         & = \mu - \left(\mu - \Exp_{z_{ik} \sim Q_k} [\widecheck{\mu}_{\text{BH}}] \right) -\sqrt{2 \Var_{z_{ik} \simiid Q_k}[\widecheck{\mu}_{\text{BH}}] \log \frac{1}{\delta}} -\|f\|_{\infty}  \frac{M  \log \frac{1}{\delta}}{3N}  \\
+          & \ge \mu - \|f\|_{\infty} M^{-\epsilon} d_{1+\epsilon}\left( P \| \Phi \right)^{\epsilon} - \|f\|_{\infty}\left(\sqrt{2} + \frac{1}{3} \right)  \left(\frac{d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}}\\
+          & = \mu - \|f\|_{\infty} \left(\sqrt{2} + \frac{4}{3} \right) \left(\frac{d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}},\\
+    \end{align*}
+    \todoalb{Commentare passaggi}
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
