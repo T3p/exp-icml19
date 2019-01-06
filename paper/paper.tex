@@ -195,7 +195,7 @@ We denote with $d_{\alpha}(P\|Q) = \exp\{D_{\alpha}(P\|Q)\}$ the exponentiated $
 %
 
 \subsection{Robust Importance Weighted Estimation}
-In this section, we discuss how to perform a robust importance weighting estimation. It has been recently observed that, in many cases of interest, the plain estimator~\eqref{eq:ise} has problematic tail behavior~\cite{metelli_policy_2018}, preventing the use of exponential concentration inequalities.\footnote{Unless we require that $d_{\infty}(P \| \Phi)$ is finite, \ie that the importance weight have finite supremum, there always exists a value $\alpha>1$ such that $d_{\alpha}(P \| \Phi)=+\infty$.} A common heuristic to address this problem consists in truncate the weight to prevent it from assuming too large values~\cite{ionides2008truncated}:
+In this section, we discuss how to perform a robust importance weighting estimation. It has been recently observed that, in many cases of interest, the plain estimator~\eqref{eq:ise} has problematic tail behavior~\cite{metelli2018policy}, preventing the use of exponential concentration inequalities.\footnote{Unless we require that $d_{\infty}(P \| \Phi)$ is finite, \ie that the importance weight have finite supremum, there always exists a value $\alpha>1$ such that $d_{\alpha}(P \| \Phi)=+\infty$.} A common heuristic to address this problem consists in truncate the weight to prevent it from assuming too large values~\cite{ionides2008truncated}:
 \begin{align}\label{eq:truncatedise}
 	\widecheck{\mu}_{\text{IS}} = \frac{1}{N}\sum_{i=1}^{N} \min \left\{ M, {w}_{P/Q}(z_i) \right\} f(z_i),
 \end{align}
@@ -365,7 +365,7 @@ Let us start with the bias term. The first inequality $0 \le \mu - \Exp_{z_{ik} 
 \thrucatedconcentration*
 
 \begin{proof}
-Let us start with the first inequality. Observing that all samples $z_{ik}$ are independent and that $\widecheck{\mu}_{\text{BH}} \le M \|f\|_{\infty}$, we can state using Bernstein inequality~\cite{} that with probability at least $1-\delta$ we have:
+Let us start with the first inequality. Observing that all samples $z_{ik}$ are independent and that $\widecheck{\mu}_{\text{BH}} \le M \|f\|_{\infty}$, we can state using Bernstein inequality~\cite{boucheron2013concentration} that with probability at least $1-\delta$ we have:
     \begin{align}
          \widecheck{\mu}_{\text{BH}} & \le \Exp_{z_{ik} \sim Q_k} [\widecheck{\mu}_{\text{BH}}] + \sqrt{2 \Var_{z_{ik} \simiid Q_k}[\widecheck{\mu}_{\text{BH}}] \log \frac{1}{\delta}} +\|f\|_{\infty}  \frac{M  \log \frac{1}{\delta}}{3N} \\
          & \le \mu + \|f\|_{\infty} \sqrt{\frac{2 M^{1-\epsilon} d_{1+\epsilon}\left( P \| \Phi \right)^{\epsilon} \log  \frac{1}{\delta} }{N}} +\|f\|_{\infty} \frac{M \log \frac{1}{\delta}}{3N}\\
