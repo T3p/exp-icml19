@@ -29,6 +29,7 @@
 \usepackage{amsthm,thmtools,thm-restate}
 \usepackage{mathabx}
 \usepackage{dsfont}
+\usepackage{enumerate}
 
 %Notes
 \usepackage[colorinlistoftodos, textsize=tiny]{todonotes}
@@ -143,7 +144,7 @@ In Policy Optimization~\citep{deisenroth2013survey} we seek the policy maximizin
 \begin{align}\label{eq:Rtau}
 	\Rew(\tau) = \sum_{h=0}^{H-1}\gamma^hr_{h+1}.
 \end{align}
-Let $J(\vtheta) = \Exp_{\tau\sim p_{\vtheta}}$ be the expected performance under policy $\pi_{\vtheta}$. In an \textit{online learning} scenario, we aim to maximize the sum of expected performances over a sequence of episodes $t=0,\dots,T$. 
+Let $J(\vtheta) = \Exp_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$ be the expected performance under policy $\pi_{\vtheta}$. In an \textit{online learning} scenario, we aim to maximize the sum of expected performances over a sequence of episodes $t=0,\dots,T$. 
 In the \textit{action-based} policy optimization paradigm~\citep{peters2008reinforcement}, the problem we want to solve is simply:
 \begin{align}\label{eq:Jtheta}
 	\max_{\vtheta_0,\dots,\vtheta_T\in\Theta} \Exp_{\tau_t\sim p_{\vtheta_t}}\left[\sum_{t=0}^T\Rew(\tau_t)\right] = 
@@ -262,7 +263,7 @@ According to Theorem \ref{lem:thrucatedconcentration}, the following \textit{ind
 	&\quad+\norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)
 	\left(\frac{d_{1+\epsilon}(p_{\vx_t}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}\right)^{\frac{\epsilon}{1+\epsilon}},
 \end{align}
-is an upper bound on $\mu(\vx)$ with probability at least $1-\delta_t$, \ie an upper confidence bound. The \algoname algorithm simply selects, at each iteration $t$, the arm with the largest value of the index $B_t(\vx)$. Pseudocode is provided in Algorithm TODOREF. The initial arm $\vx_0$ is arbitrary, as no prior information is available. The regret analysis of Section \ref{sec:regret} will provide a confidence schedule $(\delta_t)_{t=1}^T$. Knowledge of the actual horizon $T$ is not needed. Although any $\epsilon>0$ works, we suggest to use $\epsilon=1$ in practice, as it yields the more common $2$-\Renyi divergence. To be able to compute the indexes (or to perform any kind of index maximization), the algorithm needs to store all the $\vx_t$ together with the observed payoffs $f(z_t)$, hence $\mathcal{O}(Td)$ space is required, where $d$ is the dimensionality of the arm space $\Xspace$ (not to be confused with cardinality $|\Xspace|$, which may be infinite). The optimization step (line 4) may be very difficult when $\Xspace$ is not discrete~\citep[\cf][]{srinivas2009gaussian}. As often done in RL, we assume the time spent collecting samples dominates computational time. Recall that drawing a sample $z_t$ in Algorithm \ref{alg:1} corresponds to executing an entire trajectory of experience, which may be very time-consuming in real-world applications. Practical aspects of \algoname will be further discussed in Section \ref{sec:practical}.
+is an upper bound on $\mu(\vx)$ with probability at least $1-\delta_t$, \ie an upper confidence bound. The \algoname algorithm simply selects, at each iteration $t$, the arm with the largest value of the index $B_t(\vx)$. Pseudocode is provided in Algorithm \ref{alg:1}. The initial arm $\vx_0$ is arbitrary, as no prior information is available. The regret analysis of Section \ref{sec:regret} will provide a confidence schedule $(\delta_t)_{t=1}^T$. Knowledge of the actual horizon $T$ is not needed. Although any $\epsilon>0$ works, we suggest to use $\epsilon=1$ in practice, as it yields the more common $2$-\Renyi divergence. To be able to compute the indexes (or to perform any kind of index maximization), the algorithm needs to store all the $\vx_t$ together with the observed payoffs $f(z_t)$, hence $\mathcal{O}(Td)$ space is required, where $d$ is the dimensionality of the arm space $\Xspace$ (not to be confused with cardinality $|\Xspace|$, which may be infinite). The optimization step (line 4) may be very difficult when $\Xspace$ is not discrete~\citep[\cf][]{srinivas2009gaussian}. As often done in RL, we assume the time spent collecting samples dominates computational time. Recall that drawing a sample $z_t$ in Algorithm \ref{alg:1} corresponds to executing an entire trajectory of experience, which may be very time-consuming in real-world applications. Practical aspects of \algoname will be further discussed in Section \ref{sec:practical}.
 
 \begin{algorithm}[t]
 	\caption{\algoname}
@@ -278,11 +279,90 @@ is an upper bound on $\mu(\vx)$ with probability at least $1-\delta_t$, \ie an u
 \end{algorithm}
 
 \section{Regret Analysis}\label{sec:regret}
-\begin{itemize}
-	\item Finite arms
-	\item Compact arm set
-\end{itemize}
+In this section, we provide high-probability guarantees on the quality of the solution provided by Algorithm \ref{alg:1}.
+First, we rephrase the optimization problem (\ref{alg:1}) in terms of \textit{regret minimization}. The instantaneous regret is defined as:
+\begin{align}\label{eq:inregret}
+	\Delta_t = \mu(\vx^*) - \mu(\vx_t),
+\end{align}
+where $\vx^* = \arg\max_{\vx\in\Xspace}\mu(\vx)$. Let $\Reg(T) = \sum_{t=0}^T\Delta_t$ be the total regret.
+As $\mu(\vx^*)$ is a constant, problem (\ref{eq:theproblem}) is trivially equivalent to:
+\begin{align}\label{eq:regret}
+	\min_{\vx_0,\dots,\vx_T\in\Xspace} \Reg(T).
+\end{align}
+In the following, we will show that Algorithm \ref{alg:1} yields sublinear regret under some mild assumptions. The proofs combine techniques from~\citet{srinivas2009gaussian} and~\citet{bubeck2013bandits} and are reported in Appendix \ref{app:proof}.
+First, we need the following assumption on the \Renyi divergence:
+%
+\begin{restatable}{assumption}{boundrenyi}\label{ass:boundrenyi}
+	For all $t=1,\dots,T$, the $(1+\epsilon)$-\Renyi divergence is uniformly bounded as:
+	\begin{align*}
+		\sup_{\vx_0,\vx_1,\dots,\vx_t\in\Xspace}d_{1+\epsilon}(p_{\vx_t}\|\Phi_t) = v_{\epsilon} < \infty,
+	\end{align*}
+	where $\Phi_t = \frac{1}{t}\sum_{k=0}^{t-1}p_{\vx_k}$,
+\end{restatable}
+%
+which can be easily enforced through careful policy (or hyperpolicy) design. Next, we need some assumptions on the structure of the arm set $\Xspace$.
 
+\subsection{Discrete arm set}
+We start from the discrete case, where $|\mathcal{X}| = D \in \Naturals_{+}$.
+This setting is particularly convenient, as the optimization step can be trivially solved in $\mathcal{O}(D)$ time. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may be constrained to a discrete set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
+
+\begin{restatable}{theorem}{regretdiscrete}\label{th:regretdiscrete}
+	Let $\Xspace$ be a discrete arm set with ${|\mathcal{X}| = D \in \Naturals_{+}}$. Under Assumption \ref{ass:boundrenyi}, Algorithm \ref{alg:1} with confidence schedule $\delta_t = \frac{3\delta}{t^2\pi^2D}$ guarantees, with probability at least $1-\delta$:
+	\begin{align*}
+		&\Reg(T) \leq \Delta_0 \\
+		&\quad+ 	C
+			T^{\frac{1}{1+\epsilon}}
+			\left[v_{\epsilon}
+			\left(2\log T + \log \frac{\pi^2D}{3\delta}\right)
+			\right]^{\frac{\epsilon}{1+\epsilon}},
+	\end{align*}
+	where $C=(1+\epsilon)\left(2\sqrt{2}+\frac{5}{3}\right)\norm[\infty]{f}$, and $\Delta_0$ is the instantaneous regret of the initial arm $\vx_0$.
+\end{restatable}
+This yields a $\wt{\mathcal{O}}(\sqrt{T})$ regret when $\epsilon=1$.
+
+\subsection{Compact arm set}
+Now, we consider the more general case of a compact arm set $\Xspace\in\Reals^d$. We can assume, \wlg, that $\Xspace$ is entirely contained in a box $[-D,D]^d$, with $D\in\Reals_{+}$. We also need the following assumption on the expected payoff:
+%
+\begin{restatable}{assumption}{lipschitz}\label{ass:lipschitz}
+	The expected payoff $\mu$ is Lipschitz continuous, \ie, there exists a constant $L>0$ such that, for every $\vx, \vx'\in\Xspace$:
+	\begin{align*}
+		|\mu(\vx') - \mu(\vx)| \leq L\norm[1]{\vx - \vx'}.
+	\end{align*}
+\end{restatable}
+%
+This assumption is easily satisfied for policy optimization, as shown in the following:
+%
+\begin{restatable}{lemma}{lipschitzpol}\label{lem:lispschitzpol}
+	In the policy optimization problem, Assumption \ref{ass:lipschitz} can be replaced by:
+	\begin{align}\label{eq:lp1}
+		\sup_{s\in\Sspace,\vtheta\in\Theta}\Exp_{a\sim\pi_{\vtheta}}
+		\left[\left|\nabla_{\vtheta}\log\pi_{\vtheta}(a|s)\right|\right] = G_1 < \infty,
+	\end{align}
+	in the action-based paradigm, and by:
+	\begin{align}\label{eq:lp2}
+		\sup_{\vxi\in\Xi}\Exp_{\vtheta\sim\rho_{\vxi}}
+		\left[\left|\nabla_{\vxi}\log\rho_{\vxi}(a|s)\right|\right] = G_2 < \infty,
+	\end{align}
+	in the parameter-based paradigm.
+\end{restatable}
+%
+In the proof, we show how to derive the corresponding Lipschitz constants, and show how (\ref{eq:lp1}) and (\ref{eq:lp2}) are satisfied by the commonly-used Gaussian policy and hyperpolicy, respectively. This is enough for \algoname to achieve $\wt{\mathcal{O}}(d^{\frac{\epsilon}{1+\epsilon}}T^{\frac{1}{1+\epsilon}})$ regret:
+%
+\begin{restatable}{theorem}{regretcompact}\label{th:regretcompact}
+	Let $\Xspace$ be a $d$-dimensional compact arm set with $\Xspace \subseteq [-D,D]^d$. Under Assumptions \ref{ass:boundrenyi} and \ref{ass:lipschitz}, Algorithm \ref{alg:1} with confidence schedule $\delta_t = \frac{6\delta}{\pi^2t^2(1+d^dt^{2d})}$ guarantees, with probability at least $1-\delta$:
+	\begin{align*}
+	&\Reg(T) \leq \Delta_0 \\
+	&\quad+ 	C
+	T^{\frac{1}{1+\epsilon}}
+	\left[v_{\epsilon}
+	\left(2(d+1)\log T + d\log d + \log \frac{\pi^2}{3\delta}\right)
+	\right]^{\frac{\epsilon}{1+\epsilon}} \\
+	&\quad+ \frac{\pi^2LD}{6},
+	\end{align*}
+	where $C=(1+\epsilon)\left(2\sqrt{2}+\frac{5}{3}\right)\norm[\infty]{f}$, and $\Delta_0$ is the instantaneous regret of the initial arm $\vx_0$.
+\end{restatable}
+%
+This yields a $\wt{\mathcal{O}}(\sqrt{dT})$ regret when $\epsilon=1$.
 \section{Practical Aspects}\label{sec:practical}
 \begin{itemize}
 	\item The optimization problem
@@ -328,7 +408,7 @@ is an upper bound on $\mu(\vx)$ with probability at least $1-\delta_t$, \ie an u
 \clearpage
 \onecolumn
 \appendix
-\section{Proofs}
+\section{Proofs}\label{app:proof}
 
 \misevarbound*
 %
