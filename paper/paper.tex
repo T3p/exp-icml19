@@ -194,7 +194,7 @@ We denote with $d_{\alpha}(P\|Q) = \exp\{D_{\alpha}(P\|Q)\}$ the exponentiated $
 \end{restatable}
 %
 
-\subsection{Robust Importance Weighted Estimation}
+\section{Robust Importance Weighted Estimation}\label{sec:robust}
 In this section, we discuss how to perform a robust importance weighting estimation. It has been recently observed that, in many cases of interest, the plain estimator~\eqref{eq:ise} has problematic tail behavior~\cite{metelli2018policy}, preventing the use of exponential concentration inequalities.\footnote{Unless we require that $d_{\infty}(P \| \Phi)$ is finite, \ie that the importance weight have finite supremum, there always exists a value $\alpha>1$ such that $d_{\alpha}(P \| \Phi)=+\infty$.} A common heuristic to address this problem consists in truncating the weight to prevent it from assuming too large values~\cite{ionides2008truncated}:
 \begin{align}\label{eq:truncatedise}
 	\widecheck{\mu}_{\text{IS}} = \frac{1}{N}\sum_{i=1}^{N} \min \left\{ M, {w}_{P/Q}(z_i) \right\} f(z_i),
