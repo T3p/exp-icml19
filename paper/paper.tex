@@ -237,9 +237,9 @@ Our adaptive truncation approach and the consequent concentration results resemb
 \section{Algorithm}
 In this section, we use the mathematical tools presented so far to design a policy search algorithm that efficiently explores the space of solutions. The proposed algorithm, \algoname, is based on the Optimism in the Face of Uncertainty (OFU) principle and follows the Upper Confidence Bound (UCB) strategy~\citep{lai1985asymptotically,agrawal1995sample,auer2002finite} commonly used in Multi Armed Bandit (MAB) problems~\citep{robbins1985some,bubeck2012regret,lattimore2019bandit}. 
 
-The problem we want to solve does \textit{not} fall into the MAB framework and requires its own formalization. Let $\Xspace\subseteq \Reals^d$ be our decision set, or \textit{arm set} in MAB jargon. Let $Z_{\vx}$ be a continuous random vector parametrized by $\vx\in\Xspace$, with sample space (range) ${\mathcal{Z}\subseteq \Reals^m}$. We denote with $p_{\vx}$ its probability density function. Finally, let $f:\mathcal{Z}\to\Reals$ be a bounded \textit{payoff function} and $\mu(\vx) = \Exp_{z\sim p_{\vx}}\left[f(z)\right]$. At each iteration $t$, we select an \textit{arm} $\vx_t$, draw a sample $z_t$ from $p_{\vx_t}$, and observe payoff $f(z_t)$, up to horizon $T$. The goal is to maximize the expected total payoff:
+The problem we want to solve does \textit{not} fall into the MAB framework and requires its own formalization. Let $\Xspace\subseteq \Reals^d$ be our decision set, or \textit{arm set} in MAB jargon. Let $(\Omega,\mathcal{F},P)$ be a probability space. Let ${\{Z_{\vx}:\Omega\to\mathcal{Z}\mid \vx\in\Xspace\}}$ be a set of continuous random vectors parametrized by $\Xspace$, with common sample space ${\mathcal{Z}\subseteq \Reals^m}$. We denote with $p_{\vx}$ the probability density function of $Z_{\vx}$. Finally, let $f:\mathcal{Z}\to\Reals$ be a bounded \textit{payoff function}, and $\mu(\vx) = \Exp_{z\sim p_{\vx}}\left[f(z)\right]$ its expectation under $p_{\vx}$. For each iteration $t=0,\dots,T$, we select an arm $\vx_t$, draw a sample $z_t$ from $p_{\vx_t}$, and observe payoff $f(z_t)$, up to horizon $T$. The goal is to maximize the expected total payoff:
 \begin{align}\label{eq:theproblem}
-	\max_{\vx_1,\dots,\vx_T\in\Xspace} \Exp_{z_t\simiid p_{\vx_t}}\left[\sum_{t=1}^T f(z_t)\right] = \max_{\vx_1,\dots,\vx_T\in\Xspace}\sum_{t=1}^{T}\mu(\vx_t).
+	\max_{\vx_0,\dots,\vx_T\in\Xspace} \Exp_{z_t\simiid p_{\vx_t}}\left[\sum_{t=0}^T f(z_t)\right] = \max_{\vx_0,\dots,\vx_T\in\Xspace}\sum_{t=0}^{T}\mu(\vx_t).
 \end{align}
 Although we can evaluate $p_{\vx}$ for every $\vx\in\Xspace$, we can only observe $f(z_t)$ for the $z_t$ that are actually sampled. 
 This models precisely the online, episodic policy optimization problem.
@@ -249,19 +249,32 @@ In parameter-based policy optimization, $\Xspace$ corresponds to the hyperparame
 To apply the UCB strategy to our our problem (\ref{eq:theproblem}), we need an estimate of the objective $\mu(\vx)$ and a confidence region. 
 For the former, we use the robust balance heuristic estimator $\wc{\mu}_{\text{BH}}$ from (\ref{eq:truncatedmise}). To simplify the notation, \wlg, we treat each sample $\vx$ as a distinct one. This corresponds to the case $K=t-1$ and $N_k\equiv1$. Hence, at each iteration $t$:
 \begin{align}
-	\wc{\mu}_t(\vx) = \sum_{k=1}^{t-1}
+	\wc{\mu}_t(\vx) = \sum_{k=0}^{t-1}
 	\min\left\{M_{t-1}, \frac{p_{\vx}(z_k)}
 	{\sum_{j=1}^{t-1}p_{\vx_j(z_k)}}\right\}f(z_k),
 \end{align}
-where ${M_{t-1} = \left(\frac{(t-1)d_{1+\epsilon}(p_{\vx}\|\Phi_t)}{\log\frac{1}{\delta_t}}\right)^{\frac{1}{1+\epsilon}}}$ and ${\Phi_t = \frac{1}{t-1}\sum_{k=1^{t-1}}p_{\vx_k}}$.
+where ${M_{t} = \left(\frac{td_{1+\epsilon}(p_{\vx}\|\Phi_t)^{\epsilon}}{\log\frac{1}{\delta_t}}\right)^{\frac{1}{1+\epsilon}}}$ and ${\Phi_t = \frac{1}{t}\sum_{k=0}^{t-1}p_{\vx_k}}$.
 According to Theorem \ref{lem:thrucatedconcentration}, the following \textit{index}:
 \begin{align}
-	B_t(\vx) &\coloneqq 
+	&B_t(\vx,\delta_t) \coloneqq 
 	\wc{\mu}_t(\vx) \nonumber\\
-	&+\norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)
-	\left(\frac{d_{1+\epsilon}(p_{\vx_t}\|\Phi_{t})\log\frac{1}{\delta_t}}{t-1}\right)^{\frac{\epsilon}{1+\epsilon}},
+	&\quad+\norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)
+	\left(\frac{d_{1+\epsilon}(p_{\vx_t}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}\right)^{\frac{\epsilon}{1+\epsilon}},
 \end{align}
-is an upper bound on $\mu(\vx_t)$ with probability at least $1-\delta_t$, \ie an upper confidence bound. The \algoname algorithm simply selects, at each iteration $t$, the arm with the largest value of the index $B_t(\vx)$. Pseudocode is provided in Algorithm TODOREF. The choice of confidence schedule $(\delta_t)_t$ is justified by the regret analysis of Section \ref{sec:regret}. Although any $\epsilon>0$ works, we suggest to use $\epsilon=1$ in practice, as it yields the more common $2$-\Renyi divergence. To be able to compute the indexes (or to perform any kind of index maximization), the algorithm needs to store all the $\vx_t$ together with the observed payoffs $f(\vx_t)$. Optimization may be very difficult when $\Xspace$ is not discrete. As always in RL, we assume the cost of collecting samples dominates computational costs. Practical aspects of \algoname will be further discussed in Section \ref{sec:practical}
+is an upper bound on $\mu(\vx)$ with probability at least $1-\delta_t$, \ie an upper confidence bound. The \algoname algorithm simply selects, at each iteration $t$, the arm with the largest value of the index $B_t(\vx)$. Pseudocode is provided in Algorithm TODOREF. The initial arm $\vx_0$ is arbitrary, as no prior information is available. The regret analysis of Section \ref{sec:regret} will provide a confidence schedule $(\delta_t)_{t=1}^T$. Knowledge of the actual horizon $T$ is not needed. Although any $\epsilon>0$ works, we suggest to use $\epsilon=1$ in practice, as it yields the more common $2$-\Renyi divergence. To be able to compute the indexes (or to perform any kind of index maximization), the algorithm needs to store all the $\vx_t$ together with the observed payoffs $f(z_t)$, hence $O(Td)$ space is required. The optimization step (line 4) may be very difficult when the arm set $\Xspace$ is not discrete~\citep[\cf][]{srinivas2009gaussian}. As often done in RL, we assume the time spent collecting samples dominates computational time. Recall that drawing a sample $z_t$ in Algorithm \ref{alg:1} corresponds to executing an entire trajectory of experience, which may be very time-consuming in real-world applications. Practical aspects of \algoname will be further discussed in Section \ref{sec:practical}.
+
+\begin{algorithm}[t]
+	\caption{\algoname}
+	\label{alg:1}
+	\begin{algorithmic}[1]
+	\STATE {\bfseries Input:} initial arm $\vx_0$, confidence schedule $(\delta_t)_{t=1}^T$
+	\STATE Draw sample $z_0\sim p_{\vx_0}$ and observe payoff $f(z_0)$
+	\FOR{$t=1,\dots,T$}
+		\STATE Select arm $\vx_t = \arg\max_{\vx\in\Xspace}B_t(\vx,\delta_t)$
+		\STATE Draw sample $z_t\sim p_{\vx_t}$ and observe payoff $f(z_t)$
+	\ENDFOR
+	\end{algorithmic}
+\end{algorithm}
 
 \section{Regret Analysis}\label{sec:regret}
 \begin{itemize}
