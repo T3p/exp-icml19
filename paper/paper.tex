@@ -386,35 +386,16 @@ Some of the most relevant applications of policy search (\eg robotics) naturally
 %
 }
 
-\subsection{Variational Bound for the Exponentiated Renyi Divergence between mixtures}
-\todoalb{Adeguare notazione}
-\algoname requires at each iteration to compute the exponentiated Renyi divergence between the currently considered distribution $p_{\vx}$ 
-and the mixture $\Phi_t$, \ie $td_{1+\epsilon}(p_{\vx}\|\Phi_t)$. Even for standard cases, like Gaussian distributions,
-this quantity cannot be obtained in closed form. In this section, we provide a variational upper bound for computing the exponentiated Renyi divergence
-between mixtures, focusing on the case in which the first distribution is not a mixture. Consider two mixture distributions $f = \sum_{i=1}^n a_i f_i$ and $g = \sum_{j=1}^m b_j g_j$. We introduce two sets of variational parameters $\phi_{ij} \ge 0$ and $\psi_{ij} \ge 0$  such that $\sum_{j=1}^m \phi_{ij}=a_i$ and $\sum_{i=1}^n \psi_{ij}=b_j$. Using these parameters we can write:
-\begin{align*}
-    f = \sum_{i=1}^n \sum_{j=1}^m \phi_{ij} f_i, \qquad  g = \sum_{i=1}^n \sum_{j=1}^m \psi_{ij} g_j.
-\end{align*}
-We state the following preliminary result.
-\begin{restatable}{lemma}{boundd2mixture}\label{lem:boundd2mixture}
-    Let all involved symbols as defined before. Then, for any $\alpha \ge 1$ it holds that:
-    \begin{equation*}
-        d_{\alpha} (f \| g)^{\alpha-1} \le \sum_{i=1}^n \sum_{j=1}^m \phi_{ij}^\alpha \psi_{ij}^{1-\alpha} d_{\alpha} (f_i \| g_j)^{\alpha-1}.
-    \end{equation*}
-\end{restatable}
-We now consider the case in which $f$ has just one mixture component, \ie $n = 1$. In this case, we have that $\sum_{i=1}^n \psi_{ij}= \psi_j = b_j$, therefore the result reduces to:
-\begin{equation}
-     d_{\alpha} (f \| g)^{\alpha-1} \le  \sum_{j=1}^m \phi_{j}^\alpha b_{j}^{1-\alpha} d_{\alpha} (f \| g_j)^{\alpha-1}.
-\end{equation}
-We can now minimize the bound over the $\phi_j$, subject to $\sum_{j=1}^m \phi_j = 1$, we get the following result.
+\subsection{Upper Bound for the Exponentiated Renyi Divergence between mixtures}
+\algoname requires at each iteration to compute the exponentiated \Renyi divergence between the currently considered distribution $p_{\vx}$ 
+and the mixture $\Phi_t$, \ie $td_{1+\epsilon}(p_{\vx}\|\Phi_t)$. Even for Gaussian distributions, this quantity cannot be obtained in closed form, while
+the \Renyi divergence between Gaussians can be computed exactly. In this section, we provide a upper bound for computing the exponentiated \Renyi divergence
+between a generic distribution and a mixture.
 \begin{restatable}{theorem}{armonic}\label{th:armonic}
-    Let all involved symbols as defined before. Then, for any $\alpha \ge 1$ the bound is optimized by picking:
-    \begin{equation}
-        \phi_j = \frac{\frac{b_j}{d_{\alpha}(f \| g_j)}} {\sum_{k=1}^m \frac{ b_k}{ d_{\alpha}(f \| g_k)}},
-    \end{equation}
-    For this choice of $\phi_j$ we have:
+	Let $P$ be a probability measure and $\Phi = \sum_{k=1}^K \beta_k Q_k$, with $\beta_k \in [0,1]$ and $\sum_{k=1}^K \beta_k =1$, be a finite mixture of the
+	probability measures $\{Q_k\}_{k=1}^K$. Then, for any $\alpha \ge 1$, the exponentiated $\alpha$-\Renyi divergence can be bounded as: 
     \begin{equation*}
-        d_{\alpha}(f \| g) \le \frac{1} {\sum_{k=1}^m \frac{ b_k}{ d_{\alpha}(f \| g_k)}}
+        d_{\alpha}(P \| \Phi) \le \frac{1} {\sum_{k=1}^K \frac{ \beta_k}{ d_{\alpha}(P \| Q_k)}}.
     \end{equation*}
 \end{restatable}
 
@@ -524,6 +505,71 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
           & = \mu - \|f\|_{\infty} \left(\sqrt{2} + \frac{4}{3} \right) \left(\frac{d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}},\\
     \end{align*}
     \todoalb{Commentare passaggi}
+\end{proof}
+
+\begin{lemma}
+	Let $\Psi = \sum_{l=1}^L \zeta_l P_l$ and $\Phi = \sum_{k=1}^K \beta_k Q_k$, with $\zeta_l \in [0,1]$, $\sum_{l=1}^L \zeta_l =1$, $\beta_k \in [0,1]$ and $\sum_{k=1}^K \beta_k =1$, be two finite mixtures of the probability measures $\{P_l\}_{l=1}^L$ and $\{Q_k\}_{k=1}^K$ respectively. Let $\{ \psi_{ij} \}_{\substack{i=1,2,...,L \\ j=1,2,...,K}}$ and $\{ \phi_{ij} \}_{\substack{i=1,2,...,L \\ j=1,2,...,K}}$ be two sets of variational parameters s.t. $\phi_{ij} \ge 0$, $\psi_{ij} \ge 0$, $\sum_{k=1}^K \phi_{ij}=\zeta_l$ and $\sum_{l=1}^L \psi_{ij}=\beta_k$. Then, for any $\alpha \ge 1$, it holds that: 
+     \begin{equation*}
+        d_{\alpha} (\Psi \| \Phi)^{\alpha-1} \le \sum_{l=1}^L \sum_{k=1}^K \phi_{lk}^\alpha \psi_{lk}^{1-\alpha} d_{\alpha} (P_l \| Q_k)^{\alpha-1}.
+    \end{equation*}
+\end{lemma}
+
+\begin{proof}
+Using the variational parameters we can express the two mixtures as:
+\begin{align*}
+    & \Psi = \sum_{l=1}^L \sum_{k=1}^K \phi_{lk} P_l,\\
+    & \Phi = \sum_{l=1}^L \sum_{k=1}^K \psi_{lk} Q_k.
+\end{align*}
+    We use the convexity of the $d_{\alpha}$ and we apply Jensen inequality:
+    \begin{align}
+        d_{\alpha}(\Psi \| \Phi)^{\alpha-1} & = \int \left( \frac{\Psi}{\Phi} \right)^{\alpha} \mathrm{d}\Phi \notag\\
+        & = \int \left( \sum_{l=1}^L \sum_{k=1}^K \frac{\phi_{lk} P_l}{\psi_{lk} Q_k} \frac{\psi_{lk} Q_k}{\Phi} \right)^{\alpha} \mathrm{d}\Phi \notag \\
+        & \le \int \sum_{l=1}^L \sum_{k=1}^K \frac{\psi_{lk} Q_k}{\Phi} \left(  \frac{\phi_{lk} P_l}{\psi_{lk} Q_k}  \right)^{\alpha} \mathrm{d}\Phi \label{eq:strangeBound}\\
+        & = \sum_{i=1}^n \sum_{j=1}^m \phi_{lk}^{\alpha} \psi_{lk}^{1-\alpha}  \int \left( \frac{P_l}{Q_k}  \right)^{\alpha} \mathrm{d}Q_k \notag \\
+        & = \sum_{i=1}^n \sum_{j=1}^m \phi_{lk}^{\alpha} \psi_{lk}^{1-\alpha}  d_{\alpha}(P_l \| Q_k)^{\alpha-1}, \notag
+    \end{align}
+    where \eqref{eq:strangeBound} is obtained by Jensen inequality observing that $\frac{\psi_{lk} Q_k}{\Phi}$ is a distribution over $\{1,...,L\} \times \{1,...,K\}$.
+\end{proof}
+
+We now consider the case in which $f$ has just one mixture component, \ie $n = 1$. In this case, we have that $\sum_{i=1}^n \psi_{ij}= \psi_j = b_j$, therefore the result reduces to:
+\begin{equation}
+     d_{\alpha} (f \| g)^{\alpha-1} \le  \sum_{j=1}^m \phi_{j}^\alpha b_{j}^{1-\alpha} d_{\alpha} (f \| g_j)^{\alpha-1}.
+\end{equation}
+We can now minimize the bound over the $\phi_j$, subject to $\sum_{j=1}^m \phi_j = 1$, we get the following result.
+
+\armonic*
+\begin{proof}
+We now consider the case in which $\Psi$ has just one mixture component, \ie $L = 1$ and we abbreviate $\Psi = P$. In this case, we have that $\sum_{l=1}^L \psi_{kl}= \psi_k = \beta_k$, therefore the result reduces to:
+\begin{equation}
+     d_{\alpha} (P \| \Phi)^{\alpha-1} \le  \sum_{k=1}^K \phi_{k}^\alpha \beta_{k}^{1-\alpha} d_{\alpha} (P \| Q_k)^{\alpha-1}.
+\end{equation}
+We can now minimize the bound over the $\phi_k$, subject to $\sum_{k=1}^K \phi_k = 1$. We use the Lagrange multipliers.
+    \begin{equation*}
+        \mathcal{L}(\{\phi_k\}_{k=1,2,...,K}, \lambda) = \sum_{k=1}^K \phi_{k}^\alpha \beta_{k}^{1-\alpha} d_{\alpha} (P \| Q_k)^{\alpha-1} - \lambda \left( \sum_{k=1}^K \phi_k -1 \right)
+    \end{equation*}
+    We take the partial derivatives \wrt the $\phi_k$ and the Lagrange multiplier $\lambda$.
+    \begin{align*}
+        \frac{\partial \mathcal{L}}{\partial \phi_k} = \alpha \phi_k^{\alpha-1} \beta_j^{1-\alpha} d_{\alpha}(P \| Q_k)^{\alpha-1} - \lambda = 0 \implies \phi_k = \frac{\lambda^{\frac{1}{\alpha-1}}  \beta_j}{\alpha^{\frac{1}{\alpha-1}} d_{\alpha}(P \| Q_k)}.
+    \end{align*}
+    We now replace the expression of $\phi_k$ into the constraint.
+    \begin{align*}
+        \sum_{j=1}^K \phi_k = \frac{\lambda^\frac{1}{\alpha-1}}{\alpha^\frac{1}{\alpha-1}}  \sum_{k=1}^L \frac{ \beta_k}{ d_{\alpha}(P \| Q_k)} = 1 \implies \lambda = \frac{\alpha}{\left( \sum_{k=1}^K \frac{ \beta_k}{ d_{\alpha}(P \| Q_k)}\right)^{{\alpha-1}}}.
+    \end{align*}
+    And finally we get the expression for $\phi_k$:
+    \begin{equation}
+        \phi_k = \frac{\frac{\beta_k}{d_{\alpha}(P \| Q_k)}} {\sum_{h=1}^K \frac{ \beta_h}{ d_{\alpha}(P \| Q_h)}}.
+    \end{equation}
+    We can now compute the bound value:
+    \begin{align*}
+        \sum_{k=1}^K \phi_{k}^\alpha \beta_{k}^{1-\alpha} d_{\alpha} (P \| Q_k)^{\alpha-1} & = \sum_{k=1}^K \frac{\frac{\beta_k^{\alpha}}{d_{\alpha}(P \| Q_k)^{\alpha}}} {\left(\sum_{h=1}^K \frac{ \beta_h}{ d_{\alpha}(P \| Q_h)}\right)^{\alpha}} \beta_{k}^{1-\alpha} d_{\alpha} (P \| Q_k)^{\alpha-1} \\
+        & = \frac{ \sum_{k=1}^K \frac{\beta_k}{d_{\alpha}(P \| Q_k)} }{\left(\sum_{h=1}^K \frac{ \beta_h}{ d_{\alpha}(P \| Q_h)}\right)^{\alpha}} \\
+        & = \frac{1} {\left(\sum_{k=1}^K \frac{ \beta_k}{ d_{\alpha}(P \| Q_k)}\right)^{\alpha-1}}.
+    \end{align*}
+    As a consequence the bound becomes:
+    \begin{equation*}
+        d_{\alpha}(P \| \Phi)^{\alpha-1} \le  \frac{1} {\left(\sum_{k=1}^K \frac{\beta_k}{ d_{\alpha}(P \| Q_k)}\right)^{\alpha-1}} \implies  d_{\alpha}(P \| \Phi) \le \frac{1} {\sum_{k=1}^K \frac{ \beta_k}{ d_{\alpha}(P \| Q_k)}},
+    \end{equation*}
+    which is the weighted harmonic mean of the exponentiated divergences.
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
