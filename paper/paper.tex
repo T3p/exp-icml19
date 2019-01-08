@@ -364,8 +364,10 @@ In the proof, we show how to derive the corresponding Lipschitz constants, and s
 %
 This yields a $\wt{\mathcal{O}}(\sqrt{dT})$ regret when $\epsilon=1$.
 \section{Practical Aspects}\label{sec:practical}
-\textcolor{blue}{
 In this section, we discuss some practical aspects of \algoname. 
+
+\subsection{Optimization}
+\textcolor{blue}{
 As mentioned before, optimization (line 4 in Algorithm \ref{alg:1}) can be very challenging when the arm set $\Xspace$ is infinite, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees, but we leave this to future works. Instead, we propose a discretization method, inspired by the proof of Theorem \ref{th:regretcompact}, which preserves the regret bound for the compact case. The key intuition, common to several continuous MAB algorithms, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Theorem \ref{th:regretcompact} applies to Algorithm \ref{alg:2} under the same hypotheses, so \algoname2 also achieves a $\wt{\mathcal{O}}(\sqrt{dT})$ regret. Unfortunately, this algorithm does not scale well with the dimensionality $d$ of the arm set, as the time per iteration is $O(d^dt^{2d})$.
 %
 \begin{algorithm}[t]
