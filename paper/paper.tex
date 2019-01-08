@@ -30,6 +30,11 @@
 \usepackage{mathabx}
 \usepackage{dsfont}
 \usepackage{enumerate}
+\usepackage{nicefrac}
+
+\makeatletter
+\newcommand{\vast}{\bBigg@{3}}
+\makeatother
 
 %Notes
 \usepackage[colorinlistoftodos, textsize=tiny]{todonotes}
@@ -304,7 +309,7 @@ which can be easily enforced through careful policy (or hyperpolicy) design. Nex
 
 \subsection{Discrete arm set}
 We start from the discrete case, where $|\mathcal{X}| = D \in \Naturals_{+}$.
-This setting is particularly convenient, as the optimization step can be trivially solved in $\mathcal{O}(D)$ time. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may sometimes be constrained to a discrete, reasonably small set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
+This setting is particularly convenient, as the optimization step can be trivially solved in time $\mathcal{O}(Dt^2d)$, summing up to total time $\mathcal{O}(DT^3d)$. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may sometimes be constrained to a discrete, reasonably small set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
 
 \begin{restatable}{theorem}{regretdiscrete}\label{th:regretdiscrete}
 	Let $\Xspace$ be a discrete arm set with ${|\mathcal{X}| = D \in \Naturals_{+}}$. Under Assumption \ref{ass:boundrenyi}, Algorithm \ref{alg:1} with confidence schedule $\delta_t = \frac{3\delta}{t^2\pi^2D}$ guarantees, with probability at least $1-\delta$:
@@ -364,27 +369,38 @@ In the proof, we show how to derive the corresponding Lipschitz constants, and s
 %
 This yields a $\wt{\mathcal{O}}(\sqrt{dT})$ regret when $\epsilon=1$.
 \section{Practical Aspects}\label{sec:practical}
-In this section, we discuss some practical aspects of \algoname. 
+In this section, we discuss some practical aspects of \algoname. From now on, we will focus on the case $\epsilon=1$, which is the only one of practical interest in the scope of this paper.
 
 \subsection{Optimization}
-\textcolor{blue}{
-Some of the most relevant applications of policy search (\eg robotics) naturally involve infinite arm sets $\Xspace$. As mentioned before, optimization (line 4 in Algorithm \ref{alg:1}) can be very challenging in this scenario, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. This direction may be beneficial in practice, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method, inspired by the proof of Theorem \ref{th:regretcompact}, which preserves the regret bound for the compact case. The key intuition, common to several continuous MAB algorithms, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Theorem \ref{th:regretcompact} applies to Algorithm \ref{alg:2} under the same hypotheses, so \algoname2 also achieves a $\wt{\mathcal{O}}(\sqrt{dT})$ regret. Unfortunately, this algorithm does not scale well with the dimensionality $d$ of the arm set, as the time per iteration is $O(d^dt^{2d})$.
+Some of the most relevant applications of policy search (\eg robotics) naturally involve infinite arm sets $\Xspace$. As mentioned before, optimization (line 4 in Algorithm \ref{alg:1}) can be very challenging in this scenario, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. This direction may be beneficial in practice, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method, inspired by the proof of Theorem \ref{th:regretcompact}, which preserves the regret bound for the compact case. The key intuition, common to several continuous MAB algorithms, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. To keep the discretization reasonably coarse, we have to pay a slightly worse regret of $\wt{\mathcal{O}}(d\sqrt{T})$:
 %
+\begin{restatable}{theorem}{regretdiscretized}\label{th:regretdiscretized}
+	Let $\Xspace$ be a $d$-dimensional compact arm set with $\Xspace \subseteq [-D,D]^d$. Under Assumptions \ref{ass:boundrenyi} and \ref{ass:lipschitz}, Algorithm \ref{alg:2} with confidence schedule $\delta_t = \frac{6\delta}{\pi^2t^2(1+t^{\nicefrac{d}{2}})}$ and discretization schedule $\tau_t=\sqrt{t}$ guarantees, with probability at least $1-\delta$:
+	\begin{align*}
+	&\Reg(T) \leq \Delta_0  + \sqrt{T}\mathopen\vast [C_1d \mathclose +
+	\\&\quad+ C_2
+	\sqrt{v_{1}
+	\left(2(d+1)\log T + d\log d + \log \frac{\pi^2}{3\delta}\right)
+	}\mathclose\vast] 
+	\end{align*}
+	where $C_1=2Lr$, $C_2=2\left(2\sqrt{2}+\frac{5}{3}\right)\norm[\infty]{f}$, and $\Delta_0$ is the instantaneous regret of the initial arm $\vx_0$.
+\end{restatable}
+%
+Unfortunately, this algorithm is subject to the curse of dimensionality as the optimization requires time $\mathcal{O}(dt^{\nicefrac{d}{2}+2})$ per iteration, summing up to total time $\mathcal{O}(dT^{\nicefrac{d}{2}+3})$.
 \begin{algorithm}[t]
-	\caption{\algoname2}
+	\caption{\algoname2 ($\epsilon=1$)}
 	\label{alg:2}
 	\begin{algorithmic}[1]
-		\STATE {\bfseries Input:} initial arm $\vx_0$, confidence schedule $(\delta_t)_{t=1}^T$
+		\STATE {\bfseries Input:} initial arm $\vx_0$, confidence schedule $(\delta_t)_{t=1}^T$, discretization schedule $(\tau_t)_{t=1}^T$
 		\STATE Draw sample $z_0\sim p_{\vx_0}$ and observe payoff $f(z_0)$
 		\FOR{$t=1,\dots,T$}
-		\STATE Discretize $\Xspace$ with a uniform grid $\wt{\Xspace}_t$ of $(dt^2)^d$ points
+		\STATE Discretize $\Xspace$ with a uniform grid $\wt{\Xspace}_t$ of $\tau_t^d$ points
 		\STATE Select arm $\vx_t = \arg\max_{\vx\in\wt{\Xspace}_t}B_t(\vx,\delta_t)$
 		\STATE Draw sample $z_t\sim p_{\vx_t}$ and observe payoff $f(z_t)$
 		\ENDFOR
 	\end{algorithmic}
 \end{algorithm}
 %
-}
 
 \subsection{Upper Bound for the Exponentiated Renyi Divergence between mixtures}
 \algoname requires at each iteration to compute the exponentiated \Renyi divergence between the currently considered distribution $p_{\vx}$ 
