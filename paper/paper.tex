@@ -304,7 +304,7 @@ which can be easily enforced through careful policy (or hyperpolicy) design. Nex
 
 \subsection{Discrete arm set}
 We start from the discrete case, where $|\mathcal{X}| = D \in \Naturals_{+}$.
-This setting is particularly convenient, as the optimization step can be trivially solved in $\mathcal{O}(D)$ time. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may be constrained to a discrete set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
+This setting is particularly convenient, as the optimization step can be trivially solved in $\mathcal{O}(D)$ time. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may sometimes be constrained to a discrete, reasonably small set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
 
 \begin{restatable}{theorem}{regretdiscrete}\label{th:regretdiscrete}
 	Let $\Xspace$ be a discrete arm set with ${|\mathcal{X}| = D \in \Naturals_{+}}$. Under Assumption \ref{ass:boundrenyi}, Algorithm \ref{alg:1} with confidence schedule $\delta_t = \frac{3\delta}{t^2\pi^2D}$ guarantees, with probability at least $1-\delta$:
@@ -321,7 +321,7 @@ This setting is particularly convenient, as the optimization step can be trivial
 This yields a $\wt{\mathcal{O}}(\sqrt{T})$ regret when $\epsilon=1$.
 
 \subsection{Compact arm set}
-Now, we consider the more general case of a compact arm set $\Xspace\in\Reals^d$. We can assume, \wlg, that $\Xspace$ is entirely contained in a box $[-D,D]^d$, with $D\in\Reals_{+}$. We also need the following assumption on the expected payoff:
+Now, we consider the more general case of a compact arm set $\Xspace\in\Reals^d$. This case is also more interesting as it allows to tackle virtually any RL task. We can assume, \wlg, that $\Xspace$ is entirely contained in a box $[-D,D]^d$, with $D\in\Reals_{+}$. We also need the following assumption on the expected payoff:
 %
 \begin{restatable}{assumption}{lipschitz}\label{ass:lipschitz}
 	The expected payoff $\mu$ is Lipschitz continuous, \ie, there exists a constant $L>0$ such that, for every $\vx, \vx'\in\Xspace$:
@@ -368,7 +368,7 @@ In this section, we discuss some practical aspects of \algoname.
 
 \subsection{Optimization}
 \textcolor{blue}{
-As mentioned before, optimization (line 4 in Algorithm \ref{alg:1}) can be very challenging when the arm set $\Xspace$ is infinite, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees, but we leave this to future works. Instead, we propose a discretization method, inspired by the proof of Theorem \ref{th:regretcompact}, which preserves the regret bound for the compact case. The key intuition, common to several continuous MAB algorithms, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Theorem \ref{th:regretcompact} applies to Algorithm \ref{alg:2} under the same hypotheses, so \algoname2 also achieves a $\wt{\mathcal{O}}(\sqrt{dT})$ regret. Unfortunately, this algorithm does not scale well with the dimensionality $d$ of the arm set, as the time per iteration is $O(d^dt^{2d})$.
+Some of the most relevant applications of policy search (\eg robotics) naturally involve infinite arm sets $\Xspace$. As mentioned before, optimization (line 4 in Algorithm \ref{alg:1}) can be very challenging in this scenario, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. This direction may be beneficial in practice, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method, inspired by the proof of Theorem \ref{th:regretcompact}, which preserves the regret bound for the compact case. The key intuition, common to several continuous MAB algorithms, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Theorem \ref{th:regretcompact} applies to Algorithm \ref{alg:2} under the same hypotheses, so \algoname2 also achieves a $\wt{\mathcal{O}}(\sqrt{dT})$ regret. Unfortunately, this algorithm does not scale well with the dimensionality $d$ of the arm set, as the time per iteration is $O(d^dt^{2d})$.
 %
 \begin{algorithm}[t]
 	\caption{\algoname2}
