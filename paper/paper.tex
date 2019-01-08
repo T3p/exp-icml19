@@ -239,17 +239,17 @@ Our adaptive truncation approach and the consequent concentration results resemb
 \section{Algorithm}
 In this section, we use the mathematical tools presented so far to design a policy search algorithm that efficiently explores the space of solutions. The proposed algorithm, \algoname, is based on the Optimism in the Face of Uncertainty (OFU) principle and follows the Upper Confidence Bound (UCB) strategy~\citep{lai1985asymptotically,agrawal1995sample,auer2002finite} commonly used in Multi Armed Bandit (MAB) problems~\citep{robbins1985some,bubeck2012regret,lattimore2019bandit}. 
 
-The problem we want to solve does \textit{not} fall into the MAB framework and requires its own formalization. Let $\Xspace\subseteq \Reals^d$ be our decision set, or \textit{arm set} in MAB jargon. Let $(\Omega,\mathcal{F},P)$ be a probability space. Let ${\{Z_{\vx}:\Omega\to\mathcal{Z}\mid \vx\in\Xspace\}}$ be a set of continuous random vectors parametrized by $\Xspace$, with common sample space ${\mathcal{Z}\subseteq \Reals^m}$. We denote with $p_{\vx}$ the probability density function of $Z_{\vx}$. Finally, let $f:\mathcal{Z}\to\Reals$ be a bounded \textit{payoff function}, and $\mu(\vx) = \Exp_{z\sim p_{\vx}}\left[f(z)\right]$ its expectation under $p_{\vx}$. For each iteration $t=0,\dots,T$, we select an arm $\vx_t$, draw a sample $z_t$ from $p_{\vx_t}$, and observe payoff $f(z_t)$, up to horizon $T$. The goal is to maximize the expected total payoff:
+The problem we want to solve does \textit{not} fall into the MAB framework (not into its basic version, anyway) and can benefit from an ad-hoc formalization. Let $\Xspace\subseteq \Reals^d$ be our decision set, or \textit{arm set} in MAB jargon. Let $(\Omega,\mathcal{F},P)$ be a probability space. Let ${\{Z_{\vx}:\Omega\to\mathcal{Z}\mid \vx\in\Xspace\}}$ be a set of continuous random vectors parametrized by $\Xspace$, with common sample space ${\mathcal{Z}\subseteq \Reals^m}$. We denote with $p_{\vx}$ the probability density function of $Z_{\vx}$. Finally, let $f:\mathcal{Z}\to\Reals$ be a bounded \textit{payoff function}, and $\mu(\vx) = \Exp_{z\sim p_{\vx}}\left[f(z)\right]$ its expectation under $p_{\vx}$. For each iteration $t=0,\dots,T$, we select an arm $\vx_t$, draw a sample $z_t$ from $p_{\vx_t}$, and observe payoff $f(z_t)$, up to horizon $T$. The goal is to maximize the expected total payoff:
 \begin{align}\label{eq:theproblem}
 	\max_{\vx_0,\dots,\vx_T\in\Xspace} \Exp_{z_t\sim p_{\vx_t}}\left[\sum_{t=0}^T f(z_t)\right] = \max_{\vx_0,\dots,\vx_T\in\Xspace}\sum_{t=0}^{T}\mu(\vx_t).
 \end{align}
 Although we can evaluate $p_{\vx}$ for every $\vx\in\Xspace$, we can only observe $f(z_t)$ for the $z_t$ that are actually sampled. 
 This models precisely the online, episodic policy optimization problem.
 In action-based policy optimization, $\Xspace$ corresponds to the parameter space $\Theta$ of a class of stochastic policies ${\{\pi_{\vtheta}\mid\vtheta\in\Theta\}}$, $\mathcal{Z}$ to the set of possible trajectories, $p_{\vx}$ to the density $p_{\vtheta}$ over trajectories induced by policy $\pi_{\vtheta}$, and $f(z)$ to cumulated reward $\Rew(\tau)$. 
-In parameter-based policy optimization, $\Xspace$ corresponds to the hyperparameter space $\Xi$ of a class of stochastic hyperpolicies $\{\nu_{\vxi}\mid\vxi\in\Xi\}$, $\mathcal{Z}$ to policy parameter space $\Theta$, $p_{\vx}$ to hyperpolicy $\nu_{\xi}$, and $f(z)$ to performance $J(\vtheta)$. In both cases, each iteration corresponds to a single episode, and horizon $T$ is the total number of episodes (not to be confused with the trajectory horizon $H$). From now on, we will refer to (\ref{eq:theproblem}) simply as the policy optimization problem.
+In parameter-based policy optimization, $\Xspace$ corresponds to the hyperparameter space $\Xi$ of a class of stochastic hyperpolicies $\{\nu_{\vxi}\mid\vxi\in\Xi\}$, $\mathcal{Z}$ to policy parameter space $\Theta$, $p_{\vx}$ to hyperpolicy $\nu_{\xi}$, and $f(z)$ to performance $J(\vtheta)$. In both cases, each iteration corresponds to a single episode, and horizon $T$ is the total number of episodes (not to be confused with the trajectory horizon $H$). From now on, we will refer to (\ref{eq:theproblem}) simply as the policy optimization problem. The peculiarity of this framework, \wrt classic MAB, is the special structure existing over the arms. In particular, the expected payoff $\mu$ of different arms is correlated thanks to the stochasticity of the $p_{\vx}$'s on a common sample space $\mathcal{Z}$.
 
-To apply the UCB strategy to the policy optimization problem, we need an estimate of the objective $\mu(\vx)$ and a confidence region. 
-For the former, we use the robust balance heuristic estimator $\wc{\mu}_{\text{BH}}$ from (\ref{eq:truncatedmise}). To simplify the notation, \wlg, we treat each sample $\vx$ as a distinct one. This corresponds to the case $K=t-1$ and $N_k\equiv1$. Hence, at each iteration $t$:
+To apply the UCB strategy to the policy optimization problem, we need an estimate of the objective $\mu(\vx)$ and a confidence region. We use importance sampling to capture the correlation among the arms. In particular to better use all the data that we collect, we would like to use a multiple importance sampling estimator like the one from (\ref{eq:mise}). Unfortunately, the heavy-tailed behavior of this estimator would result in inefficient exploration.
+Instead, we use the robust balance heuristic estimator $\wc{\mu}_{\text{BH}}$ from (\ref{eq:truncatedmise}), which has better tail behavior. To simplify the notation, \wlg, we treat each sample $\vx$ as a distinct one. This corresponds to the case $K=t-1$ and $N_k\equiv1$. Hence, at each iteration $t$:
 \begin{align}
 	\wc{\mu}_t(\vx) = \sum_{k=0}^{t-1}
 	\min\left\{M_{t-1}, \frac{p_{\vx}(z_k)}
@@ -526,6 +526,57 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
     \todoalb{Commentare passaggi}
 \end{proof}
 
+%Finite arm set
+\regretdiscrete*
+%
+\begin{proof}
+	Fix an $\epsilon>0$.
+	To ease the notation, let $c^{-}\coloneqq \norm[\infty]{f}\left(\sqrt{2}+\frac{1}{3}\right)$, $c^{+}\coloneqq \norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)$, and $\beta_t(\vx) \coloneqq \left(\frac{d_{1+\epsilon}(p_{\vx}\|\Phi_t)\log\frac{1}{\delta_t}}{t}\right)^{\frac{\epsilon}{1+\epsilon}}$.
+	We start by showing that, with probability at least $1-\delta$:
+	\begin{align}\label{aux:1}
+		&-c^{+}\beta_t{\vx}\leq \wc{\mu}(\vx) - \mu(\vx) \leq c^{-}\beta_t(\vx) & \text{for all $\vx\in\Xspace$ and $t=1,\dots,T$}.
+	\end{align}
+	Indeed:
+	\begin{align}
+		\Prob\left(\bigcap_{k=1}^{D}\bigcap_{t=1}^T\left[\wc{\mu}(\vx_k) - \mu(\vx_k) \leq c^{-}\beta_t(\vx_k)\right]\right) &=1-\Prob\left(\bigcup_{k=1}^{D}\bigcup_{t=1}^T\left[\wc{\mu}(\vx_k) - \mu(\vx_k) > c^{-}\beta_t(\vx_k)\right]\right)\nonumber\\
+		&\geq 1-D\sum_{t=1}^{T}\Prob\left(\wc{\mu}(\vx_1) - \mu(\vx_1) > c^{-}\beta_t(\vx_1)\right) \label{pp:1}\\
+		& \geq 1 - D\sum_{t=1}^{T}\delta_t\label{pp:2}\\
+		& \geq 1 - \frac{\delta}{2},\label{pp:3}
+	\end{align}
+	where (\ref{pp:1}) is from a double union bound (over time and over the finite elements of $\Xspace$), (\ref{pp:2}) is from Theorem \ref{lem:thrucatedconcentration}, and (\ref{pp:3}) is by hypothesis on $\delta_t$ and $\sum_{t=1}^{T}\frac{1}{t^2}\leq\sum_{t=1}^{\infty}\frac{1}{t^2} = \frac{\pi^2}{6}$. Similarly:
+	\begin{align*}
+		\Prob\left(\bigcap_{k=1}^{D}\bigcap_{t=1}^T\left[\wc{\mu}(\vx_k) - \mu(\vx_k) \geq -c^{+}\beta_t(\vx_k)\right]\right) &=1-\Prob\left(\bigcup_{k=1}^{D}\bigcup_{t=1}^T\left[\wc{\mu}(\vx_k) - \mu(\vx_k) < -c^{+}\beta_t(\vx_k)\right]\right)\nonumber\\
+		&\geq 1-D\sum_{t=1}^{T}\Prob\left(\wc{\mu}(\vx_1) - \mu(\vx_1) < -c^{+}\beta_t(\vx_1)\right)\\
+		&\geq 1 - D\sum_{t=1}^{T}\delta_t\\
+		 &\geq 1 - \frac{\delta}{2}.
+	\end{align*}
+	Hence, by union bound over the two inequalities, (\ref{aux:1}) holds with probability at least $1-\delta$.
+	This allows to lower bound the instantaneous regret with the same probability:
+	\begin{align}
+		\Delta_t &= \mu(\vx^*) - \mu(\vx) \leq 
+		\wc{\mu}(\vx^*) + c^{+}\beta_t(\vx^*) - \mu(\vx_t) \label{pp:4}\\
+		&\leq \wc{\mu}(\vx_t) + c^{+}\beta_t(\vx_t) - \mu(\vx_t) \label{pp:5}\\
+		&\leq (c^{-} + c^{+})\beta(\vx_t) & \text{for all t=1,\dots,T}\label{aux:2}, 
+	\end{align}
+	where (\ref{pp:4}) and (\ref{aux:2}) are from (\ref{aux:1}), while (\ref{pp:5}) is by hypothesis, as $\vx_t=\arg\max_{\vx\in\Xspace}(\wc{\mu}(\vx) + c^{+}\beta_t(\vx))$.
+	Note that the union bound over the elements of $\Xspace$ in (\ref{aux:1}) was necessary for (\ref{pp:4}) as the optimal arm $\vx^*$ may not be unique.
+	Finally, with probability at least $1-\delta$:
+	\begin{align}
+		\Reg(T) &= \sum_{t=0}^{T}\Delta_t \nonumber\\
+		&= \Delta_0  + \sum_{t=1}^{T}\Delta_t \nonumber\\
+		&\leq \Delta_0  + (c^{+}+c^{-})\sum_{t=1}^{T}\beta_t(\vx_t) \label{pp:6}\\
+		&\leq \Delta_0  + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{\log\frac{1}{\delta_t}}{t}\right)^{\frac{\epsilon}{1+\epsilon}} \label{pp:7}\\
+		&=\Delta_0  + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{2\log t + \log\frac{\pi^2D}{3\delta}}{t}\right)^{\frac{\epsilon}{1+\epsilon}} \label{pp:8}\\
+		&\leq \Delta_0  + (c^{+}+c^{-})\left[v_{\epsilon}\left(2\log T + \log\frac{\pi^2D}{3\delta}\right)\right]^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}t^{-\frac{\epsilon}{1+\epsilon}} \nonumber\\
+		&\leq \Delta_0  + (c^{+}+c^{-})\left[v_{\epsilon}\left(2\log T + \log\frac{\pi^2D}{3\delta}\right)\right]^{\frac{\epsilon}{1+\epsilon}}(1+\epsilon)T^{\frac{1}{1+\epsilon}} \label{pp:9},
+	\end{align}
+	where (\ref{pp:6}) is from (\ref{aux:2}) and holds with probability no less than $1-\delta$, (\ref{pp:7}) is from Assumption \ref{ass:boundrenyi}, (\ref{pp:8}) is by definition of $\delta_t$, and (\ref{pp:9}) is from: 
+	\begin{align}\label{aux:3}
+		\sum_{t=1}^{T}t^{-\frac{\epsilon}{1+\epsilon}} \leq \int_{1}^{T+1}t^{-\frac{\epsilon}{1+\epsilon}}\de t
+		= (1+\epsilon)\left((T+1)^{\frac{1}{1+\epsilon}} - 1\right) \leq (1+\epsilon)T^{\frac{1}{1+\epsilon}}.
+	\end{align}
+	The proof is concluded by renaming $C\gets (1+\epsilon)(c^{+}+c^{-}) = (1+\epsilon)(2\sqrt{2} + \frac{5}{3})\norm[\infty]{f}$.
+\end{proof}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
