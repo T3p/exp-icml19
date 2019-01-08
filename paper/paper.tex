@@ -246,9 +246,9 @@ The problem we want to solve does \textit{not} fall into the MAB framework and r
 Although we can evaluate $p_{\vx}$ for every $\vx\in\Xspace$, we can only observe $f(z_t)$ for the $z_t$ that are actually sampled. 
 This models precisely the online, episodic policy optimization problem.
 In action-based policy optimization, $\Xspace$ corresponds to the parameter space $\Theta$ of a class of stochastic policies ${\{\pi_{\vtheta}\mid\vtheta\in\Theta\}}$, $\mathcal{Z}$ to the set of possible trajectories, $p_{\vx}$ to the density $p_{\vtheta}$ over trajectories induced by policy $\pi_{\vtheta}$, and $f(z)$ to cumulated reward $\Rew(\tau)$. 
-In parameter-based policy optimization, $\Xspace$ corresponds to the hyperparameter space $\Xi$ of a class of stochastic hyperpolicies $\{\nu_{\vxi}\mid\vxi\in\Xi\}$, $\mathcal{Z}$ to policy parameter space $\Theta$, $p_{\vx}$ to hyperpolicy $\nu_{\xi}$, and $f(z)$ to performance $J(\vtheta)$. In both cases, each iteration corresponds to a single episode, and horizon $T$ is the total number of episodes (not to be confused with the trajectory horizon $H$).
+In parameter-based policy optimization, $\Xspace$ corresponds to the hyperparameter space $\Xi$ of a class of stochastic hyperpolicies $\{\nu_{\vxi}\mid\vxi\in\Xi\}$, $\mathcal{Z}$ to policy parameter space $\Theta$, $p_{\vx}$ to hyperpolicy $\nu_{\xi}$, and $f(z)$ to performance $J(\vtheta)$. In both cases, each iteration corresponds to a single episode, and horizon $T$ is the total number of episodes (not to be confused with the trajectory horizon $H$). From now on, we will refer to (\ref{eq:theproblem}) simply as the policy optimization problem.
 
-To apply the UCB strategy to our our problem (\ref{eq:theproblem}), we need an estimate of the objective $\mu(\vx)$ and a confidence region. 
+To apply the UCB strategy to the policy optimization problem, we need an estimate of the objective $\mu(\vx)$ and a confidence region. 
 For the former, we use the robust balance heuristic estimator $\wc{\mu}_{\text{BH}}$ from (\ref{eq:truncatedmise}). To simplify the notation, \wlg, we treat each sample $\vx$ as a distinct one. This corresponds to the case $K=t-1$ and $N_k\equiv1$. Hence, at each iteration $t$:
 \begin{align}
 	\wc{\mu}_t(\vx) = \sum_{k=0}^{t-1}
@@ -364,9 +364,26 @@ In the proof, we show how to derive the corresponding Lipschitz constants, and s
 %
 This yields a $\wt{\mathcal{O}}(\sqrt{dT})$ regret when $\epsilon=1$.
 \section{Practical Aspects}\label{sec:practical}
-\begin{itemize}
-	\item The optimization problem
-\end{itemize}
+\textcolor{blue}{
+In this section, we discuss some practical aspects of \algoname. 
+As mentioned before, optimization (line 4 in Algorithm \ref{alg:1}) can be very challenging when the arm set $\Xspace$ is infinite, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees, but we leave this to future works. Instead, we propose a discretization method, inspired by the proof of Theorem \ref{th:regretcompact}, which preserves the regret bound for the compact case. The key intuition, common to several continuous MAB algorithms, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Theorem \ref{th:regretcompact} applies to Algorithm \ref{alg:2} under the same hypotheses, so \algoname2 also achieves a $\wt{\mathcal{O}}(\sqrt{dT})$ regret. Unfortunately, this algorithm does not scale well with the dimensionality $d$ of the arm set, as the time per iteration is $O(d^dt^{2d})$.
+%
+\begin{algorithm}[t]
+	\caption{\algoname2}
+	\label{alg:2}
+	\begin{algorithmic}[1]
+		\STATE {\bfseries Input:} initial arm $\vx_0$, confidence schedule $(\delta_t)_{t=1}^T$
+		\STATE Draw sample $z_0\sim p_{\vx_0}$ and observe payoff $f(z_0)$
+		\FOR{$t=1,\dots,T$}
+		\STATE Discretize $\Xspace$ with a uniform grid $\wt{\Xspace}_t$ of $(dt^2)^d$ points
+		\STATE Select arm $\vx_t = \arg\max_{\vx\in\wt{\Xspace}_t}B_t(\vx,\delta_t)$
+		\STATE Draw sample $z_t\sim p_{\vx_t}$ and observe payoff $f(z_t)$
+		\ENDFOR
+	\end{algorithmic}
+\end{algorithm}
+%
+}
+
 \subsection{Parameter-based exploration}
 \begin{itemize}
 	\item Bound on $d_2$
