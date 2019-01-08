@@ -239,7 +239,7 @@ Our adaptive truncation approach and the consequent concentration results resemb
 \section{Algorithm}
 In this section, we use the mathematical tools presented so far to design a policy search algorithm that efficiently explores the space of solutions. The proposed algorithm, \algoname, is based on the Optimism in the Face of Uncertainty (OFU) principle and follows the Upper Confidence Bound (UCB) strategy~\citep{lai1985asymptotically,agrawal1995sample,auer2002finite} commonly used in Multi Armed Bandit (MAB) problems~\citep{robbins1985some,bubeck2012regret,lattimore2019bandit}. 
 
-The problem we want to solve does \textit{not} fall into the MAB framework and requires its own formalization. Let $\Xspace\subseteq \Reals^d$ be our decision set, or \textit{arm set} in MAB jargon. Let $(\Omega,\mathcal{F},\mathbb{P})$ be a probability space. Let ${\{Z_{\vx}:\Omega\to\mathcal{Z}\mid \vx\in\Xspace\}}$ be a set of continuous random vectors parametrized by $\Xspace$, with common sample space ${\mathcal{Z}\subseteq \Reals^m}$. We denote with $p_{\vx}$ the probability density function of $Z_{\vx}$. Finally, let $f:\mathcal{Z}\to\Reals$ be a bounded \textit{payoff function}, and $\mu(\vx) = \Exp_{z\sim p_{\vx}}\left[f(z)\right]$ its expectation under $p_{\vx}$. For each iteration $t=0,\dots,T$, we select an arm $\vx_t$, draw a sample $z_t$ from $p_{\vx_t}$, and observe payoff $f(z_t)$, up to horizon $T$. The goal is to maximize the expected total payoff:
+The problem we want to solve does \textit{not} fall into the MAB framework and requires its own formalization. Let $\Xspace\subseteq \Reals^d$ be our decision set, or \textit{arm set} in MAB jargon. Let $(\Omega,\mathcal{F},P)$ be a probability space. Let ${\{Z_{\vx}:\Omega\to\mathcal{Z}\mid \vx\in\Xspace\}}$ be a set of continuous random vectors parametrized by $\Xspace$, with common sample space ${\mathcal{Z}\subseteq \Reals^m}$. We denote with $p_{\vx}$ the probability density function of $Z_{\vx}$. Finally, let $f:\mathcal{Z}\to\Reals$ be a bounded \textit{payoff function}, and $\mu(\vx) = \Exp_{z\sim p_{\vx}}\left[f(z)\right]$ its expectation under $p_{\vx}$. For each iteration $t=0,\dots,T$, we select an arm $\vx_t$, draw a sample $z_t$ from $p_{\vx_t}$, and observe payoff $f(z_t)$, up to horizon $T$. The goal is to maximize the expected total payoff:
 \begin{align}\label{eq:theproblem}
 	\max_{\vx_0,\dots,\vx_T\in\Xspace} \Exp_{z_t\sim p_{\vx_t}}\left[\sum_{t=0}^T f(z_t)\right] = \max_{\vx_0,\dots,\vx_T\in\Xspace}\sum_{t=0}^{T}\mu(\vx_t).
 \end{align}
@@ -367,6 +367,39 @@ This yields a $\wt{\mathcal{O}}(\sqrt{dT})$ regret when $\epsilon=1$.
 \begin{itemize}
 	\item The optimization problem
 \end{itemize}
+
+\subsection{Variational Bound for the Exponentiated Renyi Divergence between mixtures}
+\todoalb{Adeguare notazione}
+\algoname requires at each iteration to compute the exponentiated Renyi divergence between the currently considered distribution $p_{\vx}$ 
+and the mixture $\Phi_t$, \ie $td_{1+\epsilon}(p_{\vx}\|\Phi_t)$. Even for standard cases, like Gaussian distributions,
+this quantity cannot be obtained in closed form. In this section, we provide a variational upper bound for computing the exponentiated Renyi divergence
+between mixtures, focusing on the case in which the first distribution is not a mixture. Consider two mixture distributions $f = \sum_{i=1}^n a_i f_i$ and $g = \sum_{j=1}^m b_j g_j$. We introduce two sets of variational parameters $\phi_{ij} \ge 0$ and $\psi_{ij} \ge 0$  such that $\sum_{j=1}^m \phi_{ij}=a_i$ and $\sum_{i=1}^n \psi_{ij}=b_j$. Using these parameters we can write:
+\begin{align*}
+    f = \sum_{i=1}^n \sum_{j=1}^m \phi_{ij} f_i, \qquad  g = \sum_{i=1}^n \sum_{j=1}^m \psi_{ij} g_j.
+\end{align*}
+We state the following preliminary result.
+\begin{restatable}{lemma}{boundd2mixture}\label{lem:boundd2mixture}
+    Let all involved symbols as defined before. Then, for any $\alpha \ge 1$ it holds that:
+    \begin{equation*}
+        d_{\alpha} (f \| g)^{\alpha-1} \le \sum_{i=1}^n \sum_{j=1}^m \phi_{ij}^\alpha \psi_{ij}^{1-\alpha} d_{\alpha} (f_i \| g_j)^{\alpha-1}.
+    \end{equation*}
+\end{restatable}
+We now consider the case in which $f$ has just one mixture component, \ie $n = 1$. In this case, we have that $\sum_{i=1}^n \psi_{ij}= \psi_j = b_j$, therefore the result reduces to:
+\begin{equation}
+     d_{\alpha} (f \| g)^{\alpha-1} \le  \sum_{j=1}^m \phi_{j}^\alpha b_{j}^{1-\alpha} d_{\alpha} (f \| g_j)^{\alpha-1}.
+\end{equation}
+We can now minimize the bound over the $\phi_j$, subject to $\sum_{j=1}^m \phi_j = 1$, we get the following result.
+\begin{restatable}{theorem}{armonic}\label{th:armonic}
+    Let all involved symbols as defined before. Then, for any $\alpha \ge 1$ the bound is optimized by picking:
+    \begin{equation}
+        \phi_j = \frac{\frac{b_j}{d_{\alpha}(f \| g_j)}} {\sum_{k=1}^m \frac{ b_k}{ d_{\alpha}(f \| g_k)}},
+    \end{equation}
+    For this choice of $\phi_j$ we have:
+    \begin{equation*}
+        d_{\alpha}(f \| g) \le \frac{1} {\sum_{k=1}^m \frac{ b_k}{ d_{\alpha}(f \| g_k)}}
+    \end{equation*}
+\end{restatable}
+
 \subsection{Parameter-based exploration}
 \begin{itemize}
 	\item Bound on $d_2$
