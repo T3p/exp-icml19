@@ -540,7 +540,7 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 	To ease the notation, let $c^{-}\coloneqq \norm[\infty]{f}\left(\sqrt{2}+\frac{1}{3}\right)$, $c^{+}\coloneqq \norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)$, and $\beta_t(\vx) \coloneqq \left(\frac{d_{1+\epsilon}(p_{\vx}\|\Phi_t)\log\frac{1}{\delta_t}}{t}\right)^{\frac{\epsilon}{1+\epsilon}}$.
 	We start by showing that, with probability at least $1-\delta$:
 	\begin{align}\label{aux:1}
-		&-c^{+}\beta_t{\vx}\leq \wc{\mu}(\vx) - \mu(\vx) \leq c^{-}\beta_t(\vx) & \text{for all $\vx\in\Xspace$ and $t=1,\dots,T$}.
+		&-c^{+}\beta_t({\vx})\leq \wc{\mu}(\vx) - \mu(\vx) \leq c^{-}\beta_t(\vx) & \text{for all $\vx\in\Xspace$ and $t=1,\dots,T$}.
 	\end{align}
 	Indeed:
 	\begin{align}
@@ -562,7 +562,7 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 		\Delta_t &= \mu(\vx^*) - \mu(\vx) \leq 
 		\wc{\mu}(\vx^*) + c^{+}\beta_t(\vx^*) - \mu(\vx_t) \label{pp:4}\\
 		&\leq \wc{\mu}(\vx_t) + c^{+}\beta_t(\vx_t) - \mu(\vx_t) \label{pp:5}\\
-		&\leq (c^{-} + c^{+})\beta(\vx_t) & \text{for all t=1,\dots,T}\label{aux:2}, 
+		&\leq (c^{-} + c^{+})\beta(\vx_t) & \text{for all $t=1,\dots,T$}\label{aux:2}, 
 	\end{align}
 	where (\ref{pp:4}) and (\ref{aux:2}) are from (\ref{aux:1}), while (\ref{pp:5}) is by hypothesis, as $\vx_t=\arg\max_{\vx\in\Xspace}(\wc{\mu}(\vx) + c^{+}\beta_t(\vx))$.
 	Note that the union bound over the elements of $\Xspace$ in (\ref{aux:1}) was necessary for (\ref{pp:4}) as the optimal arm $\vx^*$ may not be unique.
