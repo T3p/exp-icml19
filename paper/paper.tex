@@ -308,17 +308,17 @@ First, we need the following assumption on the \Renyi divergence:
 which can be easily enforced through careful policy (or hyperpolicy) design. Next, we need some assumptions on the structure of the arm set $\Xspace$.
 
 \subsection{Discrete arm set}
-We start from the discrete case, where $|\mathcal{X}| = D \in \Naturals_{+}$.
-This setting is particularly convenient, as the optimization step can be trivially solved in time $\mathcal{O}(Dt^2d)$, summing up to total time $\mathcal{O}(DT^3d)$. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may sometimes be constrained to a discrete, reasonably small set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
+We start from the discrete case, where $|\mathcal{X}| = K \in \Naturals_{+}$.
+This setting is particularly convenient, as the optimization step can be trivially solved in time $\mathcal{O}(Kt^2d)$, summing up to total time $\mathcal{O}(KT^3d)$. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may sometimes be constrained to a discrete, reasonably small set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
 
 \begin{restatable}{theorem}{regretdiscrete}\label{th:regretdiscrete}
-	Let $\Xspace$ be a discrete arm set with ${|\mathcal{X}| = D \in \Naturals_{+}}$. Under Assumption \ref{ass:boundrenyi}, Algorithm \ref{alg:1} with confidence schedule $\delta_t = \frac{3\delta}{t^2\pi^2D}$ guarantees, with probability at least $1-\delta$:
+	Let $\Xspace$ be a discrete arm set with ${|\mathcal{X}| = K \in \Naturals_{+}}$. Under Assumption \ref{ass:boundrenyi}, Algorithm \ref{alg:1} with confidence schedule $\delta_t = \frac{3\delta}{t^2\pi^2K}$ guarantees, with probability at least $1-\delta$:
 	\begin{align*}
 		&\Reg(T) \leq \Delta_0 \\
 		&\quad+ 	C
 			T^{\frac{1}{1+\epsilon}}
 			\left[v_{\epsilon}
-			\left(2\log T + \log \frac{\pi^2D}{3\delta}\right)
+			\left(2\log T + \log \frac{\pi^2K}{3\delta}\right)
 			\right]^{\frac{\epsilon}{1+\epsilon}},
 	\end{align*}
 	where $C=(1+\epsilon)\left(2\sqrt{2}+\frac{5}{3}\right)\norm[\infty]{f}$, and $\Delta_0$ is the instantaneous regret of the initial arm $\vx_0$.
@@ -372,21 +372,24 @@ This yields a $\wt{\mathcal{O}}(\sqrt{dT})$ regret when $\epsilon=1$.
 In this section, we discuss some practical aspects of \algoname. From now on, we will focus on the case $\epsilon=1$, which is the only one of practical interest in the scope of this paper.
 
 \subsection{Optimization}
-Some of the most relevant applications of policy search (\eg robotics) naturally involve infinite arm sets $\Xspace$. As mentioned before, optimization (line 4 in Algorithm \ref{alg:1}) can be very challenging in this scenario, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. This direction may be beneficial in practice, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method, inspired by the proof of Theorem \ref{th:regretcompact}, which preserves the regret bound for the compact case. The key intuition, common to several continuous MAB algorithms, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. To keep the discretization reasonably coarse, we have to pay a slightly worse regret of $\wt{\mathcal{O}}(d\sqrt{T})$:
+Some of the most relevant applications of policy search (\eg robotics) naturally involve infinite arm sets $\Xspace$. As mentioned before, optimization (line 4 in Algorithm \ref{alg:1}) can be very challenging in this scenario, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. This direction may be beneficial in practice, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method, inspired by the proof of Theorem \ref{th:regretcompact}, which preserves the regret bound for the compact case. The key intuition, common in the continuous MAB literature, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. A reasonably coarse discretization can be used at the price of a worse (sublinear) regret:
 %
+\todomat{Theorem 4 da controllare!}
 \begin{restatable}{theorem}{regretdiscretized}\label{th:regretdiscretized}
-	Let $\Xspace$ be a $d$-dimensional compact arm set with $\Xspace \subseteq [-D,D]^d$. Under Assumptions \ref{ass:boundrenyi} and \ref{ass:lipschitz}, Algorithm \ref{alg:2} with confidence schedule $\delta_t = \frac{6\delta}{\pi^2t^2(1+t^{\nicefrac{d}{2}})}$ and discretization schedule $\tau_t=\sqrt{t}$ guarantees, with probability at least $1-\delta$:
+	Let $\Xspace$ be a $d$-dimensional compact arm set with $\Xspace \subseteq [-D,D]^d$. For any $\kappa\geq2$, under Assumptions \ref{ass:boundrenyi} and \ref{ass:lipschitz}, Algorithm \ref{alg:2} with confidence schedule $\delta_t = \frac{6\delta}{\pi^2t^2(1+t^{\nicefrac{d}{\kappa}})}$ and discretization schedule $\tau_t=\lceil t^{\frac{1}{\kappa}} \rceil$ guarantees, with probability at least $1-\delta$:
 	\begin{align*}
-	&\Reg(T) \leq \Delta_0  + \sqrt{T}\mathopen\vast [C_1d \mathclose +
+	&\Reg(T) \leq \Delta_0  + C_2T^{\left(1-\frac{1}{\kappa}\right)}d
 	\\&\quad+ C_2
-	\sqrt{v_{1}
+	\sqrt{Tv_{1}
 	\left(2(d+1)\log T + d\log d + \log \frac{\pi^2}{3\delta}\right)
-	}\mathclose\vast] 
+	}
 	\end{align*}
 	where $C_1=2Lr$, $C_2=2\left(2\sqrt{2}+\frac{5}{3}\right)\norm[\infty]{f}$, and $\Delta_0$ is the instantaneous regret of the initial arm $\vx_0$.
 \end{restatable}
 %
-Unfortunately, this algorithm is subject to the curse of dimensionality as the optimization requires time $\mathcal{O}(dt^{\nicefrac{d}{2}+2})$ per iteration, summing up to total time $\mathcal{O}(dT^{\nicefrac{d}{2}+3})$.
+For $\kappa=2$, we obtain regret $\wt{\mathcal{O}}(d\sqrt{T})$. Unfortunately, the time required for optimization is exponential in arm space dimensionality $d$. For $d\geq 2$, we can break the curse of dimensionality by taking $\kappa=d$. In this case, the regret is $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{1}{d}\right)}\right)$. On the other hand, the time per iteration is only $O(t^3d)$. Note that the regret is sublinear for any choice of $\kappa$. 
+Going further: for any $\epsilon>0$, $\kappa=\frac{d}{\epsilon}$ grants $O(t^{2+\epsilon}d)$ time per iteration at the cost of $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{\epsilon}{d}\right)}\right)$ regret. 
+
 \begin{algorithm}[t]
 	\caption{\algoname2 ($\epsilon=1$)}
 	\label{alg:2}
@@ -578,7 +581,43 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 %Compact case
 \lipschitzpol*
 \begin{proof}
-	...
+	We consider the infinite-horizon case ($H=\infty,\gamma<1$), as the finite-horizon case is \wlg under mild assumptions.
+	To show Lipschitz continuity in the action-based paradigm, it is enough to bound $|\nabla_{\vtheta}J|$ under (\ref{eq:lp1}). From the Policy Gradient Theorem~\cite{sutton2000policy}:
+	\begin{align}\label{aux:4}
+		\nabla_{\vtheta}J(\vtheta) = \frac{1}{1-\gamma}\Exp_{\substack{s\sim \rho_{\vtheta}
+		\\a\sim\pi_{\vtheta}}}\left[\nabla_{\vtheta}\log\pi_{\vtheta}(a|s)Q_{\vtheta}(s,a)\right],
+	\end{align}
+	where $\rho_{\vtheta}$ is the discounted state-occupancy measure under policy $\pi_{\vtheta}$ and $Q_{\vtheta}$ is the action-value function~\cite{sutton2000policy}, modeling the reward that can be obtained starting from state $s$, taking action $a$ and following $\pi_{\vtheta}$ thereafter.
+	From (\ref{aux:4}), for every $\vtheta\in\Theta$:
+	\begin{align}
+		|\nabla_{\vtheta}J(\vtheta)| 
+		&\leq \frac{\Rmax}{(1-\gamma)^2}\Exp_{\substack{s\sim \rho_{\vtheta}\\a\sim\pi_{\vtheta}}}\left[|\nabla_{\vtheta}\log\pi_{\vtheta}(s,a)|\right] \label{pp:10}\\
+		&\leq \frac{\Rmax}{(1-\gamma)^2}\sup_{s\in\Sspace}\Exp_{a\sim\pi_{\vtheta}}\left[|\nabla_{\vtheta}\log\pi_{\vtheta}(s,a)|\right] \nonumber\\
+		& = \frac{G_1\Rmax}{(1-\gamma)^2} \coloneqq L, \label{pp:11}
+	\end{align}
+	where (\ref{pp:10}) is from the trivial fact $\norm[\infty]{Q_{\vtheta}}\leq\frac{\Rmax}{(1-\gamma)}$ and (\ref{pp:11}) is from assumption (\ref{eq:lp1}).
+	The commonly used Gaussian policy:
+	\begin{align}\label{eq:gauss}
+		\pi_{\vtheta}(a|s) = \mathcal{N}(\vtheta^T\vphi(s),\sigma^2)  = \frac{1}{\sqrt{2\pi}\sigma}\exp\left\{-\frac{1}{2}\left(\frac{a-\vtheta^T\vphi(s)}{\sigma}\right)^2\right\},
+	\end{align}
+	where $\phi(s)$ is a vector of bounded state features, \ie $\sup_{s\in\Sspace}|\vphi(s)|\leq \vphi_{\max}$, satisfies assumption (\ref{eq:lp1}):
+	\begin{align}
+		\Exp_{a\sim\pi_{\vtheta}}\left[\left|\nabla_{\vtheta}\log\pi_{\vtheta}(a|s)\right|\right] 
+		&=\Exp_{a\sim\pi_{\vtheta}}\left[\frac{|\vphi(s)(a-\vtheta^T\vphi(s))|}{\sigma^2}\right] \nonumber\\
+		&\leq \frac{|\vphi(s)|}{\sigma}\Exp_{a\sim\pi_{\vtheta}}\left[\left|\frac{a-\vtheta^T\vphi(s)}{\sigma}\right|\right] \nonumber\\
+		&\leq \frac{|\vphi(s)|}{\sqrt{2\pi}\sigma}\int_{\Reals} e^{-x^2}|x|\de x \label{pp:14}\\
+		& \leq  \frac{2\vphi_{\max}}{\sqrt{2\pi}\sigma}\coloneqq G_1, \label{aux:5}
+	\end{align}
+	where (\ref{pp:14}) is by the substitution $x\gets \frac{a-\vtheta^T\vphi(s)}{\sigma}$. Even when $\sigma$ must be learned, proper parametrization (\eg $\sigma\propto\exp\{\vtheta\}$), together with the compactness of $\Theta$, allows to satisfy assumption (\ref{eq:lp1}).
+	
+	To show Lipschitz continuity for the parameter-based paradigm, it is enough to bound $\left|\nabla_{\vxi}\Exp_{\vtheta\sim\rho_{\vxi}}[J(\vtheta)]\right|$ under (\ref{eq:lp2}). For every $\vxi\in\Xi$:
+	\begin{align}
+		\left|\nabla_{\vxi}\Exp_{\vtheta\sim\rho_{\vxi}}[J(\vtheta)]\right| &=
+		\left|\Exp_{\vtheta\sim\rho_{\vxi}}[\nabla_{\vxi}\log\rho_{\vxi}(\vtheta)J(\vtheta)]\right| \nonumber\\
+		&\leq \frac{\Rmax}{(1-\gamma)}\Exp_{\vtheta\sim\rho_{\vxi}}\left[\left|\nabla_{\vxi}\log\rho_{\vxi}(\vtheta)\right|\right] \label{pp:12} \\
+		&\leq \frac{G_2\Rmax}{(1-\gamma)} \coloneqq L \label{pp:13},
+	\end{align}
+	where (\ref{pp:12}) is from the trivial fact $J(\vtheta)\leq\frac{\Rmax}{1-\gamma}$, and (\ref{pp:13}) is from assumption (\ref{eq:lp2}). A Gaussian hyperpolicy $\rho_{\vxi}(\vtheta) = \mathcal{N}(\vxi,\boldsymbol{\sigma}I)$ satisfies assumption (\ref{eq:lp2}) with $G_2 = \frac{2}{\sqrt{2\pi}\boldsymbol{\sigma}}$. The proof of this fact is analogous to that of (\ref{aux:5}). Even when $\boldsymbol{\sigma}$ must be learned, proper parametrization (\eg $\boldsymbol{\sigma}\propto\exp\{\vtheta\}$), together with the compactness of $\Xi$, allows to satisfy assumption (\ref{eq:lp2}).
 \end{proof}
 
 \regretcompact*
