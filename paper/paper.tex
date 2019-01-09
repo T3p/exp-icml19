@@ -373,7 +373,7 @@ This yields a $\wt{\mathcal{O}}(\sqrt{dT})$ regret when $\epsilon=1$.
 In this section, we discuss some practical aspects of \algoname. From now on, we will focus on the case $\epsilon=1$, which is the only one of practical interest in the scope of this paper.
 
 \subsection{Optimization}
-Some of the most relevant applications of policy search (\eg robotics) naturally involve infinite arm sets $\Xspace$. As mentioned before, optimization (line 4 in Algorithm \ref{alg:1}) can be very challenging in this scenario, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. This direction may be beneficial in practice, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method, inspired by the proof of Theorem \ref{th:regretcompact}, which preserves the regret bound for the compact case. The key intuition, common in the continuous MAB literature, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. A reasonably coarse discretization can be used at the price of a worse (sublinear) regret:
+Some of the most relevant applications of policy search (\eg robotics) naturally involve infinite arm sets $\Xspace$. As mentioned before, optimization (line 4 in Algorithm \ref{alg:1}) can be very challenging in this scenario, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. This direction may be beneficial in practice, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method, inspired by the proof of Theorem \ref{th:regretcompact}, which preserves the regret bound for the compact case. The key intuition, common in the continuous MAB literature, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Note that the arm space $\Xspace$ itself is fixed (and infinite), as the adaptive discretization is performed for optimization purposes only. A reasonably coarse discretization can be used at the price of a worse (sublinear) regret:
 %
 \todomat{Theorem 4 da controllare!}
 \begin{restatable}{theorem}{regretdiscretized}\label{th:regretdiscretized}
@@ -540,19 +540,19 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 	To ease the notation, let $c^{-}\coloneqq \norm[\infty]{f}\left(\sqrt{2}+\frac{1}{3}\right)$, $c^{+}\coloneqq \norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)$, and $\beta_t(\vx) \coloneqq \left(\frac{d_{1+\epsilon}(p_{\vx}\|\Phi_t)\log\frac{1}{\delta_t}}{t}\right)^{\frac{\epsilon}{1+\epsilon}}$.
 	We start by showing that, with probability at least $1-\delta$:
 	\begin{align}\label{aux:1}
-		&-c^{+}\beta_t({\vx})\leq \wc{\mu}(\vx) - \mu(\vx) \leq c^{-}\beta_t(\vx) & \text{for all $\vx\in\Xspace$ and $t=1,\dots,T$}.
+		&-c^{+}\beta_t({\vx})\leq \wc{\mu_t}(\vx) - \mu(\vx) \leq c^{-}\beta_t(\vx) & \text{for all $\vx\in\Xspace$ and $t=1,\dots,T$}.
 	\end{align}
 	Indeed:
 	\begin{align}
-		\Prob\left(\bigcap_{k=1}^{D}\bigcap_{t=1}^T\left[\wc{\mu}(\vx_k) - \mu(\vx_k) \leq c^{-}\beta_t(\vx_k)\right]\right) &=1-\Prob\left(\bigcup_{k=1}^{D}\bigcup_{t=1}^T\left[\wc{\mu}(\vx_k) - \mu(\vx_k) > c^{-}\beta_t(\vx_k)\right]\right)\nonumber\\
-		&\geq 1-D\sum_{t=1}^{T}\Prob\left(\wc{\mu}(\vx_1) - \mu(\vx_1) > c^{-}\beta_t(\vx_1)\right) \label{pp:1}\\
+		\Prob\left(\bigcap_{k=1}^{D}\bigcap_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) \leq c^{-}\beta_t(\vx_k)\right]\right) &=1-\Prob\left(\bigcup_{k=1}^{D}\bigcup_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) > c^{-}\beta_t(\vx_k)\right]\right)\nonumber\\
+		&\geq 1-D\sum_{t=1}^{T}\Prob\left(\wc{\mu_t}(\vx_1) - \mu(\vx_1) > c^{-}\beta_t(\vx_1)\right) \label{pp:1}\\
 		& \geq 1 - D\sum_{t=1}^{T}\delta_t\label{pp:2}\\
 		& \geq 1 - \frac{\delta}{2},\label{pp:3}
 	\end{align}
 	where (\ref{pp:1}) is from a double union bound (over time and over the finite elements of $\Xspace$), (\ref{pp:2}) is from Theorem \ref{lem:thrucatedconcentration}, and (\ref{pp:3}) is by hypothesis on $\delta_t$ and $\sum_{t=1}^{T}\frac{1}{t^2}\leq\sum_{t=1}^{\infty}\frac{1}{t^2} = \frac{\pi^2}{6}$. Similarly:
 	\begin{align*}
-		\Prob\left(\bigcap_{k=1}^{D}\bigcap_{t=1}^T\left[\wc{\mu}(\vx_k) - \mu(\vx_k) \geq -c^{+}\beta_t(\vx_k)\right]\right) &=1-\Prob\left(\bigcup_{k=1}^{D}\bigcup_{t=1}^T\left[\wc{\mu}(\vx_k) - \mu(\vx_k) < -c^{+}\beta_t(\vx_k)\right]\right)\nonumber\\
-		&\geq 1-D\sum_{t=1}^{T}\Prob\left(\wc{\mu}(\vx_1) - \mu(\vx_1) < -c^{+}\beta_t(\vx_1)\right)\\
+		\Prob\left(\bigcap_{k=1}^{D}\bigcap_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) \geq -c^{+}\beta_t(\vx_k)\right]\right) &=1-\Prob\left(\bigcup_{k=1}^{D}\bigcup_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) < -c^{+}\beta_t(\vx_k)\right]\right)\nonumber\\
+		&\geq 1-D\sum_{t=1}^{T}\Prob\left(\wc{\mu_t}(\vx_1) - \mu(\vx_1) < -c^{+}\beta_t(\vx_1)\right)\\
 		&\geq 1 - D\sum_{t=1}^{T}\delta_t\\
 		 &\geq 1 - \frac{\delta}{2}.
 	\end{align*}
@@ -560,11 +560,11 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 	This allows to lower bound the instantaneous regret with the same probability:
 	\begin{align}
 		\Delta_t &= \mu(\vx^*) - \mu(\vx) \leq 
-		\wc{\mu}(\vx^*) + c^{+}\beta_t(\vx^*) - \mu(\vx_t) \label{pp:4}\\
-		&\leq \wc{\mu}(\vx_t) + c^{+}\beta_t(\vx_t) - \mu(\vx_t) \label{pp:5}\\
+		\wc{\mu_t}(\vx^*) + c^{+}\beta_t(\vx^*) - \mu(\vx_t) \label{pp:4}\\
+		&\leq \wc{\mu_t}(\vx_t) + c^{+}\beta_t(\vx_t) - \mu(\vx_t) \label{pp:5}\\
 		&\leq (c^{-} + c^{+})\beta(\vx_t) & \text{for all $t=1,\dots,T$}\label{aux:2}, 
 	\end{align}
-	where (\ref{pp:4}) and (\ref{aux:2}) are from (\ref{aux:1}), while (\ref{pp:5}) is by hypothesis, as $\vx_t=\arg\max_{\vx\in\Xspace}(\wc{\mu}(\vx) + c^{+}\beta_t(\vx))$.
+	where (\ref{pp:4}) and (\ref{aux:2}) are from (\ref{aux:1}), while (\ref{pp:5}) is by hypothesis, as $\vx_t=\arg\max_{\vx\in\Xspace}(\wc{\mu_t}(\vx) + c^{+}\beta_t(\vx))$.
 	Note that the union bound over the elements of $\Xspace$ in (\ref{aux:1}) was necessary for (\ref{pp:4}) as the optimal arm $\vx^*$ may not be unique.
 	Finally, with probability at least $1-\delta$:
 	\begin{align}
@@ -578,10 +578,11 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 	\end{align}
 	where (\ref{pp:6}) is from (\ref{aux:2}) and holds with probability no less than $1-\delta$, (\ref{pp:7}) is from Assumption \ref{ass:boundrenyi}, (\ref{pp:8}) is by definition of $\delta_t$, and (\ref{pp:9}) is from: 
 	\begin{align}\label{aux:3}
-		\sum_{t=1}^{T}t^{-\frac{\epsilon}{1+\epsilon}} \leq \int_{1}^{T+1}t^{-\frac{\epsilon}{1+\epsilon}}\de t
-		= (1+\epsilon)\left((T+1)^{\frac{1}{1+\epsilon}} - 1\right) \leq (1+\epsilon)T^{\frac{1}{1+\epsilon}}.
+		&\sum_{t=1}^{T}t^{-\alpha} \leq \int_{1}^{T+1}t^{-\alpha}\de t
+		= \frac{1}{1-\alpha}\left((T+1)^{1-\alpha} - 1\right) \leq \frac{T^{1-\alpha}}{1-\alpha} &\text{for all $0<\alpha<1$},
 	\end{align}
-	The proof is concluded by renaming $C\gets (1+\epsilon)(c^{+}+c^{-}) = (1+\epsilon)(2\sqrt{2} + \frac{5}{3})\norm[\infty]{f}$.
+	with $\alpha=\frac{\epsilon}{1+\epsilon}$.
+	The proof is completed by renaming $C\gets (1+\epsilon)(c^{+}+c^{-}) = (1+\epsilon)(2\sqrt{2} + \frac{5}{3})\norm[\infty]{f}$.
 \end{proof}
 
 %Compact case
@@ -628,7 +629,62 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 
 \regretcompact*
 \begin{proof}
-	...
+	Fix an $\epsilon>0$. Let $c^{-}$, $c^{+}$ and $\beta_t(\vx)$ be defined as in the proof of Theorem \ref{th:regretdiscrete}.
+	The finite cardinality of $\Xspace$ allowed to perform a union bound over the arms that was crucial for the proof of Theorem \ref{th:regretdiscrete}. We cannot do the same here as $\Xspace$ has infinite cardinality. To overcome this problem, we follow the line of reasoning proposed by~\citet{srinivas2009gaussian}. First, we can say something about the arms that are actually selected by the algorithm, which are finite. From Theorem \ref{lem:thrucatedconcentration}, by a union bound over $t=1,\dots,T$, we have that, with probability at least $1-\sum_{t=1}^T\delta_t$:
+	\begin{align}\label{aux:6}
+		&\wc{\mu_t}(\vx_t) - \mu(\vx_t) \leq c^{-}\beta_t(\vx_t) &\text{for all $t=1,\dots,T$}.
+	\end{align}
+	
+	We also need a specular inequality for the optimal arm. Unfortunately, we cannot assume there exists a unique optimal arm $\vx^*$ (however, $\mu(\vx^*$) is always unique, hence unambiguous). Even worse, a dense set of optimal arms may exist. To overcome this problem, we introduce, \textit{only for the purposes of the proof}, a discretization of the arm space. Let $\wt{\Xspace}_t$ be a $d$-dimensional regular grid of $\tau_t^d$ vertices, where $(\tau_t\in\Naturals_{+})_{t=1}^T$ is a discretization schedule. Let $[\vx]_t$ be the closest vertex to $\vx$ in $\wt{\Xspace}_t$. From Assumption \ref{ass:lipschitz}:
+	\begin{align}\label{aux:7}
+		&|\mu(\vx) - \mu([\vx]_t)| \leq L\norm[1]{\vx - [\vx]_t} \leq \frac{LDd}{\tau_t},
+	\end{align}
+	as each voxel of the grid has side $\frac{2D}{\tau_t}$ and no point can be further from a vertex than $d$ half-sides according to the $l_1$ norm. Now fix a $t\geq1$ and an optimal arm $\vx^*$. With probability at least $1-\delta_t$:
+	\begin{align}
+		\mu(\vx^*) - \wc{\mu}_t([\vx^*]_t) 
+		&= \mu(\vx^*) - \mu([\vx^*]_t) + \mu([\vx^*]_t) - \wc{\mu}_t([\vx^*]_t)  \nonumber\\
+		&\leq \mu([\vx^*]_t) - \wc{\mu}_t([\vx^*]_t) + |\mu(\vx^*) - \mu([\vx^*]_t)| \nonumber\\
+		&\leq c^{+}\beta_t([\vx^*]_t) + \frac{LDd}{\tau_t}, \label{aux:8}
+	\end{align}
+	where the inequality (\ref{aux:8}) is from Theorem \ref{lem:thrucatedconcentration} and (\ref{aux:7}). Since any voxel may contain an optimal arm, we must perform a union bound over the $\lceil\tau\rceil^d$ vertices of $\wt{\Xspace}_t$, and a subsequent one over $t,\dots,T$. Hence, with probability at least $1-\sum_{t=1}^{T}\tau_t^d\delta_t$:
+	\begin{align}\label{aux:9}
+		&\mu(\vx^*) - \wc{\mu}_t([\vx^*]_t) \leq c^{+}\beta_t([\vx^*]_t) + \frac{LDd}{\tau_t} &\text{for $t=1,\dots,T$}.
+	\end{align}
+	
+	We can now proceed to bound the instantaneous regret. With probability at least $1-\sum_{t=1}^T\delta_t(1+\tau_t^d)$:
+	\begin{align}
+	\Delta_t = \mu(\vx^*) - \mu(\vx) &\leq 
+	\wc{\mu_t}([\vx^*]_t) + c^{+}\beta_t([\vx^*]_t) + \frac{LDd}{\tau_t} - \mu(\vx_t) \label{pp:15}\\
+	&\leq \wc{\mu_t}(\vx_t) + c^{+}\beta_t(\vx_t) + \frac{LDd}{\tau_t} - \mu(\vx_t) \label{pp:16}\\
+		&\leq (c^{+}+c^{-})\beta_t(\vx_t) + \frac{LDd}{\tau_t}, \label{aux:10}
+	\end{align}
+	where (\ref{pp:15}) is from (\ref{aux:9}) and holds with probability at least $1-\sum_{t=1}^{T}\tau_t^d\delta_t$, (\ref{pp:16}) is by hypothesis, as $\vx_t=\arg\max_{\vx\in\Xspace}(\wc{\mu_t}(\vx) + c^{+}\beta_t(\vx))$, and (\ref{aux:10}) is from (\ref{aux:7}) and holds with probability at least $1-\sum_{t=1}^{T}\delta_t$. Hence, (\ref{aux:10}) holds with probability no less than $1-\sum_{t=1}^{T}\tau_t^d\delta_t - \sum_{t=1}^{T}\delta_t = 1 - \sum_{t=1}^T\delta_t(1+\tau_t^d)$. Let us pick as a discretization schedule $\tau_t = dt^2$. This has no impact whatsoever on the algorithm, as the discretization is only hypothetical. With this $\tau_t$ and the confidence schedule proposed in the statement of the theorem, it is easy to verify that (\ref{aux:10}) holds with probability at least $1-\delta$.
+	
+	Finally, we can bound the regret. With probability at least $1-\delta$:
+	\begin{align}
+		\Reg(T) &\leq \Delta_0 + \sum_{t=1}^{T}\Delta_t \nonumber\\
+		&\leq \Delta_0 + (c^{+}+c^{-})\sum_{t=1}^{T}\beta_t(x_t) + LDd\sum_{t=1}^{T}\frac{1}{\tau_t} \label{pp:17}\\
+		&\leq (c^{+}+c^{-})\sum_{t=1}^{T}\beta_t(x_t) + \frac{\pi^2LD}{6} \label{pp:18}\\
+		&\leq \Delta_0 + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{\log\frac{1}{\delta_t}}{t}\right)^{\frac{\epsilon}{1+\epsilon}} + \frac{\pi^2LD}{6} \label{pp:19}\\
+		&\leq \Delta_0 + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{
+			\log (1+d^dt^{2d}) + 2\log t + \log\frac{\pi^2}{6\delta}
+		}{t}\right)^{\frac{\epsilon}{1+\epsilon}} + \frac{\pi^2LD}{6} \label{pp:20}\\
+		&\leq \Delta_0 + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{
+		\log (2d^dt^{2d}) + 2\log t + \log\frac{\pi^2}{6\delta}
+		}{t}\right)^{\frac{\epsilon}{1+\epsilon}} + \frac{\pi^2LD}{6} \label{pp:21}\\
+		&= \Delta_0 + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{
+		2(d+1)\log t + d\log d + \log\frac{\pi^2}{3\delta}
+		}{t}\right)^{\frac{\epsilon}{1+\epsilon}} + \frac{\pi^2LD}{6} \nonumber\\
+		&\leq \Delta_0 + (c^{+}+c^{-})\left[v_{\epsilon}\left(
+			2(d+1)\log T + d\log d + \log\frac{\pi^2}{3\delta}
+		\right)\right]^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}
+		t^{-\frac{\epsilon}{1+\epsilon}} + \frac{\pi^2LD}{6} 	\nonumber\\
+		&\leq \Delta_0 + (c^{+}+c^{-})\left[v_{\epsilon}\left(
+		2(d+1)\log T + d\log d + \log\frac{\pi^2}{3\delta}
+		\right)\right]^{\frac{\epsilon}{1+\epsilon}}(1+\epsilon)T^{\frac{1}{1+\epsilon}}+ \frac{\pi^2LD}{6}, 	\label{pp:22}
+	\end{align}
+	where (\ref{pp:17}) is from (\ref{aux:10}) and holds with probability at least $1-\delta$, (\ref{pp:18}) is from the choice of $\tau_t$ and $\sum_{t=1}^{T}t^{-2}\leq\sum_{t=1}^{\infty}t^{-2} = \frac{\pi^2}{6}$, (\ref{pp:19}) is from Assumption \ref{ass:boundrenyi}, (\ref{pp:20}) is from the choice of $\delta_t$, (\ref{pp:21}) is from $\log(1+x)\leq\log(2x)$, which holds for every $x\geq 1$, and (\ref{pp:22}) is from  (\ref{aux:3}) with $\alpha=\frac{\epsilon}{1+\epsilon}$. 
+	The proof is completed by renaming $C\gets (1+\epsilon)(c^{+}+c^{-}) = (1+\epsilon)(2\sqrt{2} + \frac{5}{3})\norm[\infty]{f}$.
 \end{proof}
 
 \regretdiscretized*
