@@ -215,6 +215,7 @@ Clearly, since we are changing the importance weights we introduce a bias term, 
 \begin{restatable}{lemma}{truncatedbias}\label{lem:truncatedbias}
 	Let $P$ and $\{ Q_k \}_{k=1}^N$ be probability measures on the measurable space $(\mathcal{Z},\mathcal{F})$ such that $P\ll Q_k$ and there exists $\epsilon \in (0,1]$ s.t. $d_{1+\epsilon}(P\|Q_k)<\infty$ for $k=1,\dots,K$. Let $f:\mathcal{Z}\to\Reals_{\ge 0}$ be a bounded non-negative function, \ie $\norm[\infty]{f}<\infty$. Let $\widecheck{\mu}_{\text{BH}}$ be the truncated balance heuristic estimator of $f$, as defined in (\ref{eq:truncatedmise}), using $N_k$ \iid samples from each $Q_k$. Then, the bias of $\widecheck{\mu}_{\text{BH}}$ can be upper bounded as:
 	 \begin{equation}
+	 \label{eq:biastruncated}
          0 \le \mu - \Exp_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}] \le  \|f\|_{\infty} M^{-\epsilon} d_{1+\epsilon}\left( P \| \Phi \right)^{\epsilon},
     \end{equation}
     and the variance of $\widecheck{\mu}_{\text{BH}}$ can be bounded as:
@@ -466,45 +467,49 @@ between a generic distribution and a mixture.
 \begin{proof}
 	The proof is similar to Lemma 4.1 of~\cite{metelli2018policy}:
     \begin{align}
-    \Var_{z_{ik} \simiid Q_k} [\widehat{\mu}_{\text{BH}}]&  = \Var_{z_{ik} \simiid Q_k} \left[ \frac{1}{N} \sum_{k=1}^K \sum_{i=1}^{N_k}  f(z_{ki})\frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right] \\
-    & = \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Var_{z_{ik} \sim Q_k} \left[   f(z_{ki}) \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right] \\
-    & \le \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( f(z_{ki})   \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right)^2 \right]\\
-    & \le \|f\|_{\infty} \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right)^2 \right]\\
-    & = \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \left(\frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right)^2 \right]\\
-    &= \|f\|_{\infty}^2 \frac{d_{2}(P\|\Phi)}{N},\\
+    \Var_{z_{ik} \simiid Q_k} [\widehat{\mu}_{\text{BH}}]&  = \Var_{z_{ik} \simiid Q_k} \left[ \frac{1}{N} \sum_{k=1}^K \sum_{i=1}^{N_k}  f(z_{ki})\frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right] \notag \\
+    & = \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Var_{z_{ik} \sim Q_k} \left[   f(z_{ki}) \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right] \label{p:misevarboundline2} \\
+    & \le \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( f(z_{ki})   \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right)^2 \right] \notag\\
+    & \le \|f\|_{\infty} \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right)^2 \right]  \notag\\
+    & = \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \left(\frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right)^2 \right] \label{p:misevarboundline5}\\
+    &= \|f\|_{\infty}^2 \frac{d_{2}(P\|\Phi)}{N},  \notag
     \end{align}
-    \todoalb{Commentare passaggi}
+    where~\eqref{p:misevarboundline2} follows from the independence of the $z_{ik}$ and~\eqref{p:misevarboundline5} is obtained by the definition of $\Phi$ and observing that for an arbitrary function $g$:
+    \begin{equation}
+    \label{eq:expectationdecomposition}
+    	\frac{1}{N} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k}[g(z_{ik})] =  \sum_{k=1}^K \frac{N_k}{N} \Exp_{z_{1k} \sim Q_k}[g(z_{1k})] = \Exp_{z \sim \Phi}[g(z)].
+    \end{equation}
 \end{proof}
 
 
 \truncatedbias*
 \begin{proof}
-Let us start with the bias term. The first inequality $0 \le \mu - \Exp_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}]$ derives from the fact that $\widehat{\mu}_{\text{BH}} \ge \widecheck{\mu}_{\text{BH}}$, being $f(z) \ge 0$ for all $z$ and observing that $\widehat{\mu}$ is unbiased, \ie $\Exp_{z_{ik} \simiid Q_k}[\widehat{\mu}_{\text{BH}}]=\mu$. For the second inequality, let us consider the following inequalities:
+Let us start with the bias term. The first inequality $0 \le \mu - \Exp_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}]$ derives from the fact that $\widehat{\mu}_{\text{BH}} \ge \widecheck{\mu}_{\text{BH}}$, being $f(z) \ge 0$ for all $z$ and observing that $\widehat{\mu}$ is unbiased, \ie $\Exp_{z_{ik} \simiid Q_k}[\widehat{\mu}_{\text{BH}}]=\mu$. For the second inequality, let us consider the following derivation:
     \begin{align}
-    \mu - \Exp_{x_i \sim q_i} [\widecheck{\mu}]&  = \Exp_{z_{ik} \simiid Q_k}[\widehat{\mu}_{\text{BH}}] - \Exp_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}] \\
+    \mu - \Exp_{x_i \sim q_i} [\widecheck{\mu}]&  = \Exp_{z_{ik} \simiid Q_k}[\widehat{\mu}_{\text{BH}}] - \Exp_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}] \notag \\
     & =  \frac{1}{N} \sum_{k=1}^K\sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[  f(z_{ik}) \left( \frac{p(z_{ik})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{ik})} - \min \left\{ M,  \frac{p(z_{ik})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{ik})} \right\} \right) \right]\\    
-    & =   \sum_{k=1}^K \frac{N_k}{N} \Exp_{z_{1k} \sim Q_k} \left[  f(z_{1k}) \left( \frac{p(z_{1k})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{1k})} - \min \left\{ M,  \frac{p(z_{1k})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{1k})} \right\} \right) \right]\\
-     & = \Exp_{z \sim \Phi} \left[  f(z) \left( \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} - \min \left\{ M,  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right\} \right) \right]\\
-    & =  \Exp_{z \sim \Phi} \left[  f(z) \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} - M  \right) \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right]\\
-    & \le \Exp_{z \sim \Phi} \left[  f(z) \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right) \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right]\\
-    & \le \|f\|_{\infty} \Exp_{z \sim \Phi} \left[  \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right) \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right]\\
-    & \le \|f\|_{\infty} \Exp_{z \sim \Phi} \left[  \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right)^{1+\epsilon} \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right)^{-\epsilon} \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right]\\
-    & \le \|f\|_{\infty} \Exp_{z \sim \Phi} \left[  \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right)^{1+\epsilon} \right] M^{-\epsilon}\\
-        & = \|f\|_{\infty} d_{1+\epsilon}(P \| \Phi)^{\epsilon}  M^{-\epsilon},
+%    & =   \sum_{k=1}^K \frac{N_k}{N} \Exp_{z_{1k} \sim Q_k} \left[  f(z_{1k}) \left( \frac{p(z_{1k})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{1k})} - \min \left\{ M,  \frac{p(z_{1k})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{1k})} \right\} \right) \right] \\
+%     & = \Exp_{z \sim \Phi} \left[  f(z) \left( \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} - \min \left\{ M,  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right\} \right) \right]\\
+    & =  \Exp_{z \sim \Phi} \left[  f(z) \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} - M  \right) \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right] \label{p:truncatedbias1}\\
+    & \le \Exp_{z \sim \Phi} \left[  f(z) \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right) \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right] \label{p:truncatedbias2}\\
+    & \le \|f\|_{\infty} \Exp_{z \sim \Phi} \left[  \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right) \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right] \notag\\
+    & \le \|f\|_{\infty} \Exp_{z \sim \Phi} \left[  \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right)^{1+\epsilon} \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right)^{-\epsilon} \mathds{1}_{\left\{ \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \ge M \right\} } \right] \notag\\
+    & \le \|f\|_{\infty} \Exp_{z \sim \Phi} \left[  \left(  \frac{p(z)}{\sum_{j=1}^K \frac{N_j}{N} q_j(z)} \right)^{1+\epsilon} \right] M^{-\epsilon} \label{p:truncatedbias3}\\
+        & = \|f\|_{\infty} d_{1+\epsilon}(P \| \Phi)^{\epsilon}  M^{-\epsilon},\notag
     \end{align}
-    \todoalb{Commentare passaggi}
-    For the variance the argument is similar.
-    \begin{align*}
-    \Var_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}]&  = \Var_{z_{ik} \simiid Q_k} \left[ \frac{1}{N} \sum_{k=1}^K \sum_{i=1}^{N_k}  f(z_{ki}) \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right] \\
-    & = \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Var_{z_{ik} \sim Q_k} \left[   f(z_{ki}) \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right] \\
-    & \le \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( f(z_{ki})  \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right)^2 \right]\\
-    & \le \|f\|_{\infty} \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right)^2 \right]\\
-    & = \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \min \left\{ M, \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right\}^2 \right]\\
-    & = \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \min \left\{ M, \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right\}^{1+\epsilon} \min \left\{ M, \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right\}^{1-\epsilon}  \right]\\
-    & \le \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \left( \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right)^{1+\epsilon}  \right] M^{1-\epsilon}\\
-    &= \|f\|_{\infty}^2 M^{1-\epsilon} \frac{d_{1+\epsilon}(P\|\Phi)^{\epsilon}}{N} ,\\
-    \end{align*}
-    \todoalb{Commentare passaggi}
+    where~\eqref{p:truncatedbias1} is an application of equation~\eqref{eq:expectationdecomposition}, \eqref{p:truncatedbias2} derives from recalling that $M\ge 0$ and \eqref{p:truncatedbias3} is obtained by observing that $ x^{-\epsilon} \mathds{1}_{\left\{ x \ge M \right\} }$ is either $0$ and thus the bound holds or at most $M^{-\epsilon}$.
+    For the variance the argument is similar:
+    \begin{align}
+    \Var_{z_{ik} \simiid Q_k} [\widecheck{\mu}_{\text{BH}}]&  = \Var_{z_{ik} \simiid Q_k} \left[ \frac{1}{N} \sum_{k=1}^K \sum_{i=1}^{N_k}  f(z_{ki}) \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right] \notag\\
+    & = \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Var_{z_{ik} \sim Q_k} \left[   f(z_{ki}) \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right] \notag\\
+    & \le \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( f(z_{ki})  \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right)^2 \right]\notag\\
+    & \le \|f\|_{\infty} \frac{1}{N^2} \sum_{k=1}^K \sum_{i=1}^{N_k} \Exp_{z_{ik} \sim Q_k} \left[   \left( \min \left\{ M, \frac{p(z_{ki})}{\sum_{j=1}^n \frac{N_j}{N} q_j(z_{ki})} \right\} \right)^2 \right]\notag\\
+    & = \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \min \left\{ M, \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right\}^2 \right] \label{p:truncatedbias4}\\
+    & = \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \min \left\{ M, \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right\}^{1+\epsilon} \min \left\{ M, \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right\}^{1-\epsilon}  \right]\notag\\
+    & \le \|f\|_{\infty}^2 \frac{1}{N} \Exp_{z \sim \Phi} \left[ \left( \frac{p(z)}{\sum_{j=1}^n \frac{N_j}{N} q_j(z)} \right)^{1+\epsilon}  \right] M^{1-\epsilon} \label{p:truncatedbias5}\\
+    &= \|f\|_{\infty}^2 M^{1-\epsilon} \frac{d_{1+\epsilon}(P\|\Phi)^{\epsilon}}{N} ,\notag\\
+    \end{align}
+    where~\eqref{p:truncatedbias4}  is again an application of equation~\eqref{eq:expectationdecomposition} and~\ref{p:truncatedbias5} derives from observing that $\min\{x,y\} \le x$ and also $\min\{x,y\} \le y$.
 \end{proof}
 
 \thrucatedconcentration*
@@ -512,18 +517,19 @@ Let us start with the bias term. The first inequality $0 \le \mu - \Exp_{z_{ik} 
 \begin{proof}
 Let us start with the first inequality. Observing that all samples $z_{ik}$ are independent and that $\widecheck{\mu}_{\text{BH}} \le M \|f\|_{\infty}$, we can state using Bernstein inequality~\cite{boucheron2013concentration} that with probability at least $1-\delta$ we have:
     \begin{align}
-         \widecheck{\mu}_{\text{BH}} & \le \Exp_{z_{ik} \sim Q_k} [\widecheck{\mu}_{\text{BH}}] + \sqrt{2 \Var_{z_{ik} \simiid Q_k}[\widecheck{\mu}_{\text{BH}}] \log \frac{1}{\delta}} +\|f\|_{\infty}  \frac{M  \log \frac{1}{\delta}}{3N} \\
-         & \le \mu + \|f\|_{\infty} \sqrt{\frac{2 M^{1-\epsilon} d_{1+\epsilon}\left( P \| \Phi \right)^{\epsilon} \log  \frac{1}{\delta} }{N}} +\|f\|_{\infty} \frac{M \log \frac{1}{\delta}}{3N}\\
-       & = \mu + \|f\|_{\infty}\left(\sqrt{2} + \frac{1}{3} \right)  \left(\frac{d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}},
+         \widecheck{\mu}_{\text{BH}} & \le \Exp_{z_{ik} \sim Q_k} [\widecheck{\mu}_{\text{BH}}] + \sqrt{2 \Var_{z_{ik} \simiid Q_k}[\widecheck{\mu}_{\text{BH}}] \log \frac{1}{\delta}} +\|f\|_{\infty}  \frac{M  \log \frac{1}{\delta}}{3N} \notag \\
+         & \le \mu + \|f\|_{\infty} \sqrt{\frac{2 M^{1-\epsilon} d_{1+\epsilon}\left( P \| \Phi \right)^{\epsilon} \log  \frac{1}{\delta} }{N}} +\|f\|_{\infty} \frac{M \log \frac{1}{\delta}}{3N} \label{p:thrucatedconcentration1}\\
+       & = \mu + \|f\|_{\infty}\left(\sqrt{2} + \frac{1}{3} \right)  \left(\frac{d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}} \label{p:thrucatedconcentration2},
     \end{align}
-    For the second inequality we just need to consider the bias as well.
-    \begin{align*}
-         \widecheck{\mu}_{\text{BH}} & \ge  \Exp_{z_{ik} \sim Q_k} [\widecheck{\mu}_{\text{BH}}] - \sqrt{2 \Var_{z_{ik} \simiid Q_k}[\widecheck{\mu}_{\text{BH}}] \log \frac{1}{\delta}} -\|f\|_{\infty}  \frac{M  \log \frac{1}{\delta}}{3N} \\
-         & = \mu - \left(\mu - \Exp_{z_{ik} \sim Q_k} [\widecheck{\mu}_{\text{BH}}] \right) -\sqrt{2 \Var_{z_{ik} \simiid Q_k}[\widecheck{\mu}_{\text{BH}}] \log \frac{1}{\delta}} -\|f\|_{\infty}  \frac{M  \log \frac{1}{\delta}}{3N}  \\
-          & \ge \mu - \|f\|_{\infty} M^{-\epsilon} d_{1+\epsilon}\left( P \| \Phi \right)^{\epsilon} - \|f\|_{\infty}\left(\sqrt{2} + \frac{1}{3} \right)  \left(\frac{d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}}\\
-          & = \mu - \|f\|_{\infty} \left(\sqrt{2} + \frac{4}{3} \right) \left(\frac{d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}},\\
-    \end{align*}
-    \todoalb{Commentare passaggi}
+    where~\eqref{p:thrucatedconcentration1} is obtained by substituting the variance with its bound~\eqref{eq:variancetruncated} and~\eqref{p:thrucatedconcentration2} is from the choice of $M$.
+    For the second inequality we just need to consider additionally the bias.
+    \begin{align}
+         \widecheck{\mu}_{\text{BH}} & \ge  \Exp_{z_{ik} \sim Q_k} [\widecheck{\mu}_{\text{BH}}] - \sqrt{2 \Var_{z_{ik} \simiid Q_k}[\widecheck{\mu}_{\text{BH}}] \log \frac{1}{\delta}} -\|f\|_{\infty}  \frac{M  \log \frac{1}{\delta}}{3N} \notag\\
+         & = \mu - \left(\mu - \Exp_{z_{ik} \sim Q_k} [\widecheck{\mu}_{\text{BH}}] \right) -\sqrt{2 \Var_{z_{ik} \simiid Q_k}[\widecheck{\mu}_{\text{BH}}] \log \frac{1}{\delta}} -\|f\|_{\infty}  \frac{M  \log \frac{1}{\delta}}{3N}  \notag\\
+          & \ge \mu - \|f\|_{\infty} M^{-\epsilon} d_{1+\epsilon}\left( P \| \Phi \right)^{\epsilon} - \|f\|_{\infty}\left(\sqrt{2} + \frac{1}{3} \right)  \left(\frac{d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}} \label{p:thrucatedconcentration3}\\
+          & = \mu - \|f\|_{\infty} \left(\sqrt{2} + \frac{4}{3} \right) \left(\frac{d_{1+\epsilon}\left( P \| \Phi  \right) \log  \frac{1}{\delta}  }{N} \right)^{\frac{\epsilon}{1+\epsilon}}, \notag\\
+    \end{align}
+    where~\eqref{p:thrucatedconcentration3} comes from substituting the bias with its bound~\eqref{eq:biastruncated}.
 \end{proof}
 
 %Finite arm set
