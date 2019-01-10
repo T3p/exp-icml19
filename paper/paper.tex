@@ -370,29 +370,29 @@ In the proof, we show how to derive the corresponding Lipschitz constants, and s
 %
 This yields a $\wt{\mathcal{O}}(\sqrt{dT})$ regret when $\epsilon=1$.
 \section{Practical Aspects}\label{sec:practical}
-In this section, we discuss some practical aspects of \algoname. From now on, we will focus on the case $\epsilon=1$, which is the only one of practical interest in the scope of this paper.
+In this section, we discuss some practical aspects of \algoname.
 
 \subsection{Optimization}
 Some of the most relevant applications of policy search (\eg robotics) naturally involve infinite arm sets $\Xspace$. As mentioned before, optimization (line 4 in Algorithm \ref{alg:1}) can be very challenging in this scenario, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. This direction may be beneficial in practice, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method, inspired by the proof of Theorem \ref{th:regretcompact}, which preserves the regret bound for the compact case. The key intuition, common in the continuous MAB literature, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Note that the arm space $\Xspace$ itself is fixed (and infinite), as the adaptive discretization is performed for optimization purposes only. A reasonably coarse discretization can be used at the price of a worse (sublinear) regret:
 %
-\todomat{Theorem 4 da controllare!}
 \begin{restatable}{theorem}{regretdiscretized}\label{th:regretdiscretized}
-	Let $\Xspace$ be a $d$-dimensional compact arm set with $\Xspace \subseteq [-D,D]^d$. For any $\kappa\geq2$, under Assumptions \ref{ass:boundrenyi} and \ref{ass:lipschitz}, Algorithm \ref{alg:2} with confidence schedule $\delta_t = \frac{6\delta}{\pi^2t^2(1+t^{\nicefrac{d}{\kappa}})}$ and discretization schedule $\tau_t=\lceil t^{\frac{1}{\kappa}} \rceil$ guarantees, with probability at least $1-\delta$:
+	Let $\Xspace$ be a $d$-dimensional compact arm set with $\Xspace \subseteq [-D,D]^d$. For any $\kappa\geq2$, under Assumptions \ref{ass:boundrenyi} and \ref{ass:lipschitz}, Algorithm \ref{alg:2} with confidence schedule ${\delta_t = \frac{6\delta}{\pi^2t^2\left(1+\left\lceil t^{\nicefrac{1}{\kappa}}\right\rceil^d\right)}}$ and discretization schedule $\tau_t=\lceil t^{\frac{1}{\kappa}} \rceil$ guarantees, with probability at least $1-\delta$:
 	\begin{align*}
-	&\Reg(T) \leq \Delta_0  + C_2T^{\left(1-\frac{1}{\kappa}\right)}d
-	\\&\quad+ C_2
-	\sqrt{Tv_{1}
-	\left(2(d+1)\log T + d\log d + \log \frac{\pi^2}{3\delta}\right)
-	}
+	&\Reg(T) \leq \Delta_0  + C_1T^{\left(1-\frac{1}{\kappa}\right)}d
+	+ C_2
+	T^{\frac{1}{1+\epsilon}} \,\cdot
+	\\&\quad\cdot\left[v_{\epsilon}
+	\left(\left(2+ \nicefrac{d}{\kappa}\right)\log T + d\log 2 + \log\frac{\pi^2}{3\delta}\right)\right]^{\frac{\epsilon}{1+\epsilon}},
 	\end{align*}
-	where $C_1=2Lr$, $C_2=2\left(2\sqrt{2}+\frac{5}{3}\right)\norm[\infty]{f}$, and $\Delta_0$ is the instantaneous regret of the initial arm $\vx_0$.
+	where $C_1=\frac{\kappa}{\kappa-1}LD$, $C_2=(1+\epsilon)\left(2\sqrt{2}+\frac{5}{3}\right)\norm[\infty]{f}$, and $\Delta_0$ is the instantaneous regret of the initial arm $\vx_0$.
 \end{restatable}
 %
+From now on, we will focus on the case $\epsilon=1$, which is the only one of practical interest in the scope of this paper.
 For $\kappa=2$, we obtain regret $\wt{\mathcal{O}}(d\sqrt{T})$. Unfortunately, the time required for optimization is exponential in arm space dimensionality $d$. For $d\geq 2$, we can break the curse of dimensionality by taking $\kappa=d$. In this case, the regret is $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{1}{d}\right)}\right)$. On the other hand, the time per iteration is only $O(t^3d)$. Note that the regret is sublinear for any choice of $\kappa$. 
-Going further: for any $\epsilon>0$, $\kappa=\frac{d}{\epsilon}$ grants $O(t^{2+\epsilon}d)$ time per iteration at the cost of $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{\epsilon}{d}\right)}\right)$ regret. 
+Going further: for any $\zeta>0$, $\kappa=\frac{d}{\zeta}$ grants $O(t^{2+\zeta}d)$ time per iteration at the cost of $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{\zeta}{d}\right)}\right)$ regret\footnote{The worse dependency $\mathcal{O}(d)$ of the regret on the arm space dimensionality (\wrt $\mathcal{O}(\sqrt{d})$ of Algorithm \ref{alg:1}) prevents the time per iteration from being $\mathcal{O}(d^d)$, irremediably exponential.}. 
 
 \begin{algorithm}[t]
-	\caption{\algoname2 ($\epsilon=1$)}
+	\caption{\algoname2}
 	\label{alg:2}
 	\begin{algorithmic}[1]
 		\STATE {\bfseries Input:} initial arm $\vx_0$, confidence schedule $(\delta_t)_{t=1}^T$, discretization schedule $(\tau_t)_{t=1}^T$
@@ -635,7 +635,7 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 		&\wc{\mu_t}(\vx_t) - \mu(\vx_t) \leq c^{-}\beta_t(\vx_t) &\text{for all $t=1,\dots,T$}.
 	\end{align}
 	
-	We also need a specular inequality for the optimal arm. Unfortunately, we cannot assume there exists a unique optimal arm $\vx^*$ (however, $\mu(\vx^*$) is always unique, hence unambiguous). Even worse, a dense set of optimal arms may exist. To overcome this problem, we introduce, \textit{only for the purposes of the proof}, a discretization of the arm space. Let $\wt{\Xspace}_t$ be a $d$-dimensional regular grid of $\tau_t^d$ vertices, where $(\tau_t\in\Naturals_{+})_{t=1}^T$ is a discretization schedule. Let $[\vx]_t$ be the closest vertex to $\vx$ in $\wt{\Xspace}_t$. From Assumption \ref{ass:lipschitz}:
+	We also need a specular inequality for the optimal arm. Unfortunately, we cannot assume there exists a unique optimal arm $\vx^*$\footnote{Instead, $\mu(\vx^*$) is always unique.}. Even worse, a dense set of optimal arms may exist. To overcome this problem, we introduce, \textit{only for the purposes of the proof}, a discretization of the arm space. Let $\wt{\Xspace}_t$ be a $d$-dimensional regular grid of $\tau_t^d$ vertexes, where $(\tau_t\in\Naturals_{+})_{t=1}^T$ is a discretization schedule. Let $[\vx]_t$ be the closest vertex to $\vx$ in $\wt{\Xspace}_t$. From Assumption \ref{ass:lipschitz}:
 	\begin{align}\label{aux:7}
 		&|\mu(\vx) - \mu([\vx]_t)| \leq L\norm[1]{\vx - [\vx]_t} \leq \frac{LDd}{\tau_t},
 	\end{align}
@@ -646,14 +646,14 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 		&\leq \mu([\vx^*]_t) - \wc{\mu}_t([\vx^*]_t) + |\mu(\vx^*) - \mu([\vx^*]_t)| \nonumber\\
 		&\leq c^{+}\beta_t([\vx^*]_t) + \frac{LDd}{\tau_t}, \label{aux:8}
 	\end{align}
-	where the inequality (\ref{aux:8}) is from Theorem \ref{lem:thrucatedconcentration} and (\ref{aux:7}). Since any voxel may contain an optimal arm, we must perform a union bound over the $\lceil\tau\rceil^d$ vertices of $\wt{\Xspace}_t$, and a subsequent one over $t,\dots,T$. Hence, with probability at least $1-\sum_{t=1}^{T}\tau_t^d\delta_t$:
+	where the inequality (\ref{aux:8}) is from Theorem \ref{lem:thrucatedconcentration} and (\ref{aux:7}). Since any voxel may contain an optimal arm, we must perform a union bound over the $\lceil\tau\rceil^d$ vertexes of $\wt{\Xspace}_t$, and a subsequent one over $t,\dots,T$. Hence, with probability at least $1-\sum_{t=1}^{T}\tau_t^d\delta_t$:
 	\begin{align}\label{aux:9}
-		&\mu(\vx^*) - \wc{\mu}_t([\vx^*]_t) \leq c^{+}\beta_t([\vx^*]_t) + \frac{LDd}{\tau_t} &\text{for $t=1,\dots,T$}.
+		&\mu(\vx^*) - \wc{\mu}_t([\vx^*]_t) \leq c^{+}\beta_t([\vx^*]_t) + \frac{LDd}{\tau_t} &\text{for $t=1,\dots,T$ and every $\vx^*\in\arg\max_{\vx\in\Xspace}\mu(\vx)$}.
 	\end{align}
 	
 	We can now proceed to bound the instantaneous regret. With probability at least $1-\sum_{t=1}^T\delta_t(1+\tau_t^d)$:
 	\begin{align}
-	\Delta_t = \mu(\vx^*) - \mu(\vx) &\leq 
+	\Delta_t = \mu(\vx^*) - \mu(\vx_t) &\leq 
 	\wc{\mu_t}([\vx^*]_t) + c^{+}\beta_t([\vx^*]_t) + \frac{LDd}{\tau_t} - \mu(\vx_t) \label{pp:15}\\
 	&\leq \wc{\mu_t}(\vx_t) + c^{+}\beta_t(\vx_t) + \frac{LDd}{\tau_t} - \mu(\vx_t) \label{pp:16}\\
 		&\leq (c^{+}+c^{-})\beta_t(\vx_t) + \frac{LDd}{\tau_t}, \label{aux:10}
@@ -689,7 +689,46 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 
 \regretdiscretized*
 \begin{proof}
-	...
+	The proof follows the one of Theorem \ref{th:regretcompact} up to (\ref{aux:9}), except from the fact that the discretization is actually performed by the algorithm. That is, with probability at least $1-\sum_{t=1}^{T}\delta_t(1+\tau_t^d)$:
+	\begin{align}
+		&\wc{\mu}_t(\vx_t) - \mu(\vx_t) \leq c^{-}\beta_t(\vx_t) &\text{and}\nonumber\\
+		&\mu(\vx^*) - \wc{\mu}_t([\vx^*]_t) \leq c^{+}\beta_t([\vx^*]_t) + \frac{LDd}{\tau_t}
+		&\text{for $t=1,\dots,T$ and every $\vx^*\in\arg\max_{\vx\in\Xspace}\mu(\vx)$.}\label{aux:11}
+	\end{align}
+	This is enough to bound the instantaneous regret. With probability at least $1-\sum_{t=1}^{T}\delta_t(1+\tau_t^d)$:
+	\begin{align}
+		\Delta_t = \mu(\vx^*) - \mu(\vx_t) 
+		&\leq \wc{\mu}_t([\vx^*]_t) + c^{+}\beta_t([\vx^*]_t) + \frac{LDd}{\tau_t} - \mu(\vx_t) \label{pp:23}\\
+		&\leq \wc{\mu}_t(\vx_t) + c^{+}\beta_t(\vx_t) + \frac{LDd}{\tau_t} - \mu(\vx_t) \label{pp:24}\\
+		&\leq (c^{+}+c^{-})\beta_t(\vx_t) + \frac{LDd}{\tau_t}, \label{aux:12}
+	\end{align}
+	where (\ref{pp:22}) and (\ref{pp:24}) are from (\ref{aux:11}) and hold simultaneously with probability at least $1-\sum_{t=1}^{T}\delta_t(1+\tau_t^d)$, and (\ref{pp:23}) is by hypothesis, as $\vx_t = \arg\max_{\vx\in\wt{\Xspace}_t}(\wc{\mu}_t(\vx) + c^{+}\beta_t(\vx)$. Note that the latter is true only by virtue of the fact that both $[\vx^*]_t$ and $\vx_t$ belong to $\wt{\Xspace}_t$, as the optimization step of Algorithm \ref{alg:2} is restricted to~$\wt{\Xspace}_t$.
+	
+	Finally, we can bound the regret. With probability at least $1-\delta$:
+	\begin{align}
+		\Reg(T) &= \Delta_0 + \sum_{t=1}^{T}\Delta_t \nonumber\\
+		&\leq \Delta_0 +(c^{+}+c^{-})\sum_{t=1}^{T}\beta_t(\vx_t) + LDd\sum_{t=1}^{T}\frac{1}{\tau_t} \label{pp:25}\\
+		&\leq \Delta_0 +(c^{+}+c^{-})\sum_{t=1}^{T}\beta_t(\vx_t) + \frac{\kappa }{\kappa-1}LDT^{\left(1-\frac{1}{\kappa}\right)}d\label{pp:26}\\
+		&\leq \Delta_0 + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{\log\frac{1}{\delta_t}}{t}\right)^{\frac{\epsilon}{1+\epsilon}} + \frac{\kappa }{\kappa-1}LDT^{\left(1-\frac{1}{\kappa}\right)}d\label{pp:27}\\
+		&\leq \Delta_0 + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{
+			2\log t + \log\left(1+\left\lceil t^{\frac{1}{\kappa}}\right\rceil^d\right) + \log\frac{\pi^2}{6\delta}
+		}{t}\right)^{\frac{\epsilon}{1+\epsilon}} + \frac{\kappa }{\kappa-1}LDT^{\left(1-\frac{1}{\kappa}\right)}d\label{pp:28}\\
+		&\leq \Delta_0 + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{
+		2\log t + d\log \left(t^{\frac{1}{\kappa}}+1\right) + \log\frac{\pi^2}{3\delta}
+		}{t}\right)^{\frac{\epsilon}{1+\epsilon}} + \frac{\kappa }{\kappa-1}LDT^{\left(1-\frac{1}{\kappa}\right)}d\label{pp:29}\\
+		&\leq \Delta_0 + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{
+		\left(2+ \frac{d}{\kappa}\right)\log t + d\log 2 + \log\frac{\pi^2}{3\delta}
+		}{t}\right)^{\frac{\epsilon}{1+\epsilon}} + \frac{\kappa }{\kappa-1}LDT^{\left(1-\frac{1}{\kappa}\right)}d\label{pp:30}\\
+		&\leq \Delta_0 + (c^{+}+c^{-})\left[v_{\epsilon}
+		\left(
+		\left(2+ \frac{d}{\kappa}\right)\log T + d\log 2 + \log\frac{\pi^2}{3\delta}
+		\right)\right]^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}t^{-\frac{\epsilon}{1+\epsilon}} + \frac{\kappa }{\kappa-1}LDT^{\left(1-\frac{1}{\kappa}\right)}d, \nonumber\\
+		&\leq \Delta_0 + (c^{+}+c^{-})\left[v_{\epsilon}
+		\left(
+		\left(2+ \frac{d}{\kappa}\right)\log T + d\log 2 + \log\frac{\pi^2}{3\delta}
+		\right)\right]^{\frac{\epsilon}{1+\epsilon}}(1+\epsilon)T^{\frac{1}{1+\epsilon}} + \frac{\kappa }{\kappa-1}LDT^{\left(1-\frac{1}{\kappa}\right)}d, \nonumber\\
+	\end{align}
+	where (\ref{pp:25}) is from (\ref{aux:12}) and holds with probability at least $1-\delta$ with the proposed $\delta_t$ and $\tau_t$, (\ref{pp:26}) is from the proposed $\tau_t$ and (\ref{aux:3}) with $\alpha=\nicefrac{1}{\kappa}$,  (\ref{pp:27}) is from Assumption \ref{ass:boundrenyi}, (\ref{pp:28}) is from the proposed $\delta_t$, (\ref{pp:29}) and (\ref{pp:30}) are from the fact $\log(x+1)\leq\log(2x)$ for $x\geq 1$, and (\ref{pp:30}) is from (\ref{aux:3}) with $\alpha=\frac{\epsilon}{1+\epsilon}$. The proof is completed by renaming ${C_1\gets(1+\epsilon)(c^{+}+c^{-})\norm[\infty]{f} = (1+\epsilon)(2\sqrt{2}+\frac{5}{3})\norm[\infty]{f}}$ and $C_2\gets\frac{\kappa}{\kappa-1}LD$.
 \end{proof}
 
 %%
