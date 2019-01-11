@@ -317,7 +317,7 @@ which can be easily enforced through careful policy (or hyperpolicy) design. Nex
 
 \subsection{Discrete arm set}
 We start from the discrete case, where $|\mathcal{X}| = K \in \Naturals_{+}$.
-This setting is particularly convenient, as the optimization step can be trivially solved in time $\mathcal{O}(Kt^2)$ per iteration\footnote{We consider the evaluation of pdf's, payoffs and \Renyi divergences in (\ref{eq:wcmu}) atomic, as it is heavily problem-dependent.}, where $t^2$ is from evaluating the nested sums in (\ref{eq:wcmu}). This sums up to total time $\mathcal{O}(KT^3)$. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may sometimes be constrained to a discrete, reasonably small set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
+This setting is particularly convenient, as the optimization step can be trivially solved in time $\mathcal{O}(Kt)$ per iteration\footnote{We consider the evaluation of pdf's, payoffs and \Renyi divergences in (\ref{eq:wcmu}) atomic, as it is heavily problem-dependent.}, where $t$ is from evaluation of (\ref{eq:wcmu}) via clever caching. This sums up to total time $\mathcal{O}(KT^2)$. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may sometimes be constrained to a discrete, reasonably small set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
 
 \begin{restatable}{theorem}{regretdiscrete}\label{th:regretdiscrete}
 	Let $\Xspace$ be a discrete arm set with ${|\mathcal{X}| = K \in \Naturals_{+}}$. Under Assumption \ref{ass:boundrenyi}, Algorithm \ref{alg:1} with confidence schedule $\delta_t = \frac{3\delta}{t^2\pi^2K}$ guarantees, with probability at least $1-\delta$:
@@ -409,8 +409,8 @@ When optimization over the infinite arm space $\Xspace$ is not feasible, Algorit
 \end{restatable}
 %
 Let us focus on the case $\epsilon=1$, which is the only one of practical interest in the scope of this paper.
-For $\kappa=2$, we obtain regret $\wt{\mathcal{O}}(d\sqrt{T})$. Unfortunately, the time required for optimization is exponential in arm space dimensionality $d$. For $d\geq 2$, we can break the curse of dimensionality by taking $\kappa=d$. In this case, the regret is $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{1}{d}\right)}\right)$. On the other hand, the time per iteration is only $O(t^3)$. Note that the regret is sublinear for any choice of $\kappa$. 
-Going further: for any $\zeta>0$, $\kappa=\frac{d}{\zeta}$ grants $O(t^{2+\zeta})$ time per iteration at the cost of $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{\zeta}{d}\right)}\right)$ regret\footnote{The worse dependency $\mathcal{O}(d)$ of the regret on the arm space dimensionality (\wrt $\mathcal{O}(\sqrt{d})$ of Algorithm \ref{alg:1}) is also necessary to prevent the time per iteration from being exponential in $d$.}. 
+For $\kappa=2$, we obtain regret $\wt{\mathcal{O}}(d\sqrt{T})$. Unfortunately, the time required for optimization is exponential in arm space dimensionality $d$. For $d\geq 2$, we can break the curse of dimensionality by taking $\kappa=d$. In this case, the regret is $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{1}{d}\right)}\right)$. On the other hand, the time per iteration is only $O(t^2)$. Note that the regret is sublinear for any choice of $\kappa$. 
+Going further: for any $\zeta>0$, $\kappa=\frac{d}{\zeta}$ grants $O(t^{1+\zeta})$ time per iteration at the cost of $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{\zeta}{d}\right)}\right)$ regret\footnote{The worse dependency $\mathcal{O}(d)$ of the regret on the arm space dimensionality (\wrt $\mathcal{O}(\sqrt{d})$ of Algorithm \ref{alg:1}) is also necessary to prevent the time per iteration from being exponential in $d$.}. 
 
 
 \section{Practical Aspects}\label{sec:practical}
@@ -439,6 +439,9 @@ between a generic distribution and a mixture.
 \end{itemize}
 
 \section{Related Works}
+In this section, we briefly survey related works from the literature.
+Exploiting particular arm structures is a common trend in the MAB literature. 
+
 
 \section{Experiments}
 
