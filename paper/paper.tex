@@ -61,7 +61,7 @@
 \newtheorem{assumption}{Assumption}
 
 %Specific macros
-\DeclareRobustCommand{\algoname}{TODO\@\xspace}
+\DeclareRobustCommand{\algoname}{OPOMIS\@\xspace}
 
 \allowdisplaybreaks[4]
 
@@ -72,7 +72,7 @@
 \begin{document}
 
 \twocolumn[
-\icmltitle{Exploration in Policy Search via Multiple Importance Sampling}
+\icmltitle{Optimistic Policy Optimization via Multiple Importance Sampling}
 
 %TITLE IDEAS
 	% Optimistic Policy Search/Optimization via Multiple Importance Sampling
@@ -256,7 +256,7 @@ In parameter-based policy optimization, $\Xspace$ corresponds to the hyperparame
 
 To apply the UCB strategy to the policy optimization problem, we need an estimate of the objective $\mu(\vx)$ and a confidence region. We use importance sampling to capture the correlation among the arms. In particular to better use all the data that we collect, we would like to use a multiple importance sampling estimator like the one from (\ref{eq:mise}). Unfortunately, the heavy-tailed behavior of this estimator would result in inefficient exploration.
 Instead, we use the robust balance heuristic estimator $\wc{\mu}_{\text{BH}}$ from (\ref{eq:truncatedmise}), which has better tail behavior. To simplify the notation, \wlg, we treat each sample $\vx$ as a distinct one. This corresponds to the case $K=t-1$ and $N_k\equiv1$. Hence, at each iteration $t$:
-\begin{align}
+\begin{align}\label{eq:wcmu}
 	\wc{\mu}_t(\vx) = \sum_{k=0}^{t-1}
 	\min\left\{M_{t-1}, \frac{p_{\vx}(z_k)}
 	{\sum_{j=1}^{t-1}p_{\vx_j(z_k)}}\right\}f(z_k),
@@ -310,7 +310,7 @@ which can be easily enforced through careful policy (or hyperpolicy) design. Nex
 
 \subsection{Discrete arm set}
 We start from the discrete case, where $|\mathcal{X}| = K \in \Naturals_{+}$.
-This setting is particularly convenient, as the optimization step can be trivially solved in time $\mathcal{O}(Kt^2d)$, summing up to total time $\mathcal{O}(KT^3d)$. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may sometimes be constrained to a discrete, reasonably small set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
+This setting is particularly convenient, as the optimization step can be trivially solved in time $\mathcal{O}(Kt^2)$ per iteration\footnote{We consider the evaluation of pdf's, payoffs and \Renyi divergences in (\ref{eq:wcmu}) atomic, as it is heavily problem-dependent.}, where $t^2$ is from evaluating the nested sums in (\ref{eq:wcmu}). This sums up to total time $\mathcal{O}(KT^3)$. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may sometimes be constrained to a discrete, reasonably small set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
 
 \begin{restatable}{theorem}{regretdiscrete}\label{th:regretdiscrete}
 	Let $\Xspace$ be a discrete arm set with ${|\mathcal{X}| = K \in \Naturals_{+}}$. Under Assumption \ref{ass:boundrenyi}, Algorithm \ref{alg:1} with confidence schedule $\delta_t = \frac{3\delta}{t^2\pi^2K}$ guarantees, with probability at least $1-\delta$:
@@ -342,14 +342,14 @@ This assumption is easily satisfied for policy optimization, as shown in the fol
 	In the policy optimization problem, Assumption \ref{ass:lipschitz} can be replaced by:
 	\begin{align}\label{eq:lp1}
 		\sup_{s\in\Sspace,\vtheta\in\Theta}\Exp_{a\sim\pi_{\vtheta}}
-		\left[\left|\nabla_{\vtheta}\log\pi_{\vtheta}(a|s)\right|\right] = G_1 < \infty,
+		\left[\left|\nabla_{\vtheta}\log\pi_{\vtheta}(a|s)\right|\right] \leq \vu_1,
 	\end{align}
 	in the action-based paradigm, and by:
 	\begin{align}\label{eq:lp2}
 		\sup_{\vxi\in\Xi}\Exp_{\vtheta\sim\rho_{\vxi}}
-		\left[\left|\nabla_{\vxi}\log\rho_{\vxi}(a|s)\right|\right] = G_2 < \infty,
+		\left[\left|\nabla_{\vxi}\log\rho_{\vxi}(\vtheta)\right|\right] \leq \vu_2,
 	\end{align}
-	in the parameter-based paradigm.
+	in the parameter-based paradigm, where $\vu_1$ and $\vu_2$ are $d$-dimensional vectors and the inequalities are component-wise.
 \end{restatable}
 %
 In the proof, we show how to derive the corresponding Lipschitz constants, and show how (\ref{eq:lp1}) and (\ref{eq:lp2}) are satisfied by the commonly-used Gaussian policy and hyperpolicy, respectively. This is enough for \algoname to achieve $\wt{\mathcal{O}}(d^{\frac{\epsilon}{1+\epsilon}}T^{\frac{1}{1+\epsilon}})$ regret:
@@ -388,8 +388,8 @@ Some of the most relevant applications of policy search (\eg robotics) naturally
 \end{restatable}
 %
 From now on, we will focus on the case $\epsilon=1$, which is the only one of practical interest in the scope of this paper.
-For $\kappa=2$, we obtain regret $\wt{\mathcal{O}}(d\sqrt{T})$. Unfortunately, the time required for optimization is exponential in arm space dimensionality $d$. For $d\geq 2$, we can break the curse of dimensionality by taking $\kappa=d$. In this case, the regret is $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{1}{d}\right)}\right)$. On the other hand, the time per iteration is only $O(t^3d)$. Note that the regret is sublinear for any choice of $\kappa$. 
-Going further: for any $\zeta>0$, $\kappa=\frac{d}{\zeta}$ grants $O(t^{2+\zeta}d)$ time per iteration at the cost of $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{\zeta}{d}\right)}\right)$ regret\footnote{The worse dependency $\mathcal{O}(d)$ of the regret on the arm space dimensionality (\wrt $\mathcal{O}(\sqrt{d})$ of Algorithm \ref{alg:1}) prevents the time per iteration from being $\mathcal{O}(d^d)$, irremediably exponential.}. 
+For $\kappa=2$, we obtain regret $\wt{\mathcal{O}}(d\sqrt{T})$. Unfortunately, the time required for optimization is exponential in arm space dimensionality $d$. For $d\geq 2$, we can break the curse of dimensionality by taking $\kappa=d$. In this case, the regret is $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{1}{d}\right)}\right)$. On the other hand, the time per iteration is only $O(t^3)$. Note that the regret is sublinear for any choice of $\kappa$. 
+Going further: for any $\zeta>0$, $\kappa=\frac{d}{\zeta}$ grants $O(t^{2+\zeta})$ time per iteration at the cost of $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{\zeta}{d}\right)}\right)$ regret\footnote{The worse dependency $\mathcal{O}(d)$ of the regret on the arm space dimensionality (\wrt $\mathcal{O}(\sqrt{d})$ of Algorithm \ref{alg:1}) is also necessary to prevent the time per iteration from being exponential in $d$.}. 
 
 \begin{algorithm}[t]
 	\caption{\algoname2}
@@ -544,16 +544,16 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 	\end{align}
 	Indeed:
 	\begin{align}
-		\Prob\left(\bigcap_{k=1}^{D}\bigcap_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) \leq c^{-}\beta_t(\vx_k)\right]\right) &=1-\Prob\left(\bigcup_{k=1}^{D}\bigcup_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) > c^{-}\beta_t(\vx_k)\right]\right)\nonumber\\
-		&\geq 1-D\sum_{t=1}^{T}\Prob\left(\wc{\mu_t}(\vx_1) - \mu(\vx_1) > c^{-}\beta_t(\vx_1)\right) \label{pp:1}\\
-		& \geq 1 - D\sum_{t=1}^{T}\delta_t\label{pp:2}\\
+		\Prob\left(\bigcap_{k=1}^{K}\bigcap_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) \leq c^{-}\beta_t(\vx_k)\right]\right) &=1-\Prob\left(\bigcup_{k=1}^{K}\bigcup_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) > c^{-}\beta_t(\vx_k)\right]\right)\nonumber\\
+		&\geq 1-K\sum_{t=1}^{T}\Prob\left(\wc{\mu_t}(\vx_1) - \mu(\vx_1) > c^{-}\beta_t(\vx_1)\right) \label{pp:1}\\
+		& \geq 1 - K\sum_{t=1}^{T}\delta_t\label{pp:2}\\
 		& \geq 1 - \frac{\delta}{2},\label{pp:3}
 	\end{align}
 	where (\ref{pp:1}) is from a double union bound (over time and over the finite elements of $\Xspace$), (\ref{pp:2}) is from Theorem \ref{lem:thrucatedconcentration}, and (\ref{pp:3}) is by hypothesis on $\delta_t$ and $\sum_{t=1}^{T}\frac{1}{t^2}\leq\sum_{t=1}^{\infty}\frac{1}{t^2} = \frac{\pi^2}{6}$. Similarly:
 	\begin{align*}
-		\Prob\left(\bigcap_{k=1}^{D}\bigcap_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) \geq -c^{+}\beta_t(\vx_k)\right]\right) &=1-\Prob\left(\bigcup_{k=1}^{D}\bigcup_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) < -c^{+}\beta_t(\vx_k)\right]\right)\nonumber\\
-		&\geq 1-D\sum_{t=1}^{T}\Prob\left(\wc{\mu_t}(\vx_1) - \mu(\vx_1) < -c^{+}\beta_t(\vx_1)\right)\\
-		&\geq 1 - D\sum_{t=1}^{T}\delta_t\\
+		\Prob\left(\bigcap_{k=1}^{K}\bigcap_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) \geq -c^{+}\beta_t(\vx_k)\right]\right) &=1-\Prob\left(\bigcup_{k=1}^{K}\bigcup_{t=1}^T\left[\wc{\mu_t}(\vx_k) - \mu(\vx_k) < -c^{+}\beta_t(\vx_k)\right]\right)\nonumber\\
+		&\geq 1-K\sum_{t=1}^{T}\Prob\left(\wc{\mu_t}(\vx_1) - \mu(\vx_1) < -c^{+}\beta_t(\vx_1)\right)\\
+		&\geq 1 - K\sum_{t=1}^{T}\delta_t\\
 		 &\geq 1 - \frac{\delta}{2}.
 	\end{align*}
 	Hence, by union bound over the two inequalities, (\ref{aux:1}) holds with probability at least $1-\delta$.
@@ -572,9 +572,9 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 		&= \Delta_0  + \sum_{t=1}^{T}\Delta_t \nonumber\\
 		&\leq \Delta_0  + (c^{+}+c^{-})\sum_{t=1}^{T}\beta_t(\vx_t) \label{pp:6}\\
 		&\leq \Delta_0  + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{\log\frac{1}{\delta_t}}{t}\right)^{\frac{\epsilon}{1+\epsilon}} \label{pp:7}\\
-		&=\Delta_0  + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{2\log t + \log\frac{\pi^2D}{3\delta}}{t}\right)^{\frac{\epsilon}{1+\epsilon}} \label{pp:8}\\
-		&\leq \Delta_0  + (c^{+}+c^{-})\left[v_{\epsilon}\left(2\log T + \log\frac{\pi^2D}{3\delta}\right)\right]^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}t^{-\frac{\epsilon}{1+\epsilon}} \nonumber\\
-		&\leq \Delta_0  + (c^{+}+c^{-})\left[v_{\epsilon}\left(2\log T + \log\frac{\pi^2D}{3\delta}\right)\right]^{\frac{\epsilon}{1+\epsilon}}(1+\epsilon)T^{\frac{1}{1+\epsilon}} \label{pp:9},
+		&=\Delta_0  + (c^{+}+c^{-})v_{\epsilon}^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}\left(\frac{2\log t + \log\frac{\pi^2K}{3\delta}}{t}\right)^{\frac{\epsilon}{1+\epsilon}} \label{pp:8}\\
+		&\leq \Delta_0  + (c^{+}+c^{-})\left[v_{\epsilon}\left(2\log T + \log\frac{\pi^2K}{3\delta}\right)\right]^{\frac{\epsilon}{1+\epsilon}}\sum_{t=1}^{T}t^{-\frac{\epsilon}{1+\epsilon}} \nonumber\\
+		&\leq \Delta_0  + (c^{+}+c^{-})\left[v_{\epsilon}\left(2\log T + \log\frac{\pi^2K}{3\delta}\right)\right]^{\frac{\epsilon}{1+\epsilon}}(1+\epsilon)T^{\frac{1}{1+\epsilon}} \label{pp:9},
 	\end{align}
 	where (\ref{pp:6}) is from (\ref{aux:2}) and holds with probability no less than $1-\delta$, (\ref{pp:7}) is from Assumption \ref{ass:boundrenyi}, (\ref{pp:8}) is by definition of $\delta_t$, and (\ref{pp:9}) is from: 
 	\begin{align}\label{aux:3}
@@ -589,7 +589,7 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 \lipschitzpol*
 \begin{proof}
 	We consider the infinite-horizon case ($H=\infty,\gamma<1$), as the finite-horizon case is \wlg under mild assumptions.
-	To show Lipschitz continuity in the action-based paradigm, it is enough to bound $|\nabla_{\vtheta}J|$ under (\ref{eq:lp1}). From the Policy Gradient Theorem~\cite{sutton2000policy}:
+	To show Lipschitz continuity in the action-based paradigm, it is enough to bound $\norm[\infty]{\nabla_{\vtheta}J}$ under (\ref{eq:lp1}). From the Policy Gradient Theorem~\cite{sutton2000policy}:
 	\begin{align}\label{aux:4}
 		\nabla_{\vtheta}J(\vtheta) = \frac{1}{1-\gamma}\Exp_{\substack{s\sim \rho_{\vtheta}
 		\\a\sim\pi_{\vtheta}}}\left[\nabla_{\vtheta}\log\pi_{\vtheta}(a|s)Q_{\vtheta}(s,a)\right],
@@ -600,31 +600,33 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 		|\nabla_{\vtheta}J(\vtheta)| 
 		&\leq \frac{\Rmax}{(1-\gamma)^2}\Exp_{\substack{s\sim \rho_{\vtheta}\\a\sim\pi_{\vtheta}}}\left[|\nabla_{\vtheta}\log\pi_{\vtheta}(s,a)|\right] \label{pp:10}\\
 		&\leq \frac{\Rmax}{(1-\gamma)^2}\sup_{s\in\Sspace}\Exp_{a\sim\pi_{\vtheta}}\left[|\nabla_{\vtheta}\log\pi_{\vtheta}(s,a)|\right] \nonumber\\
-		& = \frac{G_1\Rmax}{(1-\gamma)^2} \coloneqq L, \label{pp:11}
+		& = \frac{\vu_1\Rmax}{(1-\gamma)^2}, \label{pp:11}
 	\end{align}
-	where (\ref{pp:10}) is from the trivial fact $\norm[\infty]{Q_{\vtheta}}\leq\frac{\Rmax}{(1-\gamma)}$ and (\ref{pp:11}) is from assumption (\ref{eq:lp1}).
+	where the inequalities are component-wise, (\ref{pp:10}) is from the trivial fact $\norm[\infty]{Q_{\vtheta}}\leq\frac{\Rmax}{(1-\gamma)}$, and (\ref{pp:11}) is from assumption (\ref{eq:lp1}). It follows that $L=\frac{\norm[\infty]{\vu_1}\Rmax}{(1-\gamma)^2}$ is a valid Lipschitz constant under the $l_1$ norm.
 	The commonly used Gaussian policy:
 	\begin{align}\label{eq:gauss}
 		\pi_{\vtheta}(a|s) = \mathcal{N}(\vtheta^T\vphi(s),\sigma^2)  = \frac{1}{\sqrt{2\pi}\sigma}\exp\left\{-\frac{1}{2}\left(\frac{a-\vtheta^T\vphi(s)}{\sigma}\right)^2\right\},
 	\end{align}
-	where $\phi(s)$ is a vector of bounded state features, \ie $\sup_{s\in\Sspace}|\vphi(s)|\leq \vphi_{\max}$, satisfies assumption (\ref{eq:lp1}):
+	where $\phi(s)$ is a vector of component-wise bounded state features, \ie $\sup_{s\in\Sspace}|\vphi(s)|\leq \vphi_{\max}$, satisfies assumption (\ref{eq:lp1}):
 	\begin{align}
 		\Exp_{a\sim\pi_{\vtheta}}\left[\left|\nabla_{\vtheta}\log\pi_{\vtheta}(a|s)\right|\right] 
 		&=\Exp_{a\sim\pi_{\vtheta}}\left[\frac{|\vphi(s)(a-\vtheta^T\vphi(s))|}{\sigma^2}\right] \nonumber\\
 		&\leq \frac{|\vphi(s)|}{\sigma}\Exp_{a\sim\pi_{\vtheta}}\left[\left|\frac{a-\vtheta^T\vphi(s)}{\sigma}\right|\right] \nonumber\\
 		&\leq \frac{|\vphi(s)|}{\sqrt{2\pi}\sigma}\int_{\Reals} e^{-x^2}|x|\de x \label{pp:14}\\
-		& \leq  \frac{2\vphi_{\max}}{\sqrt{2\pi}\sigma}\coloneqq G_1, \label{aux:5}
+		& \leq  \frac{2\vphi_{\max}}{\sqrt{2\pi}\sigma}\coloneqq \vu_1, \label{aux:5}
 	\end{align}
-	where (\ref{pp:14}) is by the substitution $x\gets \frac{a-\vtheta^T\vphi(s)}{\sigma}$. Even when $\sigma$ must be learned, proper parametrization (\eg $\sigma\propto\exp\{\vtheta\}$), together with the compactness of $\Theta$, allows to satisfy assumption (\ref{eq:lp1}).
+	where inequalities are component-wise and (\ref{pp:14}) is by the substitution $x\gets \frac{a-\vtheta^T\vphi(s)}{\sigma}$. Even when $\sigma$ must be learned, proper parametrization (\eg $\sigma\propto\exp\{\vtheta\}$), together with the compactness of $\Theta$, allows to satisfy assumption (\ref{eq:lp1}).
 	
-	To show Lipschitz continuity for the parameter-based paradigm, it is enough to bound $\left|\nabla_{\vxi}\Exp_{\vtheta\sim\rho_{\vxi}}[J(\vtheta)]\right|$ under (\ref{eq:lp2}). For every $\vxi\in\Xi$:
+	To show Lipschitz continuity for the parameter-based paradigm, it is enough to bound $\norm[\infty]{\nabla_{\vxi}\Exp_{\vtheta\sim\rho_{\vxi}}[J(\vtheta)]}$ under (\ref{eq:lp2}). For every $\vxi\in\Xi$:
 	\begin{align}
 		\left|\nabla_{\vxi}\Exp_{\vtheta\sim\rho_{\vxi}}[J(\vtheta)]\right| &=
 		\left|\Exp_{\vtheta\sim\rho_{\vxi}}[\nabla_{\vxi}\log\rho_{\vxi}(\vtheta)J(\vtheta)]\right| \nonumber\\
 		&\leq \frac{\Rmax}{(1-\gamma)}\Exp_{\vtheta\sim\rho_{\vxi}}\left[\left|\nabla_{\vxi}\log\rho_{\vxi}(\vtheta)\right|\right] \label{pp:12} \\
-		&\leq \frac{G_2\Rmax}{(1-\gamma)} \coloneqq L \label{pp:13},
+		&\leq \frac{\vu_2\Rmax}{(1-\gamma)} \label{pp:13},
 	\end{align}
-	where (\ref{pp:12}) is from the trivial fact $J(\vtheta)\leq\frac{\Rmax}{1-\gamma}$, and (\ref{pp:13}) is from assumption (\ref{eq:lp2}). A Gaussian hyperpolicy $\rho_{\vxi}(\vtheta) = \mathcal{N}(\vxi,\boldsymbol{\sigma}I)$ satisfies assumption (\ref{eq:lp2}) with $G_2 = \frac{2}{\sqrt{2\pi}\boldsymbol{\sigma}}$. The proof of this fact is analogous to that of (\ref{aux:5}). Even when $\boldsymbol{\sigma}$ must be learned, proper parametrization (\eg $\boldsymbol{\sigma}\propto\exp\{\vtheta\}$), together with the compactness of $\Xi$, allows to satisfy assumption (\ref{eq:lp2}).
+	where the inequalities are component-wise, (\ref{pp:12}) is from the trivial fact $J(\vtheta)\leq\frac{\Rmax}{1-\gamma}$, and (\ref{pp:13}) is from assumption (\ref{eq:lp2}).
+	It follows that $L=\frac{\norm[\infty]{\vu_2\Rmax}}{(1-\gamma)}$ is a valid Lipschitz constant under the $l_1$ norm.
+	 A Gaussian hyperpolicy $\rho_{\vxi}(\vtheta) = \mathcal{N}(\vxi,\boldsymbol{\sigma}I)$ satisfies assumption (\ref{eq:lp2}) with $\vu_2 = \frac{2}{\sqrt{2\pi}\boldsymbol{\sigma}}$. The proof of this fact is analogous to that of (\ref{aux:5}). Even when $\boldsymbol{\sigma}$ must be learned, proper parametrization (\eg $\boldsymbol{\sigma}\propto\exp\{\vxi\}$), together with the compactness of $\Xi$, allows to satisfy assumption (\ref{eq:lp2}).
 \end{proof}
 
 \regretcompact*
