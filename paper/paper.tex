@@ -199,7 +199,7 @@ We denote with $d_{\alpha}(P\|Q) = \exp\{D_{\alpha}(P\|Q)\}$ the exponentiated $
 %
 \begin{restatable}{lemma}{misevarbound}\label{lem:misevarbound}
 	\textcolor{orange}{\sout{Let $P$ and $Q_k$ be probability measures on the measurable space $(\mathcal{Z},\mathcal{F})$ such that $P\ll Q_k$ and $d_2(P\|Q_k)<\infty$ for $k=1,\dots,K$. Let $f:\mathcal{Z}\to\Reals$ be a bounded function, \ie $\norm[\infty]{f}<\infty$. Let $\wh{\mu}_{\text{BH}}$ be the balance heuristic estimator of $f$, as defined in (\ref{eq:bhe}), using $N_k$ \iid samples from each $Q_k$. Then, the variance of $\wh{\mu}_{\text{BH}}$ can be upper bounded as:}
-	Let $P$ and $\{ Q_k \}_{k=1}^N$ be probability measures on the measurable space $(\mathcal{Z},\mathcal{F})$ such that $P\ll Q_k$ and $d_2(P\|Q_k)<\infty$ for $k=1,\dots,K$. Let $f:\mathcal{Z}\to\Reals$ be a bounded function, \ie $\norm[\infty]{f}<\infty$. Let $\wh{\mu}_{\text{BH}}$ be the balance heuristic estimator of $f$, as defined in (\ref{eq:bhe}), using $N_k$ \iid samples from each $Q_k$. Then, the variance of $\wh{\mu}_{\text{BH}}$ can be upper bounded as:}
+	Let $P$ and \textcolor{green}{\sout{$\{ Q_k \}_{k=1}^N$}$\{ Q_k \}_{k=1}^K$} be probability measures on the measurable space $(\mathcal{Z},\mathcal{F})$ such that $P\ll Q_k$ and $d_2(P\|Q_k)<\infty$ for $k=1,\dots,K$. Let $f:\mathcal{Z}\to\Reals$ be a bounded function, \ie $\norm[\infty]{f}<\infty$. Let $\wh{\mu}_{\text{BH}}$ be the balance heuristic estimator of $f$, as defined in (\ref{eq:bhe}), using $N_k$ \iid samples from each $Q_k$. Then, the variance of $\wh{\mu}_{\text{BH}}$ can be upper bounded as:}
 	\begin{align*}
 		\Var_{z_{ik}\simiid Q_k}\left[\wh{\mu}_{\text{BH}}\right] \leq \norm[\infty]{f}^2\frac{d_2(P\|\Phi)}{N},
 	\end{align*}
@@ -442,7 +442,7 @@ between a generic distribution and a mixture.
     \end{equation*}
 \end{restatable}
 
-\textcolor{orange}{In Appendix~\ref{app:proof}, we show how to generalize this bound in the case in which also $P$ is mixture.}
+\textcolor{orange}{In Appendix~\ref{app:proof}, we show how to generalize this bound \textcolor{green}{\sout{in the case in which} when} also $P$ is \textcolor{green}{a} mixture.}
 
 \subsection{Parameter-based exploration}
 \begin{itemize}
