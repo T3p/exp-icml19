@@ -241,7 +241,7 @@ It is worth noting that, when selecting $\epsilon=1$, equation~\eqref{eq:varianc
 
 Our adaptive truncation approach and the consequent concentration results resemble the ones proposed in~\cite{bubeck2013bandits}. However, differently from~\cite{bubeck2013bandits} we do not remove sample with too high value, but we exploit the nature of the importance weighted estimator to just limit the weight magnitude. Indeed, this form of truncation turned out to be very effective in practice.
 
-\section{Problem Formalization}
+\section{Problem Formalization}\label{sec:problem}
 The online learning problem we aim to solve does \textit{not} fall into the traditional MAB framework (not into its basic version, anyway) and can benefit from an ad-hoc formalization, provided in this section.
 
 Let $\Xspace\subseteq \Reals^d$ be our decision set, or \textit{arm set} in MAB jargon. Let $(\Omega,\mathcal{F},P)$ be a probability space. Let ${\{Z_{\vx}:\Omega\to\mathcal{Z}\mid \vx\in\Xspace\}}$ be a set of continuous random vectors parametrized by $\Xspace$, with common sample space ${\mathcal{Z}\subseteq \Reals^m}$. We denote with $p_{\vx}$ the probability density function of $Z_{\vx}$. Finally, let $f:\mathcal{Z}\to\Reals$ be a bounded \textit{payoff function}, and $\mu(\vx) = \Exp_{z\sim p_{\vx}}\left[f(z)\right]$ its expectation under $p_{\vx}$. For each iteration $t=0,\dots,T$, we select an arm $\vx_t$, draw a sample $z_t$ from $p_{\vx_t}$, and observe payoff $f(z_t)$, up to horizon $T$. The goal is to maximize the expected total payoff:
@@ -276,7 +276,7 @@ According to Theorem \ref{lem:thrucatedconcentration}, the following \textit{ind
 \end{align}
 is an upper bound on $\mu(\vx)$ with probability at least $1-\delta_t$, \ie an upper confidence bound. The \algoname algorithm simply selects, at each iteration $t$, the arm with the largest value of the index $B_t(\vx)$. Pseudocode is provided in Algorithm \ref{alg:1}. The initial arm $\vx_0$ is arbitrary, as no prior information is available. The regret analysis of Section \ref{sec:regret} will provide a confidence schedule $(\delta_t)_{t=1}^T$. Knowledge of the actual horizon $T$ is not needed. Although any $\epsilon>0$ works, we suggest to use $\epsilon=1$ in practice, as it yields the more common $2$-\Renyi divergence. To be able to compute the indexes (or to perform any kind of index maximization), the algorithm needs to store all the $\vx_t$ together with the observed payoffs $f(z_t)$, hence $\mathcal{O}(Td)$ space is required, where $d$ is the dimensionality of the arm space $\Xspace$ (not to be confused with cardinality $|\Xspace|$, which may be infinite). 
 
-The optimization step (line 4) may be very difficult when $\Xspace$ is not discrete~\citep[\cf][]{srinivas2009gaussian}, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. This direction may be beneficial in practice, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method. The key intuition, common in the continuous MAB literature, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Note that the arm space $\Xspace$ itself is fixed (and infinite), as the adaptive discretization is performed for optimization purposes only.
+The optimization step (line 4) may be very difficult when $\Xspace$ is not discrete~\citep[\cf][]{srinivas2010gaussian}, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. This direction may be beneficial in practice, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method. The key intuition, common in the continuous MAB literature, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Note that the arm space $\Xspace$ itself is fixed (and infinite), as the adaptive discretization is performed for optimization purposes only.
 
 \begin{algorithm}[t]
 	\caption{\algoname}
@@ -302,7 +302,7 @@ As $\mu(\vx^*)$ is a constant, problem (\ref{eq:theproblem}) is trivially equiva
 \begin{align}\label{eq:regret}
 	\min_{\vx_0,\dots,\vx_T\in\Xspace} \Reg(T).
 \end{align}
-In the following, we will show that Algorithm \ref{alg:1} yields sublinear regret under some mild assumptions. The proofs combine techniques from~\citet{srinivas2009gaussian} and~\citet{bubeck2013bandits} and are reported in Appendix \ref{app:proof}.
+In the following, we will show that Algorithm \ref{alg:1} yields sublinear regret under some mild assumptions. The proofs combine techniques from~\citet{srinivas2010gaussian} and~\citet{bubeck2013bandits} and are reported in Appendix \ref{app:proof}.
 First, we need the following assumption on the \Renyi divergence:
 %
 \begin{restatable}{assumption}{boundrenyi}\label{ass:boundrenyi}
@@ -410,7 +410,7 @@ When optimization over the infinite arm space $\Xspace$ is not feasible, Algorit
 %
 Let us focus on the case $\epsilon=1$, which is the only one of practical interest in the scope of this paper.
 For $\kappa=2$, we obtain regret $\wt{\mathcal{O}}(d\sqrt{T})$. Unfortunately, the time required for optimization is exponential in arm space dimensionality $d$. For $d\geq 2$, we can break the curse of dimensionality by taking $\kappa=d$. In this case, the regret is $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{1}{d}\right)}\right)$. On the other hand, the time per iteration is only $O(t^2)$. Note that the regret is sublinear for any choice of $\kappa$. 
-Going further: for any $\zeta>0$, $\kappa=\frac{d}{\zeta}$ grants $O(t^{1+\zeta})$ time per iteration at the cost of $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{\zeta}{d}\right)}\right)$ regret\footnote{The worse dependency $\mathcal{O}(d)$ of the regret on the arm space dimensionality (\wrt $\mathcal{O}(\sqrt{d})$ of Algorithm \ref{alg:1}) is also necessary to prevent the time per iteration from being exponential in $d$.}. 
+Going further: for any $\zeta>0$, $\kappa=\frac{d}{\zeta}$ grants $O(t^{1+\zeta})$ time per iteration at the cost of $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{\zeta}{d}\right)}\right)$ regret\footnote{The worse dependency $\wt{\mathcal{O}}(d)$ of the regret on the arm space dimensionality (\wrt $\wt{\mathcal{O}}(\sqrt{d})$ of Algorithm \ref{alg:1}) is also necessary to prevent the time per iteration from being exponential in $d$.}. 
 
 
 \section{Practical Aspects}\label{sec:practical}
@@ -440,8 +440,12 @@ between a generic distribution and a mixture.
 
 \section{Related Works}
 In this section, we briefly survey related works from the literature.
-Exploiting particular arm structures is a common trend in the MAB literature. 
+\paragraph{Finite-Arms Bandits} Exploiting particular arm structures is a common trend in the MAB literature. Correlated bandit methods assume dependencies among arms, either through a subdivision of the arms in clusters~\cite{pandey2007multi,wang2018regional} or through the dependency of the expected payoffs on a global latent variable~\cite{mersereau2009structured,atan2015global}. The arm correlation we model in Section \ref{sec:problem}, instead, is based on the effects the arms have on a shared stochastic process. This is closer in spirit to the work of~\citet{kallus2018instrument}, where the selection influences, but not completely determines, the arm that is actually pulled.
+Also related is the concept of probabilistically triggered arms in combinatorial bandits~\citep{cesa2012combinatorial,saritacc2017combinatorial,chen2016combinatorial}.
 
+\paragraph{Continuous Bandits} In continuous bandits, exploiting some sort of structure is necessary. In linear bandits~\cite{auer2002using}, the expected payoff is a linear function of the selected arm. The OFU principle can be applied to the unknown linear coefficients, estimated with ridge regression~\citep{abbasi2011improved}. Unfortunately, the linearity assumption is too stringent for most applications. More general frameworks make Lipschitz or H\"older continuity assumptions and often resolve to clever discretization schedules combined with UCB-like strategies~\citep{kleinberg2005nearly,auer2007improved,kleinberg2008multi,bubeck2009online}, obtaining $\wt{\mathcal{O}}(\sqrt{T})$ regret in some cases.~\citet{srinivas2010gaussian} make the assumption that the payoff function has low RKHS complexity, and use Gaussian processes to model uncertainty, achieving $\wt{\mathcal{O}}(\sqrt{dT})$ regret. The main advantage of our framework is that the necessary technical assumptions are very easily satisfied in the context of policy optimization.
+
+\paragraph{Reinforcement Learning} Although there is a long history of rigorously applying the OFU principle to tabular RL~\citep{kearns2002near,brafman2002r,strehl2009reinforcement,jaksch2010near,lattimore2014near,dann2015sample,dann2017unifying,jin2018q,jungseul2018exploration}, with extensions to continuous states~\citep{ortner2012online,lakshmanan2015improved,bellemare2016unifying}, optimistic approaches to continuous-action MDPs\footnote{Note that, although we discretize the policy parameter space in some occasions, we always deal with continuous action spaces.} remain largely heuristic~\cite{houthooft2016vime,haarnoja2017reinforcement,haarnoja2018soft}. Developing ideas from~\citet{bubeck2010open},~\citet{weinstein2012bandit} apply continuous bandit techniques to open-loop iterative planning, a model-based approach to RL. In the model-free setting,~\citet{sayak2018online} prove $\wt{\mathcal{O}}(\sqrt{T})$ regret for kernelized MDPs, where rewards and transitions are assumed to have low RKHS complexity, leaving some open computational problems. Our proposed algorithms are model-free and make no assumptions on the MDP, besides boundedness of the reward. Moreover, Algorithm \ref{alg:2} applied to parameter-based policy optimization allows a straightforward and efficient implementation.
 
 \section{Experiments}
 
@@ -645,7 +649,7 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 \regretcompact*
 \begin{proof}
 	Fix an $\epsilon>0$. Let $c^{-}$, $c^{+}$ and $\beta_t(\vx)$ be defined as in the proof of Theorem \ref{th:regretdiscrete}.
-	The finite cardinality of $\Xspace$ allowed to perform a union bound over the arms that was crucial for the proof of Theorem \ref{th:regretdiscrete}. We cannot do the same here as $\Xspace$ has infinite cardinality. To overcome this problem, we follow the line of reasoning proposed by~\citet{srinivas2009gaussian}. First, we can say something about the arms that are actually selected by the algorithm, which are finite. From Theorem \ref{lem:thrucatedconcentration}, by a union bound over $t=1,\dots,T$, we have that, with probability at least $1-\sum_{t=1}^T\delta_t$:
+	The finite cardinality of $\Xspace$ allowed to perform a union bound over the arms that was crucial for the proof of Theorem \ref{th:regretdiscrete}. We cannot do the same here as $\Xspace$ has infinite cardinality. To overcome this problem, we follow the line of reasoning proposed by~\citet{srinivas2010gaussian}. First, we can say something about the arms that are actually selected by the algorithm, which are finite. From Theorem \ref{lem:thrucatedconcentration}, by a union bound over $t=1,\dots,T$, we have that, with probability at least $1-\sum_{t=1}^T\delta_t$:
 	\begin{align}\label{aux:6}
 		&\wc{\mu_t}(\vx_t) - \mu(\vx_t) \leq c^{-}\beta_t(\vx_t) &\text{for all $t=1,\dots,T$}.
 	\end{align}
