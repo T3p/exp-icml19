@@ -148,7 +148,7 @@ To apply the OFU principle to policy optimization, we need to exploit some struc
 In this work, we use Multiple Importance Sampling~\citep[MIS,][]{veach_optimally_1995} to capture the information shared by different policy parameters. We employ robust estimators inspired by~\citet{bubeck2013bandits} to overcome the heavy-tail behavior typical of importance sampling. We adapt techniques from~\citet{metelli2018policy} to build confidence intervals of the expected performance of policy parameters via robust MIS.
 We use this tools to design UCB-like algorithms for PO. The proposed algorithms apply to both policy optimization paradigms\footnote{We follow the taxonomy of~\citet{metelli2018policy}.}: action-based PO~\citep[the traditional one, see \eg][]{sutton2000policy} and parameter-based PO~\citep[where optimization is over \textit{distributions} of policies,][]{sehnke2008policy}, and both to finite and continuous parameter spaces. We show that these algorithms achieve $\wt{\mathcal{O}}(\sqrt{T})$ regret. Since the optimization side can be challenging in the continuous case, we propose a general purpose discretization method that allows to trade computational complexity with regret, preserving the sub-linearity of the latter.
 
-We start by providing the essential background in Section~\ref{sec:pre}. In Section~\ref{sec:problem}, we develop robust MIS estimators that will play an essential role in the algorithms. In Section~\ref{sec:problem} we provide a formalization of the online policy optimization problem. The algorithms are presented in Section~\ref{sec:algo} and analyzed in Section~\ref{sec:regret}\textcolor{blue}{, while in Section~\ref{sec:practical} we address some implementation aspects}. Section~\ref{sec:related} relates our work to the existing literature. Finally, in Section~\ref{sec:exp}, we empirically evaluate the proposed methods on continuous control tasks.
+We start by providing the essential background in Section~\ref{sec:pre}. In Section~\ref{sec:problem}, we develop robust MIS estimators that will play an essential role in the algorithms. In Section~\ref{sec:problem} we provide a formalization of the online policy optimization problem. The algorithms are presented in Section~\ref{sec:algo} and analyzed in Section~\ref{sec:regret}. Section~\ref{sec:related} relates our work to the existing literature. Finally, in Section~\ref{sec:exp}, we empirically evaluate the proposed methods on continuous control tasks.
 
 \section{Preliminaries}\label{sec:pre}
 In this section, we provide an essential background on policy optimization and multiple importance sampling.
@@ -291,7 +291,8 @@ According to Theorem \ref{lem:thrucatedconcentration}, the following \textit{ind
 \end{align}
 is an upper bound on $\mu(\vx)$ with probability at least $1-\delta_t$, \ie an upper confidence bound. The \algoname algorithm simply selects, at each iteration $t$, the arm with the largest value of the index $B_t(\vx)$, breaking ties deterministically. The pseudocode is provided in Algorithm \ref{alg:1}. The initial arm $\vx_0$ is arbitrary, as no prior information is available. The regret analysis of Section \ref{sec:regret} will provide a confidence schedule $(\delta_t)_{t=1}^T$. Knowledge of the actual horizon $T$ is not needed. Although we can use any $\epsilon\in (0,1]$, we suggest to use $\epsilon=1$ in practice, as it yields the more common $2$-\Renyi divergence. To be able to compute the indexes (or to perform any kind of index maximization), the algorithm needs to store all the $\vx_t$ together with the observed payoffs $f(z_t)$, hence $\mathcal{O}(Td)$ space is required, where $d$ is the dimensionality of the arm space $\Xspace$ (not to be confused with cardinality $|\Xspace|$, which may be infinite). 
 
-The optimization step (line 4) may be very difficult when $\Xspace$ is not discrete~\citep[\cf][]{srinivas2010gaussian}, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. In practice, this direction may be beneficial, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method. The key intuition, common in the continuous MAB literature, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Note that the arm space $\Xspace$ itself is fixed (and infinite), as adaptive discretization is performed for optimization purposes only.
+The optimization step (line 4) may be very difficult when $\Xspace$ is not discrete~\citep[\cf][]{srinivas2010gaussian}, as the index $B_t(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. In practice, this direction may be beneficial, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method. The key intuition, common in the continuous MAB literature, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Note that the arm space $\Xspace$ itself is fixed (and infinite), as adaptive discretization is performed for optimization purposes only. 
+Implementing \algoname or \algoname 2 to solve a policy optimization problem, whether in the action-based or in the parameter-based formulation, requires some additional caveats, discussed in Appendix~\ref{app:practical}.
 
 \begin{algorithm}[t]
 	\caption{\algoname}
@@ -428,33 +429,6 @@ For $\kappa=2$, we obtain regret $\wt{\mathcal{O}}(d\sqrt{T})$. Unfortunately, t
 Going further: for any $\zeta>0$, $\kappa=\frac{d}{\zeta}$ grants $O(t^{1+\zeta})$ time per iteration at the cost of $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{\zeta}{d}\right)}\right)$ regret\footnote{The worse dependency $\wt{\mathcal{O}}(d)$ of the regret on the arm space dimensionality (\wrt $\wt{\mathcal{O}}(\sqrt{d})$ of Algorithm \ref{alg:1}) is also necessary to prevent the time per iteration from being exponential in $d$.}. 
 
 
-\section{Practical Aspects}\label{sec:practical}
-In this section, we discuss some practical aspects of \algoname.
-
-\subsection{Upper Bound for the Exponentiated Renyi Divergence between mixtures}
-\algoname requires at each iteration to compute the exponentiated \Renyi divergence between the currently considered distribution $p_{\vx}$ 
-and the mixture $\Phi_t$, \ie $d_{1+\epsilon}(p_{\vx}\|\Phi_t)$. Even for Gaussian distributions, this quantity cannot be obtained in closed form, while
-the \Renyi divergence between Gaussians can be computed exactly. In this section, we provide an upper bound for computing the exponentiated \Renyi divergence
-between a generic distribution and a mixture.
-\begin{restatable}{theorem}{armonic}\label{th:armonic}
-	Let $P$ be a probability measure and $\Phi = \sum_{k=1}^K \beta_k Q_k$, with $\beta_k \in [0,1]$ and $\sum_{k=1}^K \beta_k =1$, be a finite mixture of the
-	probability measures $\{Q_k\}_{k=1}^K$. Then, for any $\alpha \ge 1$, the exponentiated $\alpha$-\Renyi divergence can be bounded as: 
-    \begin{equation*}
-        d_{\alpha}(P \| \Phi) \le \frac{1} {\sum_{k=1}^K \frac{ \beta_k}{ d_{\alpha}(P \| Q_k)}}.
-    \end{equation*}
-\end{restatable}
-
-In Appendix~\ref{app:proof}, we show how to generalize this bound when also $P$ is a mixture.
-
-\subsection{Parameter-based exploration}
-\begin{itemize}
-	\item Bound on $d_2$
-\end{itemize}
-\subsection{Action-based exploration}
-\begin{itemize}
-	\item Estimator of $d_2$
-\end{itemize}
-
 \section{Related Works}\label{sec:related}
 In this section, we briefly survey related works from the literature.
 
@@ -496,6 +470,34 @@ Thompson sampling~\citep[TS,][]{thompson1933likelihood} is a different approach 
 \clearpage
 \onecolumn
 \appendix
+
+\section{Practical Aspects of \algoname}\label{app:practical}
+In this section, we discuss some practical aspects of \algoname.
+
+\subsection{Upper Bound for the Exponentiated Renyi Divergence between mixtures}
+\algoname requires at each iteration to compute the exponentiated \Renyi divergence between the currently considered distribution $p_{\vx}$ 
+and the mixture $\Phi_t$, \ie $d_{1+\epsilon}(p_{\vx}\|\Phi_t)$. Even for Gaussian distributions, this quantity cannot be obtained in closed form, while
+the \Renyi divergence between Gaussians can be computed exactly. In this section, we provide an upper bound for computing the exponentiated \Renyi divergence
+between a generic distribution and a mixture.
+\begin{restatable}{theorem}{armonic}\label{th:armonic}
+	Let $P$ be a probability measure and $\Phi = \sum_{k=1}^K \beta_k Q_k$, with $\beta_k \in [0,1]$ and $\sum_{k=1}^K \beta_k =1$, be a finite mixture of the
+	probability measures $\{Q_k\}_{k=1}^K$. Then, for any $\alpha \ge 1$, the exponentiated $\alpha$-\Renyi divergence can be bounded as: 
+	\begin{equation*}
+	d_{\alpha}(P \| \Phi) \le \frac{1} {\sum_{k=1}^K \frac{ \beta_k}{ d_{\alpha}(P \| Q_k)}}.
+	\end{equation*}
+\end{restatable}
+
+In Appendix~\ref{app:proof}, we show how to generalize this bound when also $P$ is a mixture.
+
+\subsection{Parameter-based exploration}
+\begin{itemize}
+	\item Bound on $d_2$
+\end{itemize}
+\subsection{Action-based exploration}
+\begin{itemize}
+	\item Estimator of $d_2$
+\end{itemize}
+
 \section{Proofs}\label{app:proof}
 
 \misevarbound*
