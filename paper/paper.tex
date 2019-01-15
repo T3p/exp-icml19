@@ -126,7 +126,16 @@
 %\printAffiliationsAndNotice{\icmlEqualContribution} % otherwise use the standard text.
 
 \begin{abstract}
-\lipsum[1]
+%\lipsum[1]
+Policy Search (PS) is an effective approach to Reinforcement Learning (RL) for solving
+ control tasks with continuous state-action spaces. In this paper,
+we address the exploration-exploitation trade off in PS by proposing an
+approach, based on Optimism in Face of Uncertainty (OFU). We cast the PS problem
+as a suitable Multi Armed Bandit problem (MAP), defined over the space of policy parameters,
+and we propose a class of algorithms that effectively exploit the structure
+of the problem, employing Multiple Importance Sampling (MIS). We show that we are
+able to achieve $\widetilde{\mathcal{O}}(\sqrt{T})$ regret for both discrete and continuous
+parameter spaces. Finally, we provide a set of numerical simulation to show...
 \end{abstract}
 
 \section{Introduction}
