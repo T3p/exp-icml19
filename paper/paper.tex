@@ -434,7 +434,52 @@ Also related is the concept of probabilistically triggered arms in combinatorial
 \textbf{Reinforcement Learning} Although there is a long history of rigorously applying the OFU principle to tabular RL~\citep{kearns2002near,brafman2002r,strehl2009reinforcement,jaksch2010near,lattimore2014near,dann2015sample,dann2017unifying,jin2018q,jungseul2018exploration}, with extensions to continuous states~\citep{ortner2012online,lakshmanan2015improved,bellemare2016unifying}, optimistic approaches to continuous-action MDPs\footnote{Note that, although we discretize the policy parameter space in some occasions, we always deal with continuous action spaces.} remain largely heuristic~\cite{houthooft2016vime,haarnoja2017reinforcement,haarnoja2018soft}. Developing ideas from~\citet{bubeck2010open},~\citet{weinstein2012bandit} apply continuous bandit techniques to open-loop iterative planning, a model-based approach to RL. In the model-free setting,~\citet{sayak2018online} prove $\wt{\mathcal{O}}(\sqrt{T})$ regret for kernelized MDPs, where rewards and transitions are assumed to have low RKHS complexity, leaving some computational problems open. Our proposed algorithms are model-free and do not make assumptions on the MDP, besides boundedness of the reward. Moreover, Algorithm \ref{alg:2} applied to parameter-based policy optimization allows a straightforward and efficient implementation.
 Thompson sampling~\citep[TS,][]{thompson1933likelihood} is a different approach to MABs, not based on optimism, which enjoys the same theoretical guarantees of UCB~\citep{kaufmann2012thompson} with better performance in many applications~\citep{chapelle2011empirical}. TS was applied to value-based RL~\citep[\eg][]{osband2013more}, and its application to policy optimization could also be fruitful.
 
-\section{Experiments}\label{sec:exp}
+\begin{figure*}[t]
+\begin{subfigure}
+  \centering
+  \includegraphics[width=0.24\linewidth]{example-image-a}
+  \label{fig:lqg}
+\end{subfigure}
+\begin{subfigure}
+  \centering
+  \includegraphics[width=0.24\linewidth]{example-image-a}
+  \label{fig:mc}
+\end{subfigure}
+\begin{subfigure}
+  \centering
+  \includegraphics[width=0.24\linewidth]{example-image-a}
+  \label{fig:mc1}
+\end{subfigure}
+\begin{subfigure}
+  \centering
+  \includegraphics[width=0.24\linewidth]{example-image-a}
+  \label{fig:mc2}
+\end{subfigure}
+\end{figure*}
+
+
+\section{Numerical Simulations}\label{sec:exp}
+In this section, we present the results of the numerical simulation of \algoname on both discrete and continuous parameter spaces. We restrict our experiments to the \emph{parameter-based} framework and Gaussian hyperpolicies. This setting is particularly convenient as the \Renyi divergence between Gaussian distributions admits closed form. Contrary, in the action-based scenario, 
+we would need to compute divergences between trajectory distributions, which is intractable and usual estimators, despite loosing the theoretical guarantees, tend to empirically behave badly~\cite{metelli2018policy}. It is worth noting that at each iteration \algoname needs to compute the \Renyi divergence between a candidate hyperpolicy and a mixture $d_2(P \| \Phi)$. We prove in Appendix~\ref{app:practical} that this quantity, in our scenario, can be upper bounded by the harmonic mean
+of the divergences between $P$ and each component of the mixture $Q_k$. 
+
+\subsection{Linear Quadratic Gaussian Regulator}
+The Linear Quadratic Gaussian Regulator~\citep[LQG,][]{dorato1995linear} is a benchmark problem
+for continuous control. We consider the monodimensional case in which the state space limited to $\mathcal{S}=[-4,4]$, the action space is $\mathcal{A}=[-4,4]$ and the horizon is limited to 20. At each timestep the agent receives a penalization proportional to the magnitude of the state and the action applied, \ie $R(s,a) = -a s^2 - b  a^2$. We employ a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}( \xi, \sigma^2)$, where $\xi$ is the mean parameter to be learned and $\sigma=0.15$ fixed. The case in which we learn the standard deviation too is reported in Appendix~\ref{apx:additionalExperiments}.
+
+The goal of this experiment is to compare \algoname
+with classical MAB algorithms, especially UCB1~\cite{auer2002finite} and GP-UCB~\cite{srinivas2010gaussian} when the parameter space $\Xi$ is discrete. For this purpose we consider
+a regular grid over the interval $[-1,1]$ made of 100 arms.\footnote{Note that the optimal parameter $\sim -0.61$ falls in this interval.} All algorithms are run with confidence level $\delta=0.2$.
+In Figure~\ref{fig:lqg} we show the cumulative regret averaged over 30 runs of \algoname compared with UCB1 and GP-UCB. We can see that our algorithm significantly outperforms UCB1. Indeed, \algoname is
+able to exploit the structure of arms, \ie hyperpolicies, by means of the MIS estimation, whereas UCB1 does not make any assumption on arm correlation. On the contrary, GP-UCB shows a better performance \wrt to \algoname. We point out that GP-UCB requires to specify, at the beginning of learning, the kernel of the Gaussian Process (GP) from which the payoff function is sampled. We employed
+the default scikit-learn kernel (RBF) which, since our payoff is not sampled from a GP, makes the
+theoretical guaranees not applicable.\footnote{Indeed, we empirically discovered that GP-UCB tends to
+be significantly more exploitative \wrt UCB1 and \algoname.}
+
+\subsection{Mountain Car}
+The second experiment we present aims at showing the learning performance of \algoname  
+when the parameters of the hyperpolicy belong to a compact (continuous) space. We consider
+the continuous Mountain Car environment.
 
 \section{Conclusion}\label{sec:end}
 
@@ -830,6 +875,16 @@ We can now minimize the bound over the $\phi_k$, subject to $\sum_{k=1}^K \phi_k
     \end{equation*}
     which is the weighted harmonic mean of the exponentiated divergences.
 \end{proof}
+
+\section{Additional Experimental Results}
+\label{apx:additionalExperiments}
+In this section, we report some additional experiments we did not include in the main paper.
+
+\subsection{Linear Quadratic Gaussian Regulator}
+In this experiment, we learn both the mean and the variance parameter of the Gaussian hyperpolicy
+for the LQG: $\nu_{\vxi} = \mathcal{N}(\xi_1, \exp(2\xi_2))$, where $\vxi=(\xi_1,\xi_2)^T$ and we modeled with $\nu_2$ the log-standard deviation. In Figure~\ref{fig:lqgVar}, we show the cumulative regret averaged over 5 runs comparing \algoname with UCB1 and GP-UCB. We see a
+trend similar to the case in which we learn only the mean parameter. While \algoname is able to exploit
+the structure of the arms induced by the fact that hyperpolicyes share information, GP-UCB still displays a better performance.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
