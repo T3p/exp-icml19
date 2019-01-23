@@ -437,12 +437,12 @@ Thompson sampling~\citep[TS,][]{thompson1933likelihood} is a different approach 
 \begin{figure*}[t]
 \begin{subfigure}
   \centering
-  \includegraphics[width=0.24\linewidth]{example-image-a}
+  \includegraphics[width=0.24\linewidth]{plots/LQG_mu.pdf}
   \label{fig:lqg}
 \end{subfigure}
 \begin{subfigure}
   \centering
-  \includegraphics[width=0.24\linewidth]{example-image-a}
+  \includegraphics[width=0.24\linewidth]{plots/MC_mu.pdf}
   \label{fig:mc}
 \end{subfigure}
 \begin{subfigure}
@@ -457,11 +457,10 @@ Thompson sampling~\citep[TS,][]{thompson1933likelihood} is a different approach 
 \end{subfigure}
 \end{figure*}
 
-
 \section{Numerical Simulations}\label{sec:exp}
-In this section, we present the results of the numerical simulation of \algoname on both discrete and continuous parameter spaces. We restrict our experiments to the \emph{parameter-based} framework and Gaussian hyperpolicies. This setting is particularly convenient as the \Renyi divergence between Gaussian distributions admits closed form. Contrary, in the action-based scenario, 
-we would need to compute divergences between trajectory distributions, which is intractable and usual estimators, despite loosing the theoretical guarantees, tend to empirically behave badly~\cite{metelli2018policy}. It is worth noting that at each iteration \algoname needs to compute the \Renyi divergence between a candidate hyperpolicy and a mixture $d_2(P \| \Phi)$. We prove in Appendix~\ref{app:practical} that this quantity, in our scenario, can be upper bounded by the harmonic mean
-of the divergences between $P$ and each component of the mixture $Q_k$. 
+In this section, we present the results of the numerical simulation of \algoname on RL tasks
+on both discrete and continuous parameter spaces. We restrict our experiments to the \emph{parameter-based} PS and Gaussian hyperpolicies. This setting is particularly convenient as the \Renyi divergence between Gaussian distributions admits closed form~\cite{gil2013renyi}. On the contrary, in the action-based scenario, 
+we would need to compute divergences between trajectory distributions, which is intractable. The usual approach consists in estimating the \Renyi divergence from samples. However, we would lose our theoretical guarantees on the regret. Furthermore, the known estimators for the \Renyi tend empirically to unstable~\cite{metelli2018policy}. It is worth noting that at each iteration \algoname needs to compute the \Renyi divergence between a candidate hyperpolicy $\nu_{\vxi_t}$ and the mixture of hyperpolicies visited so far $\nu_{\vxi_0}, ..., \nu_{\vxi_{t-1}}$. We prove in Appendix~\ref{app:practical} that this quantity can be upper bounded by the harmonic mean of the divergences between the candidate hyperpolicy $\nu_{\vxi_t}$ and each component of the mixture $\nu_{\vxi_{k}}$ for $k=1,...,t-1$. 
 
 \subsection{Linear Quadratic Gaussian Regulator}
 The Linear Quadratic Gaussian Regulator~\citep[LQG,][]{dorato1995linear} is a benchmark problem
