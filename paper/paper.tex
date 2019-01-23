@@ -459,7 +459,7 @@ Thompson sampling~\citep[TS,][]{thompson1933likelihood} is a different approach 
     \centering
     \includegraphics[width=\linewidth]{plots/heat.pdf}
     \caption{Heatmaps representing the region of the parameter space $\Xi$ explored by \algoname and PGPE in the Mountain Car experiment.} 
-    \label{fig:mc} 
+    \label{fig:hm} 
   \end{minipage} %%
   \vskip -0.2in
 \end{figure*}
@@ -501,8 +501,8 @@ In Figure~\ref{fig:lqg}, we show the cumulative regret averaged over 30 runs of 
 able to exploit the structure of arms, \ie hyperpolicies, by means of the MIS estimation, whereas UCB1 does not make any assumption on arm correlation. On the contrary, GPUCB shows a better performance \wrt to \algoname. We point out that GPUCB requires to specify, at the beginning of learning, the kernel of the Gaussian Process (GP) from which the payoff function is sampled. We employed the default scikit-learn kernel (RBF) which invalidates all theoretical guarantees, as our payoff is not actually sampled from a GP.\footnote{Indeed, GPUCB showed a significantly more exploitative behavior \wrt UCB1 and \algoname in the experiment.}
 
 \subsection{Mountain Car}
-The second experiment shows the performance of \algoname  
-when the parameters of the hyperpolicy belong to a compact (continuous) space, on the mountain car task\footnote{MountainCarContinuous-v0 from openai/gym~\citep{brockman2016openai}.}. We use a Gaussian hyperpolicy with a two-dimensional learnable mean within a box $[-1,-1]\times[0,20]$ and a fixed covariance $diag(0.15,3)$. We compare OPTIMIST2 with $k=3$ and $\delta=0.2$ against parameter based policy optimization algorithms PGPE~\citep{sehnke2008policy} and PB-POIS~\cite{metelli2018policy}. The best step size for PGPE was searched over [3, 2, 1, 0.1, 0.01, 0.001]. For PBPOIS, we used the suggested hyperparameters. OPTIMIST2 is able to learn a good policy in a very short time thanks to its better exploration capabilities. However, the policy gradient methods outperform it on the long run.
+The second experiment (Figure~\ref{fig:mc}) shows the performance of \algoname  
+when the parameters of the hyperpolicy belong to a compact (continuous) space, on the mountain car task\footnote{MountainCarContinuous-v0 from openai/gym~\citep{brockman2016openai}.}. We use a Gaussian hyperpolicy with a two-dimensional learnable mean within a box $[-1,-1]\times[0,20]$ and a fixed covariance $diag(0.15,3)$. We compare OPTIMIST2 with $k=3$ and $\delta=0.2$ against parameter based policy optimization algorithms PGPE~\citep{sehnke2008policy} and PB-POIS~\cite{metelli2018policy}. The best step size for PGPE was searched over [3, 2, 1, 0.1, 0.01, 0.001]. For PBPOIS, we used the suggested hyperparameters. OPTIMIST2 is able to learn a good policy in a very short time thanks to its better exploration capabilities (Figure~\ref{fig:hm}). However, the policy gradient methods outperform it on the long run.
 
 \section{Conclusion}\label{sec:end}
 We have studied the problem of exploration versus exploitation in policy optimization using MAB techniques. We have proposed OPTIMIST, an optimism-based approach for both the action-based and the parameter-based exploration frameworks, and for both discrete and continuous parameter spaces. We have proved sublinear regret bounds for OPTIMIST under assumptions that are easily met in practice. The empirica evaluation on continuous control tasks showed that the proposed algorithms are effectively able to leverage the structure of the PO problem, although the performances are not optimal when compared to methods with stronger assumptions or without guarantees, at least on these simple problems.
