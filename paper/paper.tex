@@ -499,8 +499,7 @@ with classical MAB algorithms, especially UCB1~\cite{auer2002finite} and GPUCB~\
 a uniform discretization of the interval $[-1,1]$ made of 100 arms. All algorithms are run with confidence level $\delta=0.2$.
 In Figure~\ref{fig:lqg}, we show the cumulative regret averaged over 30 runs of \algoname compared with UCB1 and GPUCB. We can see that our algorithm significantly outperforms UCB1. Indeed, \algoname is
 able to exploit the structure of arms, \ie hyperpolicies, by means of the MIS estimation, whereas UCB1 does not make any assumption on arm correlation. On the contrary, GPUCB shows a better performance \wrt to \algoname. We point out that GPUCB requires to specify, at the beginning of learning, the kernel of the Gaussian Process (GP) from which the payoff function is sampled. We employed
-the default scikit-learn kernel (RBF) which invalidates all theoretical guarantees, as our payoff is not sampled from a GP.\footnote{Indeed, we empirically discovered that GPUCB tends to
-be unjustifiably more exploitative \wrt UCB1 and \algoname.}
+the default scikit-learn kernel (RBF) which invalidates all theoretical guarantees, as our payoff is not sampled from a GP.\footnote{Indeed, GPUCB showed a significantly more exploitative behavior \wrt UCB1 and \algoname in the experiment.}
 
 \subsection{Mountain Car}
 The second experiment we present aims at showing the learning performance of \algoname  
