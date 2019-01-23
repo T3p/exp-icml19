@@ -481,6 +481,8 @@ when the parameters of the hyperpolicy belong to a compact (continuous) space. W
 the continuous Mountain Car environment.
 
 \section{Conclusion}\label{sec:end}
+We have studied the problem of exploration versus exploitation in policy optimization using MAB techniques. We have proposed OPTIMIST, an optimism-based approach for both the action-based and the parameter-based exploration frameworks, and for both discrete and continuous parameter spaces. We have proved sublinear regret bounds for OPTIMIST under assumptions that are easily satisfied in practice. Evaluation on continuous control tasks showed that the proposed algorithms are effectively able to leverage the structure of the PO problem, although performances are not optimal when compared with methods with stronger assumptions or without guarantees, at least on these simple problems.
+Future work should focus on finding more efficient (but still effective) ways to perform optimization in the infinite-arm setting, and on applying OPTIMIST also to the action-based framework, which requires additional caveats in computing the exploration bonus.
 
 % Acknowledgements should only appear in the accepted version.
 %\section*{Acknowledgements}
