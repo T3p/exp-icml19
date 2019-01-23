@@ -266,7 +266,7 @@ The peculiarity of this framework, compared to the classic MAB one, is the speci
 We \textit{could}, of course, frame policy optimization as a MAB problem, at the cost of ignoring some structure. It would be enough to regard $\mu(\vx)$ as the expectation of a totally unknown, stochastic reward function. This would put us in the continuous MAB framework~\citep{kleinberg2013bandits}, but would ignore the special arm correlation. In the following, we will show how this correlation can be exploited to guarantee efficient exploration.
 
 \section{Algorithms}\label{sec:algo}
-In this section, we use the mathematical tools presented so far to design a policy search algorithm that efficiently explores the space of solutions. The proposed algorithm, \algoname, is based on the Optimism in the Face of Uncertainty (OFU) principle and follows the Upper Confidence Bound (UCB) strategy~\citep{lai1985asymptotically,agrawal1995sample,auer2002finite} commonly used in Multi Armed Bandit (MAB) problems~\citep{robbins1985some,bubeck2012regret,lattimore2019bandit}. 
+In this section, we use the mathematical tools presented so far to design a policy search algorithm that efficiently explores the space of solutions. The proposed algorithm, called \algoname (Optimistic Policy opTImization via Multiple Importance Sampling with Truncation), is based on the Optimism in the Face of Uncertainty (OFU) principle and follows the Upper Confidence Bound (UCB) strategy~\citep{lai1985asymptotically,agrawal1995sample,auer2002finite} commonly used in Multi Armed Bandit (MAB) problems~\citep{robbins1985some,bubeck2012regret,lattimore2019bandit}. 
 
 To apply the UCB strategy to the policy optimization problem, we need an estimate of the objective $\mu(\vx)$ and a confidence region. We use importance sampling to capture the correlation among the arms. In particular, to better use all the data that we collect, we would like to use a multiple importance sampling estimator like the one from (\ref{eq:mise}). Unfortunately, the heavy-tailed behavior of this estimator would result in an inefficient exploration.
 Instead, we use the robust balance heuristic estimator $\wc{\mu}_{\text{BH}}$ from (\ref{eq:truncatedmise}), which has better tail behavior. To simplify the notation, , we treat each sample $\vx$ as a distinct one. This is \wlg (as each sample is always multiplied by its number of occurrences anyway) and corresponds to the case $K=t-1$ and $N_k\equiv1$. Hence, at each iteration $t$:
@@ -510,10 +510,7 @@ the continuous Mountain Car environment.
 \onecolumn
 \appendix
 
-\section{Practical Aspects of \algoname}\label{app:practical}
-In this section, we discuss some practical aspects of \algoname.
-
-\subsection{Upper Bound for the Exponentiated Renyi Divergence between mixtures}
+\section{Upper Bound for the Exponentiated Renyi Divergence between mixtures}\label{app:practical}
 \algoname requires at each iteration to compute the exponentiated \Renyi divergence between the currently considered distribution $p_{\vx}$ 
 and the mixture $\Phi_t$, \ie $d_{1+\epsilon}(p_{\vx}\|\Phi_t)$. Even for Gaussian distributions, this quantity cannot be obtained in closed form, while
 the \Renyi divergence between Gaussians can be computed exactly. In this section, we provide an upper bound for computing the exponentiated \Renyi divergence
@@ -526,16 +523,7 @@ between a generic distribution and a mixture.
 	\end{equation*}
 \end{restatable}
 
-In Appendix~\ref{app:proof}, we show how to generalize this bound when also $P$ is a mixture.
-
-\subsection{Parameter-based exploration}
-\begin{itemize}
-	\item Bound on $d_2$
-\end{itemize}
-\subsection{Action-based exploration}
-\begin{itemize}
-	\item Estimator of $d_2$
-\end{itemize}
+In Appendix~\ref{app:proof}, we prove a more general result for the case when also $P$ is a mixture.
 
 \section{Proofs}\label{app:proof}
 
