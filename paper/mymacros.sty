@@ -2,16 +2,12 @@
 
 \RequirePackage{amsmath, amsfonts, amssymb}
 
-\newcommand{\Exp}{\mathop{\mathbb{E}}}
-\newcommand{\Var}{\mathop{\mathbb{V}\mathrm{ar}}}
+
 \newcommand{\muo}{\hat{\mu}_{\omega}}
 \newcommand{\mua}{\hat{\mu}_{\alpha}}
 \newcommand{\muab}{\hat{\mu}_{\alpha,\beta}}
 \newcommand{\muabopt}{\hat{\mu}_{\alpha,\beta^{opt}}}
 \newcommand{\muabapprox}{\hat{\mu}_{\alpha,\hat{\beta}}}
-\newcommand{\Expu}[1]{\underset{#1}{\mathbb{E}}}
-\newcommand{\Varu}[1]{\underset{#1}{\mathbb{V}\mathrm{ar}}}
-\newcommand{\params}[2]{\boldsymbol{\theta}_{#1}^{#2}}
 \newcommand{\norm}[2][]{\left\|#2\right\|_{#1}}
 
 %Text
@@ -41,6 +37,10 @@
 \newcommand{\Renyi}{R\'{e}nyi }
 \newcommand{\simiid}{\stackrel{\text{iid}}{\sim}}
 \newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Exp}{\mathop{\mathbb{E}}}
+\newcommand{\Var}{\mathop{\mathbb{V}\mathrm{ar}}}
+\newcommand{\Expu}[1]{\underset{#1}{\mathbb{E}}}
+\newcommand{\Varu}[1]{\underset{#1}{\mathbb{V}\mathrm{ar}}}
 
 %RL
 \newcommand{\Sspace}{\mathcal{S}}
@@ -52,6 +52,7 @@
 \newcommand{\Task}{\mathcal{M}}
 \newcommand{\policyT}{\pi_{\boldsymbol{\theta}'}}
 \newcommand{\policyB}[1]{\pi_{\boldsymbol{\theta}_{#1}}}
+\newcommand{\params}[2]{\boldsymbol{\theta}_{#1}^{#2}}
 
 %Bandit
 \newcommand{\Reg}{\textit{Regret}}
