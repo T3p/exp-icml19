@@ -10,7 +10,7 @@ R1
 -Experiments: we agree including PGPE in the regret plot would be useful. Plotting the regret for the MC experiment would require to know the performance of the optimal policy. Studying why PGPE gives better results (despite not having any guarantees) is an interesting future direction. However, being this a first work on regret minimization in policy search, we mainly focused on theory rather than practical performance.
 
 R2
-2.This kind of regret was achieved in the MAB literature, but is new for the policy optimization setting.
+2.This kind of regret was achieved in the MAB literature, but it is new for the policy optimization setting.
 3.This is why we focus on discretization approaches, but we plan to use global optimization methods [2] in future work.
 4.Do you have any specific suggestions on how to improve the experimental section?
 5.We will add more trials in the final version.
@@ -20,7 +20,7 @@ R3
 -We thank the reviewer for suggesting additional related works, we will include them in the final version. The one by Elvira et al. seems of practical relevance for our work, as scalability when the number of proposal distribution grows is an important issue.
 
 R4
-We appriciate that the reviewer captured the spirit of the paper and rewarded its novelty. We will fix the reported typos in the final version.
+We appreciate that the reviewer captured the spirit of the paper and rewarded its novelty. We will fix the reported typos in the final version.
 
 [1] Gil, Manuel, Fady Alajaji, and Tamas Linder. "Rényi divergence measures for commonly used univariate continuous distributions." Information Sciences 249 (2013): 124-131.
 [2] Srinivas, Niranjan, et al. "Gaussian process optimization in the bandit setting: No regret and experimental design." arXiv preprint arXiv:0912.3995 (2009).
