@@ -327,7 +327,7 @@ First, we need the following assumption on the \Renyi divergence:
 	where $\Phi_t = \frac{1}{t}\sum_{k=0}^{t-1}p_{\vx_k}$,
 \end{restatable}
 %
-which can be easily enforced through careful policy (or hyperpolicy) design (See Appendix TODO).
+which can be easily enforced through careful policy (or hyperpolicy) design (See Appendix~\ref{app:renyi}).
 
 \subsection{Discrete arm set}
 We start from the discrete case, where $|\mathcal{X}| = K \in \Naturals_{+}$.
@@ -551,6 +551,43 @@ between a generic distribution and a mixture.
 \end{restatable}
 
 In Appendix~\ref{app:proof}, we prove a more general result for the case when also $P$ is a mixture.
+
+\section{Boundedness of the Exponentiated Renyi Divergence}\label{app:renyi}
+Assumption~\ref{ass:boundrenyi} requires the existence of a uniform upper bound on the exponentiated $(1+\epsilon)$-\Renyi divergence between the current distribution $p_{\vx_t}$ and the mixture of previous ones $\Phi_t=\frac{1}{t}\sum_{k=0}^{t-1}p_{\vx_k}$:
+\begin{align*}
+&\sup_{\vx_0,\vx_1,\dots,\vx_t\in\Xspace}d_{1+\epsilon}(p_{\vx_t}\|\Phi_t) \leq v_{\epsilon} &\text{for all $t=1,\dots,T$}.
+\end{align*}
+Note, from Algorithm~\ref{alg:1}, that the value of $v_{\epsilon}$ is not required in practice. Hence, we will just show that an upper bound exists.
+From Theorem~\ref{th:armonic}, it suffices to bound the exponentiated \Renyi divergence between the current distribution and each previous one:
+\begin{align}
+	&\sup_{\vx_t, \vx_k\in\Xspace}d_{1+\epsilon}(p_{\vx_t}\|p_{\vx_k}) < \infty &\text{for all $t=1,\dots,T$ and $k=0,\dots,t-1$.}
+\end{align}
+Since the arm set $\Xspace$ is compact, we just need to ensure that $d_{1+\epsilon}(p_{\vx_t}\|p_{\vx_k})$ is continuous over $\Xspace^2$ (a continuous function on a compact set is bounded).  This may require additional care in defining the arm space, depending on the kind of distribution that is employed and on the specific parametrization. We analyze two cases of practical interest for the scope of this paper.
+
+\subsection{Gaussian hyperpolicies with fixed covariance matrix}
+Let $\nu_{\vxi}$ denote an $m$-variate Gaussian hyperpolicy with parametric mean $\vxi$ and fixed covariance matrix $\Sigma$:
+\begin{align}
+	\nu_{\vxi}(\vtheta) = \frac{1}{(2\pi)^{\nicefrac{m}{2}}|\Sigma|^{\nicefrac{1}{2}}}\exp\left\{
+		-\frac{1}{2}(\vtheta-\vxi)^T\Sigma^{-1}(\vtheta-\vxi)
+	\right\}.
+\end{align}
+The exponentiated $(1+\epsilon)$-\Renyi divergence between $\nu_{\vxi_t}$ and $\nu_{\vxi_k}$ is~\citep{gil2013renyi}:
+\begin{align}
+	d_{1+\epsilon}(\nu_{\vxi_t}\|\nu_{\vxi_k}) = \exp\left\{\frac{1+\epsilon}{2}(\vxi_t-\vxi_k)^T\Sigma^{-1}(\vxi_t-\vxi_k)\right\},
+\end{align}
+which is continuous.
+
+\subsection{Univariate Gaussian hyperpolicies with adaptive standard deviation}
+Let $\nu_{\vxi}$ be an univariate Gaussian hyperpolicy:
+\begin{align}
+	\nu_{\vxi}(\theta) = \frac{1}{\sqrt{2\pi}\sigma}\exp\left\{-\frac{1}{2}\left(\frac{\theta-\mu}{\sigma}\right)^2\right\},
+\end{align}
+where the hyperparameter consists of a mean $\mu$ and a standard deviation $\sigma>0$, \ie $\vxi=[\mu, \sigma]^T$.
+The exponentiated $(1+\epsilon)$-\Renyi divergence between $\nu_{\vxi_t}$ and $\nu_{\vxi_k}$ is~\citep{gil2013renyi}:
+\begin{align}
+	d_{1+\epsilon}(\nu_{\vxi_t}\|\nu_{\vxi_k}) = \frac{\sigma_k}{\sigma_t} \left(\frac{\sigma_k^2}{\sigma_{1+\epsilon}^2}\right)^{\nicefrac{1}{2\epsilon}}\exp\left\{\frac{(1+\epsilon)(\mu_t-\mu_k)^2}{2\sigma_{\epsilon+1}^2}\right\},
+\end{align}
+where $\sigma_{\epsilon+1}^2 = (1+\epsilon)\sigma_k^2 - \epsilon\sigma_t^2$. The divergence is well-defined (and continuous) as long as $\sigma_{\epsilon+1}^2 > 0$, hence $\sigma_t^2<\frac{1+\epsilon}{\epsilon}\sigma_k^2$. Intuitively, the target distribution cannot be much more stochastic than the behavioral. To ensure this for all $t=1,\dots,T$ and $k=0,\dots,t-1$, it is enough to fix a minimum standard deviation $\sigma_0$ and constrain the search for the $\sigma$ parameter to $[\sigma_0, \frac{1+\epsilon}{\epsilon}\sigma_0]$. This easily generalizes to multivariate Gaussian hyperpolicies with diagonal covariance matrix.
 
 \section{Proofs}\label{app:proof}
 
