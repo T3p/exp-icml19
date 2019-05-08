@@ -67,9 +67,9 @@
                 				Dark2-6 \nextlist
                 				my marks \nextlist
                 				very thick \nextlist},
-                      		  height=6cm,
+                      		  height=5cm,
                       		  width=7cm,  
-                      		  ylabel style={yshift=-0.1cm},
+                      		  %ylabel style={yshift=-0.1cm},
                       		  xlabel style={yshift=0.1cm},
                       		  yticklabel style={
         						/pgf/number format/fixed,
@@ -82,7 +82,7 @@
                       		  ]
         		\nextgroupplot[title={}, 
         					   xlabel={Episodes},
-        					   ylabel={Cumulative Average Return}]
+        					   ylabel={Cumulative Return}]
         			
         			\drawplot{OPTIMIST}{mean}{up}{low}{\optimist}{4}
         			\drawplot{}{}{}{}{}{}

@@ -2,6 +2,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{bm}
+\usepackage{amsmath}
 
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
@@ -29,30 +30,37 @@
         },
     }
 
-\pgfplotstableread[col sep = comma]{./OPTIMIST.csv}\optimist
-\pgfplotstableread[col sep = comma]{./GPUCB.csv}\gpucb
-\pgfplotstableread[col sep = comma]{./UCB1.csv}\ucb
+\pgfplotstableread[col sep = comma]{./OPTIMIST_disc_20.csv}\optdisc
+\pgfplotstableread[col sep = comma]{./OPTIMIST_disc_100.csv}\optdiscc
+\pgfplotstableread[col sep = comma]{./OPTIMIST_cont_k2.csv}\optcontd
+\pgfplotstableread[col sep = comma]{./OPTIMIST_cont_k3.csv}\optcontt
+\pgfplotstableread[col sep = comma]{./OPTIMIST_cont_k4.csv}\optcontq
+\pgfplotstableread[col sep = comma]{./PGPE.csv}\pgpe
 
 
 \renewcommand{\rmdefault}{ptm}
 \newcommand{\mathbr}[1]{\bm{\mathbf{#1}}}
 
-\newcommand\drawplot[5]{
-	\addplot table[x=iteration, y={#2}]{#5};\label{plots:#1}
-	\def\temp{#3}\ifx\temp\empty
+\newcommand\drawplot[6]{
+	\def\todraw{#1}\ifx\todraw\empty
+		\addplot[draw=none] coordinates {(1,1)};
 	\else
-		\addplot[name path=up, draw=none, forget plot] table[x=iteration, y={#3}]{#5};
-    	\addplot[name path=low, draw=none, forget plot] table[x=iteration, y={#4}]{#5};
-    	\addplot[/pgfplots/refstyle={plots:#1}, fill opacity=0.2, forget plot] fill between[of=up and low];
+		\addplot table[x=iteration, y={#2}, each nth point={#6}]{#5};\label{plots:#1}
+		%\addlegendentry{#1}
+		\def\temp{#3}\ifx\temp\empty
+		\else
+			\addplot[name path=up, draw=none, forget plot, each nth point={#6}] table[x=iteration, y={#3}]{#5};
+    		\addplot[name path=low, draw=none, forget plot, each nth point={#6}] table[x=iteration, y={#4}]{#5};
+    		\addplot[/pgfplots/refstyle={plots:#1}, fill opacity=0.2, forget plot, each nth point={#6}] fill between[of=up and low];
+		\fi
 	\fi
-	\addlegendentry{#1}
 }
 
 
 \begin{document}
 
    
-\begin{tikzpicture}[line width=1.5pt, mark size=1.5pt, mark repeat={10}]
+\begin{tikzpicture}[line width=1.5pt, mark size=1.5pt, mark repeat={5}]
     		\begin{groupplot}[cycle list/Dark2-6,
     					group style={
                       		  group name=myplot,
@@ -71,20 +79,24 @@
         						/pgf/number format/fixed,
         						/pgf/number format/precision=5
 							  },
-							  legend style={thin, draw=gray, at={(0.47,0.98)},anchor=north east},
+							  xtick={0,1000,2000,3000,4000,5000},
+							  legend style={thin, draw=gray, at={(0.95,0.32)},anchor=south east},
                       		  grid=both,
 							  grid style={gray!10},   
       						  every tick/.style={gray!60},
                       		  ]
         		\nextgroupplot[title={}, 
         					   xlabel={Episodes},
-        					   ylabel={Cumulative Regret}]
+        					   ylabel={Cumulative Return}]
         			
-        			\drawplot{OPTIMIST}{mean}{up}{low}{\optimist}
-        			\drawplot{UCB1}{mean}{up}{low}{\ucb}
-        			\drawplot{GPUCB}{mean}{up}{low}{\gpucb}
+        			\drawplot{OPTIMIST discrete 20}{ReturnMean_mean}{ReturnMean_up}{ReturnMean_low}{\optdisc}{4}
+        			\drawplot{OPTIMIST2 ($k=2$)}{ReturnMean_mean}{ReturnMean_up}{ReturnMean_low}{\optcontd}{4}
+        			\drawplot{}{}{}{}{}{}
+        			\drawplot{PGPE}{ReturnMean_mean}{ReturnMean_up}{ReturnMean_low}{\pgpe}{1}
+        			\legend{OPTIMIST (20 arms),OPTIMIST2 ($\kappa=2$),,PGPE};
         			
 			\end{groupplot}
+	
     					
 \end{tikzpicture}
 
