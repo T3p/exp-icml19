@@ -438,35 +438,65 @@ Also related is the concept of probabilistically triggered arms in combinatorial
 \textbf{Reinforcement Learning} Although there is a long history of rigorously applying the OFU principle to tabular RL~\citep{kearns2002near,brafman2002r,strehl2009reinforcement,jaksch2010near,lattimore2014near,dann2015sample,dann2017unifying,jin2018q,jungseul2018exploration}, with extensions to continuous states~\citep{ortner2012online,lakshmanan2015improved,bellemare2016unifying}, optimistic approaches to continuous-action MDPs\footnote{Note that, although we discretize the policy parameter space in some occasions, we always deal with continuous action spaces.} remain largely heuristic~\cite{houthooft2016vime,haarnoja2017reinforcement,haarnoja2018soft}. Developing ideas from~\citet{bubeck2010open},~\citet{weinstein2012bandit} apply continuous bandit techniques to open-loop iterative planning, a model-based approach to RL. In the model-free setting,~\citet{sayak2018online} prove $\wt{\mathcal{O}}(\sqrt{T})$ regret for kernelized MDPs, where rewards and transitions are assumed to have low RKHS complexity, leaving some computational problems open. Our proposed algorithms are model-free and do not make assumptions on the MDP, besides boundedness of the reward. Moreover, Algorithm \ref{alg:2} applied to parameter-based policy optimization allows a straightforward and efficient implementation.
 Thompson sampling~\citep[TS,][]{thompson1933likelihood} is a different approach to MABs, not based on optimism, which enjoys the same theoretical guarantees of UCB~\citep{kaufmann2012thompson} with better performance in many applications~\citep{chapelle2011empirical}. TS was applied to value-based RL~\citep[\eg][]{osband2013more}, and its application to policy optimization could also be fruitful.
 
+%\begin{figure*}[t] 
+%\vskip 0.2in
+%  \begin{minipage}[b]{0.24\linewidth}
+%    \centering
+%    %\includegraphics[width=\linewidth]{plots/LQG_mu.pdf}
+%    \includegraphics[width=\linewidth]{plots/lqg_mu/plot.pdf}
+%    \vspace{-0.4cm}
+%    \caption{Cumulative regret in the LQG experiment, comparing \algoname, UCB1 and GPUCB (30 runs, 95\% c.i.)} 
+%    \label{fig:lqg} 
+%  \end{minipage}%%
+%  \hspace{0.3cm}
+%  \begin{minipage}[b]{0.24\linewidth}
+%    \centering
+%    %\includegraphics[width=\linewidth]{plots/MC_mu.pdf}
+%    \includegraphics[width=\linewidth]{plots/mc/plot.pdf}
+%    \vspace{-0.4cm}
+%    \caption{Cumulative average return for the Mountain Car, comparing \algoname, PGPE and PB-POIS (5 runs, 95\% c.i.)} 
+%    \label{fig:mc} 
+%  \end{minipage} %%
+%  \hspace{0.3cm}
+%  \begin{minipage}[b]{0.48\linewidth}
+%    \centering
+%    \includegraphics[width=\linewidth]{plots/heat.pdf}
+%    \vspace{-0.3cm}
+%    \caption{Heatmaps representing the region of the parameter space $\Xi$ explored by \algoname and PGPE in the Mountain Car experiment.} 
+%    \label{fig:hm} 
+%  \end{minipage} %%
+%  \vskip -0.2in
+%\end{figure*}
+
 \begin{figure*}[t] 
 \vskip 0.2in
-  \begin{minipage}[b]{0.24\linewidth}
+  \begin{minipage}[b]{0.32\linewidth}
     \centering
-    %\includegraphics[width=\linewidth]{plots/LQG_mu.pdf}
     \includegraphics[width=\linewidth]{plots/lqg_mu/plot.pdf}
     \vspace{-0.4cm}
-    \caption{Cumulative regret in the LQG experiment, comparing \algoname, UCB1 and GPUCB (30 runs, 95\% c.i.)} 
+    \caption{Cumulative regret in the LQG experiment, comparing \algoname, UCB1 and GPUCB (30 runs, 95\% c.i.).} 
     \label{fig:lqg} 
   \end{minipage}%%
-  \hspace{0.3cm}
-  \begin{minipage}[b]{0.24\linewidth}
+  \hspace{0.2cm}
+  \begin{minipage}[b]{0.32\linewidth}
     \centering
-    %\includegraphics[width=\linewidth]{plots/MC_mu.pdf}
+    \includegraphics[width=\linewidth]{plots/riverswim/plot_main.pdf}
+    \vspace{-0.3cm}
+    \caption{Cumulative average return for the River Swim, comparing \algoname, OPTIMIST2 and PGPE (10 runs, 95\% c.i.).} 
+    \label{fig:rs} 
+   \end{minipage} %%
+    \hspace{0.2cm}
+  \begin{minipage}[b]{0.32\linewidth}
+    \centering
     \includegraphics[width=\linewidth]{plots/mc/plot.pdf}
     \vspace{-0.4cm}
-    \caption{Cumulative average return for the Mountain Car, comparing \algoname, PGPE and PB-POIS (5 runs, 95\% c.i.)} 
+    \caption{Cumulative average return for the Mountain Car, comparing \algoname, PGPE and PB-POIS (5 runs, 95\% c.i.).} 
     \label{fig:mc} 
-  \end{minipage} %%
-  \hspace{0.3cm}
-  \begin{minipage}[b]{0.48\linewidth}
-    \centering
-    \includegraphics[width=\linewidth]{plots/heat.pdf}
-    \vspace{-0.3cm}
-    \caption{Heatmaps representing the region of the parameter space $\Xi$ explored by \algoname and PGPE in the Mountain Car experiment.} 
-    \label{fig:hm} 
   \end{minipage} %%
   \vskip -0.2in
 \end{figure*}
+
+
 %
 %\begin{figure*}[t]
 %\begin{subfigure}
@@ -495,16 +525,17 @@ Thompson sampling~\citep[TS,][]{thompson1933likelihood} is a different approach 
 In this section, we present the results of the numerical simulation of \algoname on RL tasks on both discrete and continuous parameter spaces. We restrict our experiments to the \emph{parameter-based} PS and Gaussian hyperpolicies. This setting is particularly convenient as the \Renyi divergence between Gaussian distributions admits closed form~\cite{gil2013renyi}. On the contrary, in the action-based scenario, we would need to compute the divergences between trajectory distributions, which is intractable. The usual approach consists in estimating the \Renyi divergence from the samples. However, we would lose our theoretical guarantees on the regret. Furthermore, the known estimators for the \Renyi divergence tend empirically to be unstable~\cite{metelli2018policy}. It is worth noting that at each iteration \algoname needs to compute the \Renyi divergence between a candidate hyperpolicy $\nu_{\vxi_t}$ and the mixture of hyperpolicies visited so far $\nu_{\vxi_0}, ..., \nu_{\vxi_{t-1}}$. We prove in Appendix~\ref{app:practical} that this quantity can be upper bounded by the harmonic mean of the divergences between the candidate hyperpolicy $\nu_{\vxi_t}$ and each component of the mixture $\nu_{\vxi_{k}}$ for $k=1,...,t-1$. 
 
 \subsection{Linear Quadratic Gaussian Regulator}
-The Linear Quadratic Gaussian Regulator~\citep[LQG,][]{dorato1995linear} is a benchmark problem for continuous control. We consider the monodimensional case in which the state space is limited to $\mathcal{S}=[-4,4]$, the action space is $\mathcal{A}=[-4,4]$ and the horizon is limited to 20. At each timestep, the agent receives a penalization proportional to the magnitude of the state and the action applied, \ie $R(s,a) = -a s^2 - b  a^2$. We employ a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}( \xi, \sigma^2)$, where $\xi$ is the mean parameter to be learned and $\sigma=0.15$ fixed. The case in which we also learn the standard deviation is reported in Appendix~\ref{apx:additionalExperiments}.
-
-The goal of this experiment is to compare \algoname
+The Linear Quadratic Gaussian Regulator~\citep[LQG,][]{dorato1995linear} is a benchmark problem for continuous control. We consider the monodimensional case in which the state space is limited to $\mathcal{S}=[-4,4]$, the action space is $\mathcal{A}=[-4,4]$ and the horizon is limited to 20. At each timestep, the agent receives a penalization proportional to the magnitude of the state and the action applied, \ie $R(s,a) = -a s^2 - b  a^2$. We employ a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}( \xi, \sigma^2)$, where $\xi$ is the mean parameter to be learned and $\sigma=0.15$ fixed. The case in which we also learn the standard deviation is reported in Appendix~\ref{apx:expLQG}. The goal of this experiment is to compare \algoname
 with classical MAB algorithms, in particular UCB1~\cite{auer2002finite} and GPUCB~\cite{srinivas2010gaussian} when the parameter space $\Xi$ is discrete. For this purpose we consider a uniform discretization of the interval $[-1,1]$ made of 100 arms. All algorithms are run with confidence level $\delta=0.2$.
 In Figure~\ref{fig:lqg}, we show the cumulative regret averaged over 30 runs of \algoname compared with UCB1 and GPUCB. We can see that our algorithm significantly outperforms UCB1. Indeed, \algoname is
 able to exploit the structure of arms, \ie hyperpolicies, by means of the MIS estimation, whereas UCB1 does not make any assumption on arm correlation. On the contrary, GPUCB shows a better performance \wrt to \algoname. We point out that GPUCB requires to specify, at the beginning of learning, the kernel of the Gaussian Process (GP) from which the payoff function is sampled. We employed the default scikit-learn kernel (RBF) which invalidates all theoretical guarantees, as our payoff is not actually sampled from a GP.\footnote{Indeed, GPUCB showed a significantly more exploitative behavior \wrt UCB1 and \algoname in the experiment.}
 
+\subsection{River Swim}
+The River Swim~\cite{strehl2008analysis} is a classical benchmark for exploration, in which the goal of the agent is to swimming against the current of the river to reach the right bank. The interesting feature of this problem is that there is a local optimum that consists in remaining on the left bank. We parametrized the probability $p$ to perform a right action (in every state) as $p = \frac{1}{1+e^{-\zeta}}$, where $\zeta$ is sampled from a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}(\xi, \sigma^2)$ with $\xi \in [-5,5]$ and $\sigma=0.5$. In Figure\ref{fig:rs}, we can see that PGPE, starting with with $\xi = 0$ (so $p$ is sampled around $0.5$), converges to the local optimum as it lacks the exploration of the high values of $p$. Instead, OPTIMIST both with a fixed discretization of the arm set (20 arms) and an adaptive discretization (OPTIMIST2 with $\kappa=2$) manages to reach the global optimum and converges to the policy that allows crossing the river. Additional details are reported in Appendix~\ref{apx:expRS}.
+
 \subsection{Mountain Car}
 The second experiment, shown in Figure~\ref{fig:mc}, illustrates the behavior of \algoname  
-when the parameters of the hyperpolicy belong to a compact (continuous) space, on the Mountain Car task ~\citep{brockman2016openai}. We use a Gaussian hyperpolicy with a two-dimensional learnable mean within a box $[-1,-1]\times[0,20]$ and a fixed covariance $\mathrm{diag}(0.15,3)$. We compare OPTIMIST2 with $k=3$ and $\delta=0.2$ against parameter based policy optimization algorithms PGPE~\citep{sehnke2008policy} and PB-POIS~\cite{metelli2018policy}. The best step size for PGPE was searched in the set $[3, 2, 1, 0.1, 0.01, 0.001]$. For PBPOIS, we used the suggested hyperparameters. We can notice that OPTIMIST2 is able to learn a good policy in a very short time thanks to its better exploration capabilities (Figure~\ref{fig:hm}). However, the policy gradient methods outperform it on the long run.
+when the parameters of the hyperpolicy belong to a compact (continuous) space, on the Mountain Car task~\citep{brockman2016openai}. We use a Gaussian hyperpolicy with a two-dimensional learnable mean within a box $[-1,1]\times[0,20]$ and a fixed covariance $\mathrm{diag}(0.15,\,3)$. We compare OPTIMIST2 with $k=3$ against PGPE~\citep{sehnke2008policy} and PB-POIS~\cite{metelli2018policy}. The best step size for PGPE was searched in the set $[3, 2, 1, 0.1, 0.01, 0.001]$. For PBPOIS, we used the suggested hyperparameters. We can notice that OPTIMIST2 is able to learn a good policy in a very short time thanks to its better exploration capabilities. However, the policy gradient methods outperform it on the long run. Further details are reported in Appendix~\ref{apx:expMC}.
 
 \section{Conclusion}\label{sec:end}
 We have studied the problem of exploration versus exploitation in policy optimization using MAB techniques. We have proposed OPTIMIST, an optimism-based approach for both the action-based and the parameter-based exploration frameworks, and for both discrete and continuous parameter spaces. We have proved sublinear regret bounds for OPTIMIST under assumptions that are easily met in practice. The empirica evaluation on continuous control tasks showed that the proposed algorithms are effectively able to leverage the structure of the PO problem, although the performances are not optimal when compared to methods with stronger assumptions or without guarantees, at least on these simple problems.
@@ -933,6 +964,7 @@ We can now minimize the bound over the $\phi_k$, subject to $\sum_{k=1}^K \phi_k
 In this section, we report some additional experiments we did not include in the main paper.
 
 \subsection{Linear Quadratic Gaussian Regulator}
+\label{apx:expLQG}
 In this experiment, we learn both the mean and the variance parameter of the Gaussian hyperpolicy
 for the LQG: $\nu_{\vxi} = \mathcal{N}(\xi_1, \exp(2\xi_2))$, where $\vxi=(\xi_1,\xi_2)^T$ and we modeled with $\xi_2$ the log-standard deviation. In Figure~\ref{fig:lqgVar}, we show the cumulative regret averaged over 5 runs comparing \algoname with UCB1 and GPUCB. We see a
 trend similar to the case in which we learn only the mean parameter. While \algoname is able to exploit
@@ -941,11 +973,39 @@ the structure of the arms induced by the fact that hyperpolicyes share informati
 \vskip 0.2in
     \centering
     %\includegraphics[width=0.3\linewidth]{plots/LQG_mu_sigma.pdf}
-    \includegraphics[width=0.3\linewidth]{plots/lqg_mu_sigma/plot.pdf}
+    \includegraphics[width=0.4\linewidth]{plots/lqg_mu_sigma/plot.pdf}
     \caption{Cumulative regret in the LQG experiment, comparing \algoname, UCB1 and GPUCB  when learning both the mean and the log-standard deviation parameters. (5 runs, 95\% c.i.)} 
     \label{fig:lqgVar} 
   \vskip -0.2in
 \end{figure*}
+
+\subsection{River Swim}
+\label{apx:expRS}
+In Figure~\ref{fig:rs_exp}, we report more details and experiments with additional versions of OPTIMIST and OPTIMIST2. We can see that all versions of OPTIMIST perform almost the same and they are all able to reach the global optimum consisting in crossing the river. This is also visible as the probability of performing action right tends to approach 1.
+
+\begin{figure*}[h!] 
+\vskip 0.2in
+    \centering
+    %\includegraphics[width=0.3\linewidth]{plots/LQG_mu_sigma.pdf}
+    \includegraphics[width=0.8\linewidth]{plots/riverswim/plot.pdf}
+    \caption{Cumulative regret, Per-step regret, probability of right action and size of the discretization grid for the River Swim, comparing \algoname with two fixed discretizations (20 and 100 arms), OPTIMIST2 with three values of $\kappa$ and PGPE (10 runs, 95\% c.i.).} 
+    \label{fig:rs_exp} 
+  \vskip -0.2in
+\end{figure*}
+
+\subsection{Mountain Car}
+In Figure~\ref{fig:hm}, we show the empirical probability density function induced by one run of OPTIMIST2 and PGPE on the parameter space. We can clearly see that OPTIMIST2 explores a wider region of the parameter space, while PGPE tends to limit the search in a more restricted region. This allows OPTIMIST to reach a good performance sooner but slows down the exploitation phase, which is quicker for PGPE.
+
+\label{apx:expMC}
+\begin{figure*}[h!] 
+\vskip 0.2in
+    \centering
+    \includegraphics[width=0.6\linewidth]{plots/heat.pdf}
+    \caption{Heatmaps representing the region of the parameter space $\Xi$ explored by \algoname and PGPE in the Mountain Car experiment.} 
+    \label{fig:hm} 
+  \vskip -0.2in
+\end{figure*}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
