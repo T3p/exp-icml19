@@ -3,8 +3,9 @@
 % Recommended, but optional, packages for figures and better typesetting:
 \usepackage{microtype}
 \usepackage{graphicx}
-\usepackage{subfigure}
+\usepackage{subcaption}
 \usepackage{booktabs} % for professional tables
+
 
 % hyperref makes hyperlinks in the resulting PDF.
 % If your build breaks (sometimes temporarily if a hyperlink spans a page)
@@ -371,8 +372,8 @@ This assumption is easily satisfied for policy optimization, as shown in the fol
 	\end{align}
 	and, in the parameter-based paradigm, by:
 	\begin{align}\label{eq:lp2}
-		\sup_{\vxi\in\Xi}\Exp_{\vtheta\sim\rho_{\vxi}}
-		\left[\left|\nabla_{\vxi}\log\rho_{\vxi}(\vtheta)\right|\right] \leq \vu_2,
+		\sup_{\vxi\in\Xi}\Exp_{\vtheta\sim\nu_{\vxi}}
+		\left[\left|\nabla_{\vxi}\log\nu_{\vxi}(\vtheta)\right|\right] \leq \vu_2,
 	\end{align}
 	where $\vu_1$ and $\vu_2$ are $d$-dimensional vectors and the inequalities are component-wise.
 \end{restatable}
@@ -529,24 +530,23 @@ Thompson sampling~\citep[TS,][]{thompson1933likelihood} is a different approach 
 %\end{figure*}
  
 \section{Numerical Simulations}\label{sec:exp}
-In this section, we present the results of the numerical simulation of \algoname on RL tasks with both discrete and continuous parameter spaces. We restrict our experiments to the \emph{parameter-based} PS and Gaussian hyperpolicies, which are, by far, the most widely used hyperpolicies. This setting is particularly convenient as the \Renyi divergence between Gaussian distributions admits closed form~\cite{gil2013renyi}. On the contrary, in the action-based scenario, we would need to compute the divergences between trajectory distributions, which is intractable. The usual approach consists in estimating the \Renyi divergence from the samples. However, we would lose our theoretical guarantees on the regret. Furthermore, the known estimators for the \Renyi divergence tend empirically to be unstable~\cite{metelli2018policy}. It is worth noting that at each iteration \algoname needs to compute the \Renyi divergence between a candidate hyperpolicy $\nu_{\vxi_t}$ and the mixture of hyperpolicies visited so far $\nu_{\vxi_0}, ..., \nu_{\vxi_{t-1}}$. We prove in Appendix~\ref{app:practical} that this quantity can be upper bounded by the harmonic mean of the divergences between the candidate hyperpolicy $\nu_{\vxi_t}$ and each component of the mixture $\nu_{\vxi_{k}}$ for $k=1,...,t-1$. 
+In this section, we present the results of the numerical simulation of \algoname on RL tasks with both discrete and continuous parameter spaces. We restrict our experiments to the \emph{parameter-based} PS and Gaussian hyperpolicies, which are, by far, the most widely used hyperpolicies. This setting is particularly convenient as the \Renyi divergence between Gaussian distributions admits closed form~\cite{gil2013renyi}. On the contrary, in the action-based scenario, we would need to compute the divergences between trajectory distributions, which is intractable. The usual approach consists in estimating the \Renyi divergence from the samples. However, we would lose our theoretical guarantees on the regret. Furthermore, the known estimators for the \Renyi divergence tend to be unstable~\cite{metelli2018policy} empirically. It is worth noting that at each iteration \algoname needs to compute the \Renyi divergence between a candidate hyperpolicy $\nu_{\vxi_t}$ and the mixture of hyperpolicies visited so far $\nu_{\vxi_0}, ..., \nu_{\vxi_{t-1}}$. We prove in Appendix~\ref{app:practical} that this quantity can be upper bounded by the harmonic mean of the divergences between the candidate hyperpolicy $\nu_{\vxi_t}$ and each component of the mixture $\nu_{\vxi_{k}}$ for $k=1,...,t-1$. 
 
 \subsection{Linear Quadratic Gaussian Regulator}
-The Linear Quadratic Gaussian Regulator~\citep[LQG,][]{dorato1995linear} is a benchmark problem for continuous control. We consider the monodimensional case in which the state space is limited to $\mathcal{S}=[-4,4]$, the action space is $\mathcal{A}=[-4,4]$ and the horizon is limited to 20. At each timestep, the agent receives a penalization proportional to the magnitude of the state and the action applied, \ie $R(s,a) = -a s^2 - b  a^2$. We employ a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}( \xi, \sigma^2)$ to select the gain of a linear policy in the state, where $\xi$ is the mean parameter to be learned and $\sigma=0.15$ fixed. The case in which we also learn the standard deviation is reported in Appendix~\ref{apx:expLQG}. The goal of this experiment is to compare \algoname
-with classical MAB algorithms, in particular UCB1~\cite{auer2002finite} and GPUCB~\cite{srinivas2010gaussian} when the parameter space $\Xi$ is discrete. For this purpose we consider a uniform discretization of the interval $[-1,1]$ made of 100 arms. All algorithms are run with confidence level $\delta=0.2$.
+The Linear Quadratic Gaussian Regulator~\citep[LQG,][]{dorato1995linear} is a benchmark problem for continuous control. We consider the monodimensional case in which the state space is limited to $\mathcal{S}=[-4,4]$, the action space is $\mathcal{A}=[-4,4]$ and the horizon is limited to 20. At each timestep, the agent receives a penalization proportional to the magnitude of the state and the action applied, \ie $R(s,a) = -a s^2 - b  a^2$. We employ a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}( \xi, \sigma^2)$ to select the gain of a linear policy in the state, where $\xi$ is the mean parameter to be learned and $\sigma=0.15$ fixed. The case in which we also learn the standard deviation is reported in Appendix~\ref{apx:expLQG}. The goal of this experiment is to compare \algoname with classical MAB algorithms, in particular UCB1~\cite{auer2002finite} and GPUCB~\cite{srinivas2010gaussian} when the parameter space $\Xi$ is discrete, as well as to verify empirically the sublinearity of its regret. For this purpose we consider a uniform discretization of the interval $[-1,1]$ made of 100 arms. All algorithms are run with confidence level $\delta=0.2$.
 In Figure~\ref{fig:lqg}, we show the cumulative regret averaged over 30 runs of \algoname compared with UCB1 and GPUCB. We can see that our algorithm significantly outperforms UCB1. Indeed, \algoname is
-able to exploit the structure of arms, \ie hyperpolicies, by means of the MIS estimation, whereas UCB1 does not make any assumption on arm correlation. On the contrary, GPUCB shows a better performance \wrt to \algoname. We point out that GPUCB requires to specify, at the beginning of learning, the kernel of the Gaussian Process (GP) from which the payoff function is sampled. We employed the default scikit-learn kernel (RBF) which invalidates the theoretical guarantees of GPUCB, as our payoff is not actually sampled from a GP.\footnote{Indeed, GPUCB showed a significantly more exploitative behavior \wrt UCB1 and \algoname in the experiment.}
+able to exploit the structure of arms, \ie hyperpolicies, by means of the MIS estimation, whereas UCB1 does not make any assumption on arm correlation. On the contrary, GPUCB shows a better performance \wrt to \algoname. We point out that GPUCB requires to specify, at the beginning of learning, the kernel of the Gaussian Process (GP) from which the payoff function is meant to be sampled. We employed the default scikit-learn kernel (RBF). However, our payoff is not actually sampled from a GP. This fact invalidates the theoretical guarantees of GPUCB and it might explain why GPUCB showed a significantly more exploitative behavior \wrt UCB1 and \algoname in the experiment, thus achieving lower in the LQG taks.
 
 \subsection{River Swim}
-The River Swim~\cite{strehl2008analysis} is a classical benchmark for exploration in RL, in which the goal of the agent is to swim against the current of the river to reach the right bank. The interesting feature of this problem is that there is a local optimum that consists in remaining on the left bank. We parametrized the probability $p$ to perform a right action (in every state) as $p = \frac{1}{1+e^{-\zeta}}$, where $\zeta$ is sampled from a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}(\xi, \sigma^2)$ with $\xi \in [-5,5]$ and $\sigma=0.5$ fixed. In Figure~\ref{fig:rs}, we can see that PGPE~\citep{sehnke2008policy}, a classical parameter-based algorithm, starting with with $\xi = 0$ (so $p$ is sampled around $0.5$), converges to the local optimum as it lacks the exploration of the high values of $p$. Instead, OPTIMIST both with a fixed discretization of the arm set (20 arms) and an adaptive discretization (OPTIMIST2 with $\kappa=2$) manages to reach the global optimum and converges to the policy that allows crossing the river. Additional details are reported in Appendix~\ref{apx:expRS}.
+The River Swim~\cite{strehl2008analysis} is a classical benchmark for exploration in RL, in which the goal of the agent is to swim against the current of the river to reach the right bank. The interesting feature of this problem is that there is a local optimum that consists in remaining on the left bank. Hence, finding the global optimum requires a certain degree of exploration. We parametrized the probability $p$ to perform a right action (in every state) as $p = \frac{1}{1+e^{-\zeta}}$, where $\zeta$ is sampled from a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}(\xi, \sigma^2)$ with $\xi \in [-5,5]$ and $\sigma=0.5$ fixed. In Figure~\ref{fig:rs}, we can see that PGPE~\citep{sehnke2008policy}, a classical parameter-based algorithm, starting with with $\xi = 0$ (so $p$ is sampled around $0.5$), converges to the local optimum as it lacks the exploration of the high values of $p$. Instead, OPTIMIST both with a fixed discretization of the arm set (20 arms) and an adaptive discretization (OPTIMIST2 with $\kappa=2$) manages to reach the global optimum and converges to the policy that allows crossing the river. Additional details are reported in Appendix~\ref{apx:expRS}.
 
 \subsection{Mountain Car}
 The third experiment, shown in Figure~\ref{fig:mc}, illustrates the behavior of \algoname  
-when the parameters of the hyperpolicy belong to a compact (continuous) space, on the Mountain Car task~\citep{brockman2016openai}. We use a Gaussian hyperpolicy with a two-dimensional learnable mean within a box $[-1,1]\times[0,20]$ and a fixed covariance $\mathrm{diag}(0.15,\,3)$. We compare OPTIMIST2 with $\kappa=3$ against PGPE~\citep{sehnke2008policy} and PB-POIS~\cite{metelli2018policy}. The best step size for PGPE was searched in the set $[3, 2, 1, 0.1, 0.01, 0.001]$. For PB-POIS, we used the suggested hyperparameters. We can notice that OPTIMIST2 is able to learn a good policy in a very short time thanks to its better exploration capabilities. However, the policy gradient methods outperform it on the long run. Further details are reported in Appendix~\ref{apx:expMC}.
+when the parameters of the hyperpolicy belong to a compact (continuous) space, on the Mountain Car task~\citep{brockman2016openai}. We use a Gaussian hyperpolicy with a two-dimensional learnable mean within a box $[-1,1]\times[0,20]$ and a fixed covariance $\mathrm{diag}(0.15,\,3)^2$. We compare OPTIMIST2 with $\kappa=3$ against PGPE~\citep{sehnke2008policy} and PB-POIS~\cite{metelli2018policy}. The best step size for PGPE was searched in the set $[3, 2, 1, 0.1, 0.01, 0.001]$. For PB-POIS, we used the suggested hyperparameters. We can notice that OPTIMIST2 is able to learn a good policy in a very short time thanks to its better exploration capabilities. However, the policy gradient methods outperform it on the long run because the Mountain Car task does not require a thorough exploration as the River Swim does. Further details are reported in Appendix~\ref{apx:expMC}.
 
 \section{Conclusion}\label{sec:end}
 We have studied the problem of exploration versus exploitation in policy optimization using MAB techniques. We have proposed OPTIMIST, an optimism-based approach for both the action-based and the parameter-based exploration frameworks, and for both discrete and continuous parameter spaces. We have proved sublinear regret bounds for OPTIMIST under assumptions that are easily met in practice. The empirical evaluation on continuous control tasks showed that the proposed algorithms are effectively able to leverage the structure of the PO problem, although the performances are not always optimal when compared to methods with stronger assumptions or without guarantees. However, the real benefits of our approach are visible when the task poses significant exploration challenges (like the River Swim).
-Future work should focus on finding more efficient (but still effective) ways to perform optimization in the infinite-arm setting, and on applying OPTIMIST also to the action-based framework, which requires additional caveats in computing the exploration bonus.
+Future work should focus on finding more efficient (but still effective) ways to perform optimization in the infinite-arm setting, and on applying OPTIMIST to the action-based framework too, which requires additional caveats in computing the exploration bonus.
 
 % Acknowledgements should only appear in the accepted version.
 %\section*{Acknowledgements}
@@ -784,16 +784,16 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 	\end{align}
 	where inequalities are component-wise and (\ref{pp:14}) is by the substitution $x\gets \frac{a-\vtheta^T\vphi(s)}{\sigma}$. Even when $\sigma$ must be learned, proper parametrization (\eg $\sigma\propto\exp\{\vtheta\}$), together with the compactness of $\Theta$, allows to satisfy assumption (\ref{eq:lp1}).
 	
-	To show Lipschitz continuity for the parameter-based paradigm, it is enough to bound $\norm[\infty]{\nabla_{\vxi}\Exp_{\vtheta\sim\rho_{\vxi}}[J(\vtheta)]}$ under (\ref{eq:lp2}). For every $\vxi\in\Xi$:
+	To show Lipschitz continuity for the parameter-based paradigm, it is enough to bound $\norm[\infty]{\nabla_{\vxi}\Exp_{\vtheta\sim\nu_{\vxi}}[J(\vtheta)]}$ under (\ref{eq:lp2}). For every $\vxi\in\Xi$:
 	\begin{align}
-		\left|\nabla_{\vxi}\Exp_{\vtheta\sim\rho_{\vxi}}[J(\vtheta)]\right| &=
-		\left|\Exp_{\vtheta\sim\rho_{\vxi}}[\nabla_{\vxi}\log\rho_{\vxi}(\vtheta)J(\vtheta)]\right| \nonumber\\
-		&\leq \frac{\Rmax}{(1-\gamma)}\Exp_{\vtheta\sim\rho_{\vxi}}\left[\left|\nabla_{\vxi}\log\rho_{\vxi}(\vtheta)\right|\right] \label{pp:12} \\
+		\left|\nabla_{\vxi}\Exp_{\vtheta\sim\nu_{\vxi}}[J(\vtheta)]\right| &=
+		\left|\Exp_{\vtheta\sim\nu_{\vxi}}[\nabla_{\vxi}\log\nu_{\vxi}(\vtheta)J(\vtheta)]\right| \nonumber\\
+		&\leq \frac{\Rmax}{(1-\gamma)}\Exp_{\vtheta\sim\nu_{\vxi}}\left[\left|\nabla_{\vxi}\log\nu_{\vxi}(\vtheta)\right|\right] \label{pp:12} \\
 		&\leq \frac{\vu_2\Rmax}{(1-\gamma)} \label{pp:13},
 	\end{align}
 	where the inequalities are component-wise, (\ref{pp:12}) is from the trivial fact $J(\vtheta)\leq\frac{\Rmax}{1-\gamma}$, and (\ref{pp:13}) is from assumption (\ref{eq:lp2}).
 	It follows that $L=\frac{\norm[\infty]{\vu_2\Rmax}}{(1-\gamma)}$ is a valid Lipschitz constant under the $l_1$ norm.
-	 A Gaussian hyperpolicy $\rho_{\vxi}(\vtheta) = \mathcal{N}(\vxi,\mathrm{diag}(\boldsymbol{\sigma}))$ satisfies assumption (\ref{eq:lp2}) with $\vu_2 = \frac{2}{\sqrt{2\pi}\boldsymbol{\sigma}}$. The proof of this fact is analogous to that of (\ref{aux:5}). Even when $\boldsymbol{\sigma}$ must be learned, proper parametrization (\eg $\boldsymbol{\sigma}\propto\exp\{\vxi\}$), together with the compactness of $\Xi$, allows to satisfy assumption (\ref{eq:lp2}).
+	 A Gaussian hyperpolicy $\nu_{\vxi}(\vtheta) = \mathcal{N}(\vxi,\mathrm{diag}(\boldsymbol{\sigma}))$ satisfies assumption (\ref{eq:lp2}) with $\vu_2 = \frac{2}{\sqrt{2\pi}\boldsymbol{\sigma}}$. The proof of this fact is analogous to that of (\ref{aux:5}). Even when $\boldsymbol{\sigma}$ must be learned, proper parametrization (\eg $\boldsymbol{\sigma}\propto\exp\{\vxi\}$), together with the compactness of $\Xi$, allows to satisfy assumption (\ref{eq:lp2}).
 \end{proof}
 
 \regretcompact*
@@ -997,16 +997,21 @@ In Figure~\ref{fig:rs_exp}, we report more details and additional versions of OP
 \subsection{Mountain Car}
 In Figure~\ref{fig:hm}, we show the empirical probability density function induced by one run of OPTIMIST2 and PGPE on the parameter space. We can clearly see that OPTIMIST2 explores a wider region of the parameter space, while PGPE tends to limit the search in a more restricted region. This allows OPTIMIST to reach a good performance sooner but slows down the exploitation phase, which is quicker for PGPE.
 
-\label{apx:expMC}
-\begin{figure*}[h!] 
-\vskip 0.2in
-    \centering
-    \includegraphics[width=0.6\linewidth]{plots/heat.pdf}
-    \caption{Heatmaps representing the region of the parameter space $\Xi$ explored by \algoname and PGPE in the Mountain Car experiment.} 
-    \label{fig:hm} 
-  \vskip -0.2in
-\end{figure*}
 
+\label{apx:expMC}
+\begin{figure*}[h!]
+	\centering
+	\begin{subfigure}[b]{0.4\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{plots/heat_OPTIMIST.pdf}
+	\end{subfigure}%
+	\begin{subfigure}[b]{0.4\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{plots/heat_PGPE.pdf}
+	\end{subfigure}
+	\caption{Heatmaps representing the region of the parameter space $\Xi$ explored by \algoname and PGPE in the Mountain Car experiment.} 
+    \label{fig:hm}
+\end{figure*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
