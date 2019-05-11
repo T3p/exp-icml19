@@ -16,7 +16,7 @@
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 
 % Use the following line for the initial blind version submitted for review:
-\usepackage{icml2019}
+\usepackage[accepted]{icml2019}
 
 % If accepted, instead use the following line for the camera-ready submission:
 %\usepackage[accepted]{icml2019}
@@ -132,14 +132,14 @@
 \begin{abstract}
 %\lipsum[1]
 Policy Search (PS) is an effective approach to Reinforcement Learning (RL) for solving
-control tasks with continuous state-action spaces. In this paper, we address the exploration-exploitation trade-off in PS by proposing an approach based on Optimism in Face of Uncertainty. We cast the PS problem as a suitable Multi Armed Bandit (MAB) problem, defined over the policy parameter space, and we propose a class of algorithms that effectively exploit the problem structure, by leveraging Multiple Importance Sampling to perform an off-policy estimation of the expected return.
+control tasks with continuous state-action spaces. In this paper, we address the exploration-exploitation trade-off in PS by proposing an approach based on Optimism in the Face of Uncertainty. We cast the PS problem as a suitable Multi Armed Bandit (MAB) problem, defined over the policy parameter space, and we propose a class of algorithms that effectively exploit the problem structure, by leveraging Multiple Importance Sampling to perform an off-policy estimation of the expected return.
 We show that the regret of the proposed approach is bounded by $\widetilde{\mathcal{O}}(\sqrt{T})$ for both discrete and continuous parameter spaces. Finally, we evaluate our algorithms on tasks of varying difficulty, comparing them with existing MAB and RL algorithms.
 \end{abstract} 
 
 \section{Introduction}
 Reinforcement Learning~\citep[RL,][]{sutton2018reinforcement} allows an agent to learn a control task by repeated interaction with the environment in the presence of a reward signal. One of the current challenges of RL is to master tasks, such as robotic locomotion, in which states and actions are naturally modeled as real numbers. Policy optimization~\citep[PO,][]{deisenroth2013survey} is a family of RL algorithms that are particularly suited to this class of problems. In PO, the behavior of the agent, or \textit{policy}, is explicitly modeled, typically as a parametric mapping from states to actions. Learning corresponds to the optimization of a performance measure \wrt the agent's parameters. 
 
-The literature on PO focused mainly on the problem of \textit{finding} the optimal policy with the minimum amount of interaction~\cite{sutton2000policy,sehnke2008policy,silver2014deterministic,schulman2015trust,mnih2016asynchronous,espeholt2018impala}. This is well motivated, as interacting with some environments can be very expensive. However, in many cases, we are also interested in the performance of the agent \textit{during} the learning process. We call this \textit{online policy optimization}. This goal is particularly relevant in applications where an agent must be deployed in the real world to perfect its behavior (\eg robot learning) or to learn at all (\eg recommender systems). In such cases, the \textit{exploration-exploitation} dilemma arises naturally, as the agent must continually find the right trade-off between complying with its current expertise or widening it by trial and error. Equivalently, it must minimize its total \textit{regret} \wrt the optimal behavior. This problem has been thoroughly studied in the field of Multi Armed Bandits~\citep[MAB,][]{auer2002finite,lattimore2019bandit}. In this simple framework, an agent has to repeatedly select an action, called an \textit{arm} in this context, in order to maximize an unknown, stochastic reward. This can be seen as RL without states. However, we can also see PO as a MAB-like problem where the set of available actions is the parameter space of the agent. Hopefully, this allows to apply some of the theoretical and algorithmic ideas developed in the MAB literature to the problem of exploration in continuous-action RL, whose solutions proposed so far have been largely heuristic~\citep{houthooft2016vime,haarnoja2017reinforcement,haarnoja2018soft}. In particular, the Optimism in the Face of Uncertainty (OFU) principle at the heart of the Upper Confidence Bound~\citep[UCB,][]{lai1985asymptotically,agrawal1995sample,auer2002using} family of MAB algorithms lends itself to relatively straightforward application to PO. The core idea is simply to overestimate the expected reward of arms, which, in our scenario, are the policies the agent can play. The overestimation is larger for those arms the agent knows less about.
+The literature on PO focused mainly on the problem of \textit{finding} the optimal policy with the minimum amount of interaction~\cite{sutton2000policy,sehnke2008policy,silver2014deterministic,schulman2015trust,mnih2016asynchronous,espeholt2018impala}. This is well motivated, as interacting with some environments can be very expensive. However, in many cases, we are also interested in the performance of the agent \textit{during} the learning process. We call this \textit{online policy optimization}. This goal is particularly relevant in applications where an agent must be deployed in the real world to perfect its behavior (\eg robot learning) or to learn at all (\eg recommender systems). In such cases, the \textit{exploration-exploitation} dilemma arises naturally, as the agent must continually find the right trade-off between complying with its current expertise or widening it by trial and error. Equivalently, it must minimize its total \textit{regret} \wrt the optimal behavior. This problem has been thoroughly studied in the field of Multi Armed Bandits~\citep[MAB,][]{auer2002finite,lattimore2019bandit}. In this simple framework, an agent has to repeatedly select an action, called an \textit{arm} in this context, in order to maximize an unknown, stochastic reward. This can be seen as RL without states. However, we can also see PO as a MAB-like problem where the set of available actions is the parameter space of the agent. Hopefully, this allows to apply some of the theoretical and algorithmic ideas developed in the MAB literature to the problem of exploration in continuous-action RL, whose solutions proposed so far have been largely heuristic~\citep{houthooft2016vime,haarnoja2017reinforcement,haarnoja2018soft}. In particular, the Optimism in the Face of Uncertainty (OFU) principle, at the heart of the Upper Confidence Bound~\citep[UCB,][]{lai1985asymptotically,agrawal1995sample,auer2002using} family of MAB algorithms, lends itself to relatively straightforward application to PO. The core idea is simply to overestimate the expected reward of arms, which, in our scenario, are the policies the agent can play. The overestimation is larger for those arms the agent knows less about.
 
 To apply the OFU principle to policy optimization, we need to exploit some structure in the way arms (policy parameters) concur to generate rewards. This is both necessary, as the parameter space is typically continuous, and desirable, as there exists an evident correlation between arms that we can hope to exploit (different policies can lead to similar performances). Both features are absent in the classic MAB formulation, but have been studied before~\citep[\eg][see Section \ref{sec:related} for a brief overview of the related literature, including applications to RL]{pandey2007multi,kleinberg2005nearly}.
 
@@ -151,7 +151,9 @@ We start by providing the essential background in Section~\ref{sec:pre}. In Sect
 \section{Preliminaries}\label{sec:pre}
 In this section, we provide an essential background on policy optimization and multiple importance sampling.
 \subsection{Policy optimization}
-In Policy Optimization~\citep{deisenroth2013survey} we look for the policy that maximizes the agent's performance on a given RL task. The task is modeled as a discrete-time continuous Markov Decision Process~\citep[MDP,][]{puterman2014markov} $\Task = \langle\Sspace,\Aspace,\Tran,\Rew,\gamma,\init\rangle$, where $\Sspace\in\Reals^{d_{\Sspace}}$ is the state space; $\Aspace\in\Reals^{d_{\Aspace}}$ is the action space; $\Tran:\Sspace\times\Aspace\to\Delta(\Sspace)$ is a Markovian transition kernel, such that, for each time $h$, the next state is drawn as $s_{h+1}\sim\Tran(\cdot|s_h,a_h)$ that depends only on the current state and action; $\Rew:\Sspace\times\Aspace\to[-\Rmax,\Rmax]$ is a bounded reward signal, such that the next reward $r_{h+1} = \Rew(s_h,a_h)$ is a function of the current state and action, and $\Rmax>0$ is the maximum reward; $\gamma\in(0,1]$ is a discount factor; $\init\in\Delta(\Sspace)$ is the initial state distribution, such that the initial state is drawn as $s_0\sim\mu$. The agent's behavior is modeled as a parametric policy $\pi_{\vtheta}:\Sspace\to\Delta(\Aspace)$, such that the current action is drawn as $a_h\sim\pi_{\vtheta}(\cdot|s_h)$, depending on the current state, where $\vtheta\in\Theta\subseteq\Reals^m$ are the policy parameters. Deterministic policies represent a special case where $\pi_{\vtheta}$ is a Dirac delta function. With abuse of notation, we write $a_h=\pi_{\vtheta}(s_h)$ in this case. In practice, we consider finite trajectories of length $H$, the task's horizon.
+%$\Aspace\in\Reals^{d_{\Aspace}}$
+%$\Sspace\in\Reals^{d_{\Sspace}}$
+In Policy Optimization~\citep{deisenroth2013survey} we look for the policy that maximizes the agent's performance on a given RL task. The task is modeled as a discrete-time Markov Decision Process~\citep[MDP,][]{puterman2014markov} $\Task = \langle\Sspace,\Aspace,\Tran,\Rew,\gamma,\init\rangle$, where $\Sspace$ is the state space; $\Aspace$ is the action space; $\Tran:\Sspace\times\Aspace\to\Delta(\Sspace)$ is a Markovian transition kernel, such that, for each time $h$, the next state is drawn as $s_{h+1}\sim\Tran(\cdot|s_h,a_h)$ that depends only on the current state and action; $\Rew:\Sspace\times\Aspace\to[-\Rmax,\Rmax]$ is a bounded reward signal, such that the next reward $r_{h+1} = \Rew(s_h,a_h)$ is a function of the current state and action, and $\Rmax<\infty$ is the maximum reward; $\gamma\in(0,1]$ is a discount factor; $\init\in\Delta(\Sspace)$ is the initial state distribution, such that the initial state is drawn as $s_0\sim\mu$. The agent's behavior is modeled as a parametric policy $\pi_{\vtheta}:\Sspace\to\Delta(\Aspace)$, such that the current action is drawn as $a_h\sim\pi_{\vtheta}(\cdot|s_h)$, depending on the current state, where $\vtheta\in\Theta\subseteq\Reals^m$ are the policy parameters. Deterministic policies represent a special case where $\pi_{\vtheta}$ is a Dirac delta function. With little abuse of notation, we write $a_h=\pi_{\vtheta}(s_h)$ in this case. In practice, we consider finite trajectories of length $H$, the task's horizon.
 A trajectory is a sequence of states and actions $\tau=[s_0,a_0,s_1,a_1,\dots,s_{H-1},a_{H-1}]$. Every policy $\pi_{\vtheta}$ induces a distribution over trajectories, whose density is denoted as $p_{\vtheta}$. Our basic measure of performance is the sum of discounted rewards over the trajectory:
 \begin{align}\label{eq:Rtau}
 	\Rew(\tau) = \sum_{h=0}^{H-1}\gamma^hr_{h+1}.
@@ -164,7 +166,7 @@ In the \textit{action-based} policy optimization paradigm~\citep{peters2008reinf
 \end{align}
 where $\pi_{\vtheta_t}$ is the policy used for episode $t$.
 In the action-based paradigm, stochastic policies are typically employed in order to ensure exploration, although deterministic policies have also been used with the addition of exogenous noise~\citep{silver2014deterministic}.
-Instead, in the \textit{parameter-based} policy optimization paradigm~\citep{sehnke2008policy}, we define a distribution over policy parameters, $\nu_{\vxi}\in\Delta(\Theta)$, called \textit{hyperpolicy}, where $\vxi\in\Xi\subseteq\Reals^d$ are the hyperpolicy parameters, or \textit{hyperparameters}. For each episode $t$, policy parameters are drawn as $\vtheta_t\sim\nu_{\vxi_t}$ and the whole trajectory is executed with $\pi_{\vtheta_t}$. In this case, the optimization problem becomes:
+Instead, in the \textit{parameter-based} policy optimization paradigm~\citep{sehnke2008policy}, we define a distribution over policy parameters, $\nu_{\vxi}\in\Delta(\Theta)$, called \textit{hyperpolicy}, where $\vxi\in\Xi\subseteq\Reals^d$ are the hyperpolicy parameters, or \textit{hyperparameters}. For each episode $t$, the policy parameters are drawn as $\vtheta_t\sim\nu_{\vxi_t}$ and the whole trajectory is executed with $\pi_{\vtheta_t}$. In this case, the optimization problem becomes:
 \begin{align}\label{eq:Jx}
 	\max_{\vxi_0,\dots,\vxi_T\in\Xi} \sum_{t=0}^T\Exp_{\vtheta_t\sim\nu_{\vxi_t}}\left[J(\vtheta_t)\right] = \max_{\vxi_0,\dots,\vxi_T\in\Xi} \sum_{t=0}^T J(\vxi_t).
 \end{align}
@@ -176,7 +178,7 @@ Importance sampling~\citep{cochran2007sampling,mcbook} is a technique that allow
 Let $P$ and $Q$ be probability measures on a measurable space $(\mathcal{Z}, \mathcal{F})$, such that $P\ll Q$ (\ie $P$ is absolutely continuous \wrt $Q$). The importance weight $w_{P/Q}$ is the Radon-Nikodym derivative of $P$ \wrt $Q$, \ie~$w_{P/Q} \equiv \frac{\de P}{\de Q}$. Let $p$ and $q$ be the densities of $P$ and $Q$, respectively, \wrt a reference measure. From the chain rule, $w_{P/Q} = \frac{p}{q}$. In the continuous case, $p$ and $q$ are probability density functions (pdf's) of absolutely continuous random variables having laws $P$ and $Q$, respectively, and $w_{P/Q}$ is a likelihood ratio. 
 Given a bounded function $f:\mathcal{Z}\to\Reals$, and a set of \iid outcomes $z_1,\dots,z_N$ sampled from $Q$, the importance sampling estimator of $\mu\coloneqq\Exp_{z\sim P}\left[f(z)\right]$ is:
 \begin{align}\label{eq:ise}
-	\wh{\mu}_{\text{IS}} = \frac{1}{N}\sum_{i=1}^{N}f(z_i)w_{P/Q}(z_i),
+	\wh{\mu}_{\text{IS}} = \frac{1}{N}\sum_{i=1}^{N}w_{P/Q}(z_i) f(z_i),
 \end{align}
 which is an unbiased estimator~\cite{mcbook}, \ie ${\Exp_{z_i\simiid Q}\left[\wh{\mu}_{IS}\right] = \mu}$. 
 
@@ -213,17 +215,17 @@ We denote with $d_{\alpha}(P\|Q) = \exp\{D_{\alpha}(P\|Q)\}$ the exponentiated $
 %
 
 \section{Robust Importance Sampling Estimation}\label{sec:robust}
-In this section, we discuss how to perform a robust importance weighting estimation. Recently it has been observed that, in many cases of interest, the plain estimator~\eqref{eq:ise} presents problematic tail behaviors~\cite{metelli2018policy}, preventing the use of exponential concentration inequalities.\footnote{Unless we require that $d_{\infty}(P \| \Phi)$ is finite, \ie that the importance weight have finite supremum, there always exists a value $\alpha>1$ such that $d_{\alpha}(P \| \Phi)=+\infty$.} A common heuristic to address this problem consists in truncating the weight~\cite{ionides2008truncated}:
+In this section, we discuss how to perform a robust importance weighting estimation. Recently it has been observed that, in many cases of interest, the plain estimator~\eqref{eq:ise} presents problematic tail behaviors~\cite{metelli2018policy}, preventing the use of exponential concentration inequalities.\footnote{Unless we require that $d_{\infty}(P \| \Phi)$ is finite, \ie that the importance weight have finite essentialsupremum, there always exists a value $1<\alpha<\infty$ such that $d_{\alpha}(P \| \Phi)=\infty$.} A common heuristic to address this problem consists in truncating the weight~\cite{ionides2008truncated}:
 \begin{align}\label{eq:truncatedise}
 	\widecheck{\mu}_{\text{IS}} = \frac{1}{N}\sum_{i=1}^{N} \min \left\{ M, {w}_{P/Q}(z_i) \right\} f(z_i),
 \end{align}
 where 
 % $\widecheck{w}_{P/Q}^M(z_i) = $ and $M_N$ 
-$M$ is a threshold to limit the magnitude of the importance weight. Similarly, for the multiple importance sampling case, restricting to the BH, we have:
+$M < \infty$ is a threshold to limit the magnitude of the importance weight. Similarly, for the multiple importance sampling case, restricting to the BH, we have:
 \begin{align}\label{eq:truncatedmise}
 	\widecheck{\mu}_{\text{BH}} =\frac{1}{N} \sum_{k=1}^K\sum_{i=1}^{N_k} \min \left\{M,  \frac{p(z_{ik})}{\sum_{j=1}^K \frac{N_j}{N} q_j(z_{ik})} \right\} f(z_{ik}).
 \end{align}
-Clearly, since we are changing the importance weights, we introduce a bias term, but, by reducing the range of the estimation, we get a benefit in terms of variance. Below, we present the bias-variance analysis of the estimator $\widecheck{\mu}_{\text{BH}}$ and we conclude by showing that we are able, using an adaptive truncation, to guarantee an exponential concentration (differently from the non-truncated case).
+Clearly, since we are changing the importance weights, we introduce a bias term, but, by reducing the range of the estimate, we get a benefit in terms of variance. Below, we present the bias-variance analysis of the estimator $\widecheck{\mu}_{\text{BH}}$ and we conclude by showing that we are able, using an adaptive truncation, to guarantee an exponential concentration (differently from the non-truncated case).
 
 \begin{restatable}{lemma}{truncatedbias}\label{lem:truncatedbias}
 	Let $P$ and $\{ Q_k \}_{k=1}^N$ be probability measures on the measurable space $(\mathcal{Z},\mathcal{F})$ such that $P\ll Q_k$ and there exists $\epsilon \in (0,1]$ s.t. $d_{1+\epsilon}(P\|Q_k)<\infty$ for $k=1,\dots,K$. Let $f:\mathcal{Z}\to\Reals_{+}$ be a bounded non-negative function, \ie $\norm[\infty]{f}<\infty$. Let $\widecheck{\mu}_{\text{BH}}$ be the truncated balance heuristic estimator of $f$, as defined in (\ref{eq:truncatedmise}), using $N_k$ \iid samples from each $Q_k$. Then, the bias of $\widecheck{\mu}_{\text{BH}}$ can be bounded as:
@@ -252,7 +254,7 @@ It is worth noting that, by selecting $\epsilon=1$, equation~\eqref{eq:variancet
     \end{equation*}
 \end{restatable}
 
-Our adaptive truncation approach and the consequent concentration results resemble the ones proposed in~\citet{bubeck2013bandits}. However, unlike~\citet{bubeck2013bandits} we do not remove samples with too high value, but we exploit the nature of the importance weighted estimator only to limit the weight magnitude. Indeed, this form of truncation turned out to be very effective in practice~\cite{ionides2008truncated,koblents2015population}.
+Our adaptive truncation approach and the consequent concentration results resemble the ones proposed in~\citet{bubeck2013bandits}. However, unlike~\citet{bubeck2013bandits} we do not remove samples with too high value, but we exploit the nature of the importance weighted estimator only to limit the weight magnitude. Indeed, this form of truncation turned out to be very effective in practice~\cite{ionides2008truncated}.
 
 
 \section{Problem Formalization}\label{sec:problem}
@@ -260,7 +262,7 @@ The online learning problem that we aim to solve does \textit{not} fall within t
 
 Let $\Xspace\subseteq \Reals^d$ be our decision set, or \textit{arm set} in MAB jargon. Let $(\Omega,\mathcal{F},P)$ be a probability space. Let ${\{Z_{\vx}:\Omega\to\mathcal{Z}\mid \vx\in\Xspace\}}$ be a set of continuous random vectors parametrized by $\Xspace$, with common sample space ${\mathcal{Z}\subseteq \Reals^m}$. We denote with $p_{\vx}$ the probability density function of $Z_{\vx}$. Finally, let $f:\mathcal{Z}\to\Reals$ be a bounded \textit{payoff function}, and $\mu(\vx) = \Exp_{z\sim p_{\vx}}\left[f(z)\right]$ its expectation under $p_{\vx}$. For each iteration $t=0,\dots,T$, we select an arm $\vx_t$, draw a sample $z_t$ from $p_{\vx_t}$, and observe payoff $f(z_t)$, up to horizon $T$. The goal is to maximize the expected total payoff:
 \begin{align}\label{eq:theproblem}
-\max_{\vx_0,\dots,\vx_T\in\Xspace} \sum_{t=0}^T \Exp_{z_t\sim p_{\vx_t}}\left[ f(z_t)\right] = \max_{\vx_0,\dots,\vx_T\in\Xspace}\sum_{t=0}^{T}\mu(\vx_t).
+\max_{\vx_0,\dots,\vx_T\in\Xspace} \sum_{t=0}^T \Exp_{z_t\sim p_{\vx_t}}\left[ f(z_t)\right] =  \max_{\vx_0,\dots,\vx_T\in\Xspace}\sum_{t=0}^{T}\mu(\vx_t).
 \end{align}
 Although we can evaluate $p_{\vx}$ for each $\vx\in\Xspace$, we can only observe $f(z_t)$ for the $z_t$ that are actually sampled. 
 This reflects the online, episodic policy optimization problem.
@@ -274,11 +276,11 @@ We \textit{could}, of course, frame policy optimization as a MAB problem, at the
 In this section, we use the mathematical tools presented so far to design a policy search algorithm that efficiently explores the space of solutions. The proposed algorithm, called \algoname (Optimistic Policy opTImization via Multiple Importance Sampling with Truncation), is based on the Optimism in the Face of Uncertainty (OFU) principle and follows the Upper Confidence Bound (UCB) strategy~\citep{lai1985asymptotically,agrawal1995sample,auer2002finite} commonly used in Multi Armed Bandit (MAB) problems~\citep{robbins1985some,bubeck2012regret,lattimore2019bandit}. 
 
 To apply the UCB strategy to the policy optimization problem, we need an estimate of the objective $\mu(\vx)$ and a confidence region. We use importance sampling to capture the correlation among the arms. In particular, to better use all the data that we collect, we would like to use a multiple importance sampling estimator like the one from (\ref{eq:mise}). Unfortunately, the heavy-tailed behavior of this estimator would result in an inefficient exploration.
-Instead, we use the robust balance heuristic estimator $\wc{\mu}_{\text{BH}}$ from (\ref{eq:truncatedmise}), which has better tail behavior. To simplify the notation, , we treat each sample $\vx$ as a distinct one. This is \wlg (as each sample is always multiplied by its number of occurrences anyway) and corresponds to the case $K=t-1$ and $N_k\equiv1$. Hence, at each iteration $t$:
+Instead, we use the robust balance heuristic estimator $\wc{\mu}_{\text{BH}}$ from (\ref{eq:truncatedmise}), which has a more desirable tail behavior. To simplify the notation, we treat each sample $\vx$ as a distinct one. This is \wlg (as each sample is always multiplied by its number of occurrences anyway) and corresponds to the case $K=t-1$ and $N_k\equiv1$. Hence, at each iteration $t$:
 \begin{align}\label{eq:wcmu}
 	\wc{\mu}_t(\vx) = \sum_{k=0}^{t-1}
-	\min\left\{M_{t-1}, \frac{p_{\vx}(z_k)}
-	{\sum_{j=1}^{t-1}p_{\vx_j(z_k)}}\right\}f(z_k),
+	\min\left\{M_{t}, \frac{p_{\vx}(z_k)}
+	{\sum_{j=0}^{t-1}p_{\vx_j(z_k)}}\right\}f(z_k),
 \end{align}
 where ${M_{t} = \left(\frac{td_{1+\epsilon}(p_{\vx}\|\Phi_t)^{\epsilon}}{\log\frac{1}{\delta_t}}\right)^{\frac{1}{1+\epsilon}}}$ and ${\Phi_t = \frac{1}{t}\sum_{k=0}^{t-1}p_{\vx_k}}$.
 According to Theorem \ref{lem:thrucatedconcentration}, the following \textit{index}:
@@ -288,7 +290,7 @@ According to Theorem \ref{lem:thrucatedconcentration}, the following \textit{ind
 	&\quad+\norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)
 	\left(\frac{d_{1+\epsilon}(p_{\vx}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}\right)^{\frac{\epsilon}{1+\epsilon}},
 \end{align*}
-is an upper bound on $\mu(\vx)$ with probability at least $1-\delta_t$, \ie an upper confidence bound. The \algoname algorithm simply selects, at each iteration $t$, the arm with the largest value of the index $B_t^{\epsilon}(\vx)$, breaking ties deterministically. The pseudocode is provided in Algorithm \ref{alg:1}. The initial arm $\vx_0$ is arbitrary, as no prior information is available. The regret analysis of Section \ref{sec:regret} will provide a confidence schedule $(\delta_t)_{t=1}^T$. Knowledge of the actual horizon $T$ is not needed. Although we can use any $\epsilon\in (0,1]$, we suggest to use $\epsilon=1$ in practice, as it yields the more common $2$-\Renyi divergence. To be able to compute the indexes (or to perform any kind of index maximization), the algorithm needs to store all the $\vx_t$ together with the observed payoffs $f(z_t)$, hence $\mathcal{O}(Td)$ space is required, where $d$ is the dimensionality of the arm space $\Xspace$ (not to be confused with cardinality $|\Xspace|$, which may be infinite). 
+is an upper bound on $\mu(\vx)$ with probability at least $1-\delta_t$, \ie an upper confidence bound. The \algoname algorithm simply selects, at each iteration $t$, the arm with the largest value of the index $B_t^{\epsilon}(\vx)$, breaking ties deterministically. The pseudocode is provided in Algorithm \ref{alg:1}. The initial arm $\vx_0$ is arbitrary, as no prior information is available. The regret analysis of Section \ref{sec:regret} will provide a confidence schedule $(\delta_t)_{t=1}^T$. The knowledge of the actual horizon $T$ is not needed. Although we can use any $\epsilon\in (0,1]$, we suggest to use $\epsilon=1$ in practice, as it yields the more common $2$-\Renyi divergence. To be able to compute the indexes (or to perform any kind of index maximization), the algorithm needs to store all the $\vx_t$ together with the observed payoffs $f(z_t)$, hence $\mathcal{O}(Td)$ space is required, where $d$ is the dimensionality of the arm space $\Xspace$ (not to be confused with cardinality $|\Xspace|$, which may be infinite). 
 
 The optimization step (line 4) may be very difficult when $\Xspace$ is not discrete~\citep[\cf][]{srinivas2010gaussian}, as the index $B_t^{\epsilon}(\vx,\delta_t)$ is non-convex and non-differentiable. Global optimization methods could be applied at the cost of giving up theoretical guarantees. In practice, this direction may be beneficial, but we leave it to future, more application-oriented work. Instead, we propose a general discretization method. The key intuition, common in the continuous MAB literature, is to make the discretization progressively finer. The pseudocode for this variant, called \algoname2, is reported in Algorithm \ref{alg:2}. Note that the arm space $\Xspace$ itself is fixed (and infinite), as adaptive discretization is performed for optimization purposes only. 
 Implementing any variant of \algoname to solve a policy optimization problem, whether in the action-based or in the parameter-based formulation, requires some additional caveats, discussed in Appendix~\ref{app:practical}.
@@ -300,7 +302,7 @@ Implementing any variant of \algoname to solve a policy optimization problem, wh
 	\STATE {\bfseries Input:} initial arm $\vx_0$, confidence schedule $(\delta_t)_{t=1}^T$, order ${\epsilon\in(0,1]}$
 	\STATE Draw sample $z_0\sim p_{\vx_0}$ and observe payoff $f(z_0)$
 	\FOR{$t=1,\dots,T$}
-		\STATE Select arm $\vx_t = \arg\max_{\vx\in\Xspace}B_t^{\epsilon}(\vx,\delta_t)$
+		\STATE Select arm $\vx_t \in \arg\max_{\vx\in\Xspace}B_t^{\epsilon}(\vx,\delta_t)$
 		\STATE Draw sample $z_t\sim p_{\vx_t}$ and observe payoff $f(z_t)$
 	\ENDFOR
 	\end{algorithmic}
@@ -312,7 +314,7 @@ First, we rephrase the optimization problem (\ref{alg:1}) in terms of \textit{re
 \begin{align}\label{eq:inregret}
 	\Delta_t = \mu(\vx^*) - \mu(\vx_t),
 \end{align}
-where $\vx^* = \arg\max_{\vx\in\Xspace}\mu(\vx)$. Let $\Reg(T) = \sum_{t=0}^T\Delta_t$ be the total regret.
+where $\vx^* \in \arg\max_{\vx\in\Xspace}\mu(\vx)$. Let $\Reg(T) = \sum_{t=0}^T\Delta_t$ be the total regret.
 As $\mu(\vx^*)$ is a constant, problem (\ref{eq:theproblem}) is trivially equivalent to:
 \begin{align}\label{eq:regret}
 	\min_{\vx_0,\dots,\vx_T\in\Xspace} \Reg(T).
@@ -323,16 +325,16 @@ First, we need the following assumption on the \Renyi divergence:
 \begin{restatable}{assumption}{boundrenyi}\label{ass:boundrenyi}
 	For all $t=1,\dots,T$, the $(1+\epsilon)$-\Renyi divergence is uniformly bounded as:
 	\begin{align*}
-		\sup_{\vx_0,\vx_1,\dots,\vx_t\in\Xspace}d_{1+\epsilon}(p_{\vx_t}\|\Phi_t) = v_{\epsilon} < \infty,
+		\sup_{\vx_0,,\dots,\vx_T\in\Xspace}d_{1+\epsilon}(p_{\vx_t}\|\Phi_t) = v_{\epsilon} < \infty,
 	\end{align*}
 	where $\Phi_t = \frac{1}{t}\sum_{k=0}^{t-1}p_{\vx_k}$,
 \end{restatable}
 %
-which can be easily enforced through careful policy (or hyperpolicy) design (See Appendix~\ref{app:renyi}).
+which can be easily enforced through careful policy (or hyperpolicy) design (see Appendix~\ref{app:renyi}).
 
 \subsection{Discrete arm set}
 We start from the discrete case, where $|\mathcal{X}| = K \in \Naturals_{+}$.
-This setting is particularly convenient, as the optimization step can be trivially solved in time $\mathcal{O}(Kt)$ per iteration,\footnote{We consider the evaluation of pdf's, payoffs and \Renyi divergences in (\ref{eq:wcmu}) atomic, as it is heavily problem-dependent.} where $t$ is from evaluation of (\ref{eq:wcmu}) via clever caching~\footnote{\citet{elvira2015efficient} propose a way to further reduce the complexity of MIS estimation.}. This sums up to total time $\mathcal{O}(KT^2)$. It is also of practical interest: even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may sometimes be constrained to a discrete, reasonably small set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
+This setting is particularly convenient, as the optimization step can be trivially solved in time $\mathcal{O}(Kt)$ per iteration,\footnote{We consider the evaluation of pdf's, payoffs and \Renyi divergences in (\ref{eq:wcmu}) atomic, as their cost are heavily problem-dependent.} where $t$ is from evaluation of (\ref{eq:wcmu}) via clever caching.~\footnote{\citet{elvira2015efficient} propose a way to further reduce the complexity of MIS estimation.} This sums up to total time $\mathcal{O}(KT^2)$. The case of the discrete arm set, besides being convenient for the analysis, is also of practical interest. Even in applications where $\Xspace$ is naturally continuous (\eg robotics), the set of solutions that can be actually tried in practice may sometimes be constrained to a discrete, reasonably small, set. In this simple setting, \algoname achieves $\wt{\mathcal{O}}(T^{\frac{1}{1+\epsilon}})$ regret:
 
 \begin{restatable}{theorem}{regretdiscrete}\label{th:regretdiscrete}
 	Let $\Xspace$ be a discrete arm set with ${|\mathcal{X}| = K \in \Naturals_{+}}$. Under Assumption \ref{ass:boundrenyi}, Algorithm \ref{alg:1} with confidence schedule $\delta_t = \frac{3\delta}{t^2\pi^2K}$ guarantees, with probability at least $1-\delta$:
@@ -350,7 +352,7 @@ This yields a $\wt{\mathcal{O}}(\sqrt{T})$ regret when $\epsilon=1$.
 
 
 \subsection{Compact arm set}
-Now, we consider the more general case of a compact arm set $\Xspace\in\Reals^d$. This case is also more interesting as it allows to tackle virtually any RL task. We can assume, \wlg, that $\Xspace$ is entirely contained in a box $[-D,D]^d$, with $D\in\Reals_{+}$. We also need the following assumption on the expected payoff:
+We consider the more general case of a compact arm set $\Xspace\in\Reals^d$. This case is even more interesting as it allows tackling virtually any RL task. We assume, \wlg, that $\Xspace$ is entirely contained in a box $[-D,D]^d$, with $D\in\Reals_{+}$. We also need the following assumption on the expected payoff:
 %
 \begin{restatable}{assumption}{lipschitz}\label{ass:lipschitz}
 	The expected payoff $\mu$ is Lipschitz continuous, \ie there exists a constant $L>0$ such that, for every $\vx, \vx'\in\Xspace$:
@@ -362,36 +364,35 @@ Now, we consider the more general case of a compact arm set $\Xspace\in\Reals^d$
 This assumption is easily satisfied for policy optimization, as shown in the following:
 %
 \begin{restatable}{lemma}{lipschitzpol}\label{lem:lispschitzpol}
-	In the policy optimization problem, Assumption \ref{ass:lipschitz} can be replaced by:
+	Assumption \ref{ass:lipschitz} can be replaced, in the action-based paradigm, by:
 	\begin{align}\label{eq:lp1}
 		\sup_{s\in\Sspace,\vtheta\in\Theta}\Exp_{a\sim\pi_{\vtheta}}
 		\left[\left|\nabla_{\vtheta}\log\pi_{\vtheta}(a|s)\right|\right] \leq \vu_1,
 	\end{align}
-	in the action-based paradigm, and by:
+	and, in the parameter-based paradigm, by:
 	\begin{align}\label{eq:lp2}
 		\sup_{\vxi\in\Xi}\Exp_{\vtheta\sim\rho_{\vxi}}
 		\left[\left|\nabla_{\vxi}\log\rho_{\vxi}(\vtheta)\right|\right] \leq \vu_2,
 	\end{align}
-	in the parameter-based paradigm, where $\vu_1$ and $\vu_2$ are $d$-dimensional vectors and the inequalities are component-wise.
+	where $\vu_1$ and $\vu_2$ are $d$-dimensional vectors and the inequalities are component-wise.
 \end{restatable}
 %
-In the proof, we show how to derive the corresponding Lipschitz constants, and show how (\ref{eq:lp1}) and (\ref{eq:lp2}) are satisfied by the commonly-used Gaussian policy and hyperpolicy, respectively. This is enough for \algoname to achieve $\wt{\mathcal{O}}(d^{\frac{\epsilon}{1+\epsilon}}T^{\frac{1}{1+\epsilon}})$ regret:
+In the proof, we show how to derive the corresponding Lipschitz constants, and show how (\ref{eq:lp1}) and (\ref{eq:lp2}) are satisfied by the commonly-used Gaussian policy and hyperpolicy, respectively. This is allows achieving $\wt{\mathcal{O}}(d^{\frac{\epsilon}{1+\epsilon}}T^{\frac{1}{1+\epsilon}})$ regret:
 %
 \begin{restatable}{theorem}{regretcompact}\label{th:regretcompact}
 	Let $\Xspace$ be a $d$-dimensional compact arm set with $\Xspace \subseteq [-D,D]^d$. Under Assumptions \ref{ass:boundrenyi} and \ref{ass:lipschitz}, Algorithm \ref{alg:1} with confidence schedule $\delta_t = \frac{6\delta}{\pi^2t^2(1+d^dt^{2d})}$ guarantees, with probability at least $1-\delta$:
 	\begin{align*}
-	&\Reg(T) \leq \Delta_0 \\
+	&\Reg(T) \leq \Delta_0 + \frac{\pi^2LD}{6} \\
 	&\quad+ 	C
 	T^{\frac{1}{1+\epsilon}}
 	\left[v_{\epsilon}
 	\left(2(d+1)\log T + d\log d + \log \frac{\pi^2}{3\delta}\right)
-	\right]^{\frac{\epsilon}{1+\epsilon}} \\
-	&\quad+ \frac{\pi^2LD}{6},
+	\right]^{\frac{\epsilon}{1+\epsilon}},
 	\end{align*}
 	where $C=(1+\epsilon)\left(2\sqrt{2}+\frac{5}{3}\right)\norm[\infty]{f}$, and $\Delta_0$ is the instantaneous regret of the initial arm $\vx_0$.
 \end{restatable}
 %
-This yields a $\wt{\mathcal{O}}(\sqrt{dT})$ regret when $\epsilon=1$. Unfortunately, the optimization step may be very time-consuming. In some applications, we can assume the time required to draw samples to dominate the computational time. In fact, drawing a sample (Algorithm \ref{alg:1}, line 2) corresponds to generating a whole trajectory of experience, which may take a long time, especially in real-world applications.
+This yields a $\wt{\mathcal{O}}(\sqrt{dT})$ regret when $\epsilon=1$. Unfortunately, the optimization step may be very time-consuming. In some applications, we can assume that the time required to draw samples dominates the computational time. In fact, drawing a sample (Algorithm \ref{alg:1}, line 2) corresponds to generating a whole trajectory of experience, which may take a long time, especially in real-world applications.
 
 \begin{algorithm}[t]
 	\caption{\algoname2}
@@ -400,8 +401,8 @@ This yields a $\wt{\mathcal{O}}(\sqrt{dT})$ regret when $\epsilon=1$. Unfortunat
 		\STATE {\bfseries Input:} initial arm $\vx_0$, confidence schedule $(\delta_t)_{t=1}^T$, discretization schedule $(\tau_t)_{t=1}^T$, order $\epsilon\in(0,1]$
 		\STATE Draw sample $z_0\sim p_{\vx_0}$ and observe payoff $f(z_0)$
 		\FOR{$t=1,\dots,T$}
-		\STATE Discretize $\Xspace$ with a uniform grid $\wt{\Xspace}_t$ of $\tau_t^d$ points
-		\STATE Select arm $\vx_t = \arg\max_{\vx\in\wt{\Xspace}_t}B_t^{\epsilon}(\vx,\delta_t)$
+		\STATE Discretize $\Xspace$ with a uniform grid $\wt{\Xspace}_t$ of $(\tau_t)^d$ points
+		\STATE Select arm $\vx_t \in \arg\max_{\vx\in\wt{\Xspace}_t}B_t^{\epsilon}(\vx,\delta_t)$
 		\STATE Draw sample $z_t\sim p_{\vx_t}$ and observe payoff $f(z_t)$
 		\ENDFOR
 	\end{algorithmic}
@@ -418,14 +419,14 @@ When optimization over the infinite arm space $\Xspace$ is not feasible, Algorit
 	+ C_2
 	T^{\frac{1}{1+\epsilon}} %\,\cdot
 	\\&\quad\cdot\left[v_{\epsilon}
-	\left(\left(2+ \nicefrac{d}{\kappa}\right)\log T + d\log 2 + \log\frac{\pi^2}{3\delta}\right)\right]^{\frac{\epsilon}{1+\epsilon}},
+	\left(\left(2+ \frac{d}{\kappa}\right)\log T + d\log 2 + \log\frac{\pi^2}{3\delta}\right)\right]^{\frac{\epsilon}{1+\epsilon}},
 	\end{align*}
 	where $C_1=\frac{\kappa}{\kappa-1}LD$, $C_2=(1+\epsilon)\left(2\sqrt{2}+\frac{5}{3}\right)\norm[\infty]{f}$, and $\Delta_0$ is the instantaneous regret of the initial arm $\vx_0$.
 \end{restatable}
 %
 Let us focus on the case $\epsilon=1$, which is the only one of practical interest in the scope of this paper.
-For $\kappa=2$, we obtain regret $\wt{\mathcal{O}}(d\sqrt{T})$. Unfortunately, the time required for optimization is exponential in arm space dimensionality $d$. For $d\geq 2$, we can break the curse of dimensionality by taking $\kappa=d$. In this case, the regret is $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{1}{d}\right)}\right)$. On the other hand, the time per iteration is only $O(t^2)$. Note that the regret is sublinear for any choice of $\kappa$. 
-Going further: for any $\zeta>0$, $\kappa=\frac{d}{\zeta}$ grants $O(t^{1+\zeta})$ time per iteration at the cost of $\wt{\mathcal{O}}\left(dT^{\left(1-\frac{\zeta}{d}\right)}\right)$ regret.\footnote{The worse dependency $\wt{\mathcal{O}}(d)$ of the regret on the arm space dimensionality (\wrt $\wt{\mathcal{O}}(\sqrt{d})$ of Algorithm \ref{alg:1}) is also necessary to prevent the time per iteration from being exponential in $d$.}
+For $\kappa=2$, we obtain regret $\wt{\mathcal{O}}(d\sqrt{T})$. Unfortunately, the time required for optimization is exponential in arm space dimensionality $d$. For $d\geq 2$, we can break the curse of dimensionality by taking $\kappa=d$. In this case, the regret is $\wt{\mathcal{O}}\big(dT^{\left(1-\frac{1}{d}\right)}\big)$. On the other hand, the time per iteration is only ${\mathcal{O}}(t^2)$. Note that the regret is sublinear for any choice of $\kappa$. 
+Going further: for any $\zeta>0$, $\kappa=\frac{d}{\zeta}$ grants ${\mathcal{O}}(t^{1+\zeta})$ time per iteration at the cost of $\wt{\mathcal{O}}\big(dT^{\left(1-\frac{\zeta}{d}\right)}\big)$ regret.\footnote{The worse dependency $\wt{\mathcal{O}}(d)$ of the regret on the arm space dimensionality (\wrt $\wt{\mathcal{O}}(\sqrt{d})$ of Algorithm \ref{alg:1}) is also necessary to prevent the time per iteration from being exponential in $d$.}
 
 
 \section{Related Works}\label{sec:related}
@@ -475,24 +476,27 @@ Thompson sampling~\citep[TS,][]{thompson1933likelihood} is a different approach 
 \vskip 0.2in
   \begin{minipage}[b]{0.32\linewidth}
     \centering
+    \vspace{-0.2cm}
     \includegraphics[width=\linewidth]{plots/lqg_mu/plot.pdf}
-    \vspace{-0.4cm}
+    \vspace{-0.5cm}
     \caption{Cumulative regret in the LQG experiment, comparing \algoname, UCB1 and GPUCB (30 runs, 95\% c.i.).} 
     \label{fig:lqg} 
   \end{minipage}%%
   \hspace{0.2cm}
   \begin{minipage}[b]{0.32\linewidth}
     \centering
+    \vspace{-0.2cm}
     \includegraphics[width=0.99\linewidth]{plots/riverswim/plot_main.pdf}
-    \vspace{-0.4cm}
+    \vspace{-0.5cm}
     \caption{Cumulative average return for the River Swim, comparing \algoname, OPTIMIST2 and PGPE (10 runs, 95\% c.i.).} 
     \label{fig:rs} 
    \end{minipage} %%
     \hspace{0.2cm}
   \begin{minipage}[b]{0.32\linewidth}
     \centering
+    \vspace{-0.2cm}
     \includegraphics[width=\linewidth]{plots/mc/plot.pdf}
-    \vspace{-0.4cm}
+    \vspace{-0.5cm}
     \caption{Cumulative average return for the Mountain Car, comparing \algoname, PGPE and PB-POIS (5 runs, 95\% c.i.).} 
     \label{fig:mc} 
   \end{minipage} %%
@@ -525,23 +529,23 @@ Thompson sampling~\citep[TS,][]{thompson1933likelihood} is a different approach 
 %\end{figure*}
  
 \section{Numerical Simulations}\label{sec:exp}
-In this section, we present the results of the numerical simulation of \algoname on RL tasks on both discrete and continuous parameter spaces. We restrict our experiments to the \emph{parameter-based} PS and Gaussian hyperpolicies. This setting is particularly convenient as the \Renyi divergence between Gaussian distributions admits closed form~\cite{gil2013renyi}. On the contrary, in the action-based scenario, we would need to compute the divergences between trajectory distributions, which is intractable. The usual approach consists in estimating the \Renyi divergence from the samples. However, we would lose our theoretical guarantees on the regret. Furthermore, the known estimators for the \Renyi divergence tend empirically to be unstable~\cite{metelli2018policy}. It is worth noting that at each iteration \algoname needs to compute the \Renyi divergence between a candidate hyperpolicy $\nu_{\vxi_t}$ and the mixture of hyperpolicies visited so far $\nu_{\vxi_0}, ..., \nu_{\vxi_{t-1}}$. We prove in Appendix~\ref{app:practical} that this quantity can be upper bounded by the harmonic mean of the divergences between the candidate hyperpolicy $\nu_{\vxi_t}$ and each component of the mixture $\nu_{\vxi_{k}}$ for $k=1,...,t-1$. 
+In this section, we present the results of the numerical simulation of \algoname on RL tasks with both discrete and continuous parameter spaces. We restrict our experiments to the \emph{parameter-based} PS and Gaussian hyperpolicies, which are, by far, the most widely used hyperpolicies. This setting is particularly convenient as the \Renyi divergence between Gaussian distributions admits closed form~\cite{gil2013renyi}. On the contrary, in the action-based scenario, we would need to compute the divergences between trajectory distributions, which is intractable. The usual approach consists in estimating the \Renyi divergence from the samples. However, we would lose our theoretical guarantees on the regret. Furthermore, the known estimators for the \Renyi divergence tend empirically to be unstable~\cite{metelli2018policy}. It is worth noting that at each iteration \algoname needs to compute the \Renyi divergence between a candidate hyperpolicy $\nu_{\vxi_t}$ and the mixture of hyperpolicies visited so far $\nu_{\vxi_0}, ..., \nu_{\vxi_{t-1}}$. We prove in Appendix~\ref{app:practical} that this quantity can be upper bounded by the harmonic mean of the divergences between the candidate hyperpolicy $\nu_{\vxi_t}$ and each component of the mixture $\nu_{\vxi_{k}}$ for $k=1,...,t-1$. 
 
 \subsection{Linear Quadratic Gaussian Regulator}
-The Linear Quadratic Gaussian Regulator~\citep[LQG,][]{dorato1995linear} is a benchmark problem for continuous control. We consider the monodimensional case in which the state space is limited to $\mathcal{S}=[-4,4]$, the action space is $\mathcal{A}=[-4,4]$ and the horizon is limited to 20. At each timestep, the agent receives a penalization proportional to the magnitude of the state and the action applied, \ie $R(s,a) = -a s^2 - b  a^2$. We employ a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}( \xi, \sigma^2)$, where $\xi$ is the mean parameter to be learned and $\sigma=0.15$ fixed. The case in which we also learn the standard deviation is reported in Appendix~\ref{apx:expLQG}. The goal of this experiment is to compare \algoname
+The Linear Quadratic Gaussian Regulator~\citep[LQG,][]{dorato1995linear} is a benchmark problem for continuous control. We consider the monodimensional case in which the state space is limited to $\mathcal{S}=[-4,4]$, the action space is $\mathcal{A}=[-4,4]$ and the horizon is limited to 20. At each timestep, the agent receives a penalization proportional to the magnitude of the state and the action applied, \ie $R(s,a) = -a s^2 - b  a^2$. We employ a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}( \xi, \sigma^2)$ to select the gain of a linear policy in the state, where $\xi$ is the mean parameter to be learned and $\sigma=0.15$ fixed. The case in which we also learn the standard deviation is reported in Appendix~\ref{apx:expLQG}. The goal of this experiment is to compare \algoname
 with classical MAB algorithms, in particular UCB1~\cite{auer2002finite} and GPUCB~\cite{srinivas2010gaussian} when the parameter space $\Xi$ is discrete. For this purpose we consider a uniform discretization of the interval $[-1,1]$ made of 100 arms. All algorithms are run with confidence level $\delta=0.2$.
 In Figure~\ref{fig:lqg}, we show the cumulative regret averaged over 30 runs of \algoname compared with UCB1 and GPUCB. We can see that our algorithm significantly outperforms UCB1. Indeed, \algoname is
-able to exploit the structure of arms, \ie hyperpolicies, by means of the MIS estimation, whereas UCB1 does not make any assumption on arm correlation. On the contrary, GPUCB shows a better performance \wrt to \algoname. We point out that GPUCB requires to specify, at the beginning of learning, the kernel of the Gaussian Process (GP) from which the payoff function is sampled. We employed the default scikit-learn kernel (RBF) which invalidates all theoretical guarantees, as our payoff is not actually sampled from a GP.\footnote{Indeed, GPUCB showed a significantly more exploitative behavior \wrt UCB1 and \algoname in the experiment.}
+able to exploit the structure of arms, \ie hyperpolicies, by means of the MIS estimation, whereas UCB1 does not make any assumption on arm correlation. On the contrary, GPUCB shows a better performance \wrt to \algoname. We point out that GPUCB requires to specify, at the beginning of learning, the kernel of the Gaussian Process (GP) from which the payoff function is sampled. We employed the default scikit-learn kernel (RBF) which invalidates the theoretical guarantees of GPUCB, as our payoff is not actually sampled from a GP.\footnote{Indeed, GPUCB showed a significantly more exploitative behavior \wrt UCB1 and \algoname in the experiment.}
 
 \subsection{River Swim}
-The River Swim~\cite{strehl2008analysis} is a classical benchmark for exploration, in which the goal of the agent is to swimming against the current of the river to reach the right bank. The interesting feature of this problem is that there is a local optimum that consists in remaining on the left bank. We parametrized the probability $p$ to perform a right action (in every state) as $p = \frac{1}{1+e^{-\zeta}}$, where $\zeta$ is sampled from a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}(\xi, \sigma^2)$ with $\xi \in [-5,5]$ and $\sigma=0.5$. In Figure\ref{fig:rs}, we can see that PGPE, starting with with $\xi = 0$ (so $p$ is sampled around $0.5$), converges to the local optimum as it lacks the exploration of the high values of $p$. Instead, OPTIMIST both with a fixed discretization of the arm set (20 arms) and an adaptive discretization (OPTIMIST2 with $\kappa=2$) manages to reach the global optimum and converges to the policy that allows crossing the river. Additional details are reported in Appendix~\ref{apx:expRS}.
+The River Swim~\cite{strehl2008analysis} is a classical benchmark for exploration in RL, in which the goal of the agent is to swim against the current of the river to reach the right bank. The interesting feature of this problem is that there is a local optimum that consists in remaining on the left bank. We parametrized the probability $p$ to perform a right action (in every state) as $p = \frac{1}{1+e^{-\zeta}}$, where $\zeta$ is sampled from a Gaussian hyperpolicy $\nu_{\xi} = \mathcal{N}(\xi, \sigma^2)$ with $\xi \in [-5,5]$ and $\sigma=0.5$ fixed. In Figure~\ref{fig:rs}, we can see that PGPE~\citep{sehnke2008policy}, a classical parameter-based algorithm, starting with with $\xi = 0$ (so $p$ is sampled around $0.5$), converges to the local optimum as it lacks the exploration of the high values of $p$. Instead, OPTIMIST both with a fixed discretization of the arm set (20 arms) and an adaptive discretization (OPTIMIST2 with $\kappa=2$) manages to reach the global optimum and converges to the policy that allows crossing the river. Additional details are reported in Appendix~\ref{apx:expRS}.
 
 \subsection{Mountain Car}
-The second experiment, shown in Figure~\ref{fig:mc}, illustrates the behavior of \algoname  
-when the parameters of the hyperpolicy belong to a compact (continuous) space, on the Mountain Car task~\citep{brockman2016openai}. We use a Gaussian hyperpolicy with a two-dimensional learnable mean within a box $[-1,1]\times[0,20]$ and a fixed covariance $\mathrm{diag}(0.15,\,3)$. We compare OPTIMIST2 with $k=3$ against PGPE~\citep{sehnke2008policy} and PB-POIS~\cite{metelli2018policy}. The best step size for PGPE was searched in the set $[3, 2, 1, 0.1, 0.01, 0.001]$. For PBPOIS, we used the suggested hyperparameters. We can notice that OPTIMIST2 is able to learn a good policy in a very short time thanks to its better exploration capabilities. However, the policy gradient methods outperform it on the long run. Further details are reported in Appendix~\ref{apx:expMC}.
+The third experiment, shown in Figure~\ref{fig:mc}, illustrates the behavior of \algoname  
+when the parameters of the hyperpolicy belong to a compact (continuous) space, on the Mountain Car task~\citep{brockman2016openai}. We use a Gaussian hyperpolicy with a two-dimensional learnable mean within a box $[-1,1]\times[0,20]$ and a fixed covariance $\mathrm{diag}(0.15,\,3)$. We compare OPTIMIST2 with $\kappa=3$ against PGPE~\citep{sehnke2008policy} and PB-POIS~\cite{metelli2018policy}. The best step size for PGPE was searched in the set $[3, 2, 1, 0.1, 0.01, 0.001]$. For PB-POIS, we used the suggested hyperparameters. We can notice that OPTIMIST2 is able to learn a good policy in a very short time thanks to its better exploration capabilities. However, the policy gradient methods outperform it on the long run. Further details are reported in Appendix~\ref{apx:expMC}.
 
 \section{Conclusion}\label{sec:end}
-We have studied the problem of exploration versus exploitation in policy optimization using MAB techniques. We have proposed OPTIMIST, an optimism-based approach for both the action-based and the parameter-based exploration frameworks, and for both discrete and continuous parameter spaces. We have proved sublinear regret bounds for OPTIMIST under assumptions that are easily met in practice. The empirical evaluation on continuous control tasks showed that the proposed algorithms are effectively able to leverage the structure of the PO problem, although the performances are not optimal when compared to methods with stronger assumptions or without guarantees, at least on these simple problems.
+We have studied the problem of exploration versus exploitation in policy optimization using MAB techniques. We have proposed OPTIMIST, an optimism-based approach for both the action-based and the parameter-based exploration frameworks, and for both discrete and continuous parameter spaces. We have proved sublinear regret bounds for OPTIMIST under assumptions that are easily met in practice. The empirical evaluation on continuous control tasks showed that the proposed algorithms are effectively able to leverage the structure of the PO problem, although the performances are not always optimal when compared to methods with stronger assumptions or without guarantees. However, the real benefits of our approach are visible when the task poses significant exploration challenges (like the River Swim).
 Future work should focus on finding more efficient (but still effective) ways to perform optimization in the infinite-arm setting, and on applying OPTIMIST also to the action-based framework, which requires additional caveats in computing the exploration bonus.
 
 % Acknowledgements should only appear in the accepted version.
@@ -589,7 +593,7 @@ In Appendix~\ref{app:proof}, we prove a more general result for the case when al
 \section{Boundedness of the Exponentiated Renyi Divergence}\label{app:renyi}
 Assumption~\ref{ass:boundrenyi} requires the existence of a uniform upper bound on the exponentiated $(1+\epsilon)$-\Renyi divergence between the current distribution $p_{\vx_t}$ and the mixture of previous ones $\Phi_t=\frac{1}{t}\sum_{k=0}^{t-1}p_{\vx_k}$:
 \begin{align*}
-&\sup_{\vx_0,\vx_1,\dots,\vx_t\in\Xspace}d_{1+\epsilon}(p_{\vx_t}\|\Phi_t) \leq v_{\epsilon} &\text{for all $t=1,\dots,T$}.
+&\sup_{\vx_0,\dots,\vx_T\in\Xspace}d_{1+\epsilon}(p_{\vx_t}\|\Phi_t) \leq v_{\epsilon} &\text{for all $t=1,\dots,T$}.
 \end{align*}
 Note, from Algorithm~\ref{alg:1}, that the value of $v_{\epsilon}$ is not required in practice. Hence, we will just show that an upper bound exists.
 From Theorem~\ref{th:armonic}, it suffices to bound the exponentiated \Renyi divergence between the current distribution and each previous one:
@@ -616,12 +620,12 @@ Let $\nu_{\vxi}$ be an univariate Gaussian hyperpolicy:
 \begin{align}
 	\nu_{\vxi}(\theta) = \frac{1}{\sqrt{2\pi}\sigma}\exp\left\{-\frac{1}{2}\left(\frac{\theta-\mu}{\sigma}\right)^2\right\},
 \end{align}
-where the hyperparameter consists of a mean $\mu$ and a standard deviation $\sigma>0$, \ie $\vxi=[\mu, \sigma]^T$.
+where the hyperparameter consists of a mean $\mu$ and a standard deviation $\sigma>0$, \ie $\vxi=(\mu, \sigma)^T$.
 The exponentiated $(1+\epsilon)$-\Renyi divergence between $\nu_{\vxi_t}$ and $\nu_{\vxi_k}$ is~\citep{gil2013renyi}:
 \begin{align}
 	d_{1+\epsilon}(\nu_{\vxi_t}\|\nu_{\vxi_k}) = \frac{\sigma_k}{\sigma_t} \left(\frac{\sigma_k^2}{\sigma_{1+\epsilon}^2}\right)^{\nicefrac{1}{2\epsilon}}\exp\left\{\frac{(1+\epsilon)(\mu_t-\mu_k)^2}{2\sigma_{\epsilon+1}^2}\right\},
 \end{align}
-where $\sigma_{\epsilon+1}^2 = (1+\epsilon)\sigma_k^2 - \epsilon\sigma_t^2$. The divergence is well-defined (and continuous) as long as $\sigma_{\epsilon+1}^2 > 0$, hence $\sigma_t^2<\frac{1+\epsilon}{\epsilon}\sigma_k^2$. Intuitively, the target distribution cannot be much more stochastic than the behavioral. To ensure this for all $t=1,\dots,T$ and $k=0,\dots,t-1$, it is enough to fix a minimum standard deviation $\sigma_0$ and constrain the search for the $\sigma$ parameter to $[\sigma_0, \frac{1+\epsilon}{\epsilon}\sigma_0]$. This easily generalizes to multivariate Gaussian hyperpolicies with diagonal covariance matrix.
+where $\sigma_{1+\epsilon}^2 = (1+\epsilon)\sigma_k^2 - \epsilon\sigma_t^2$. The divergence is well-defined (and continuous) as long as $\sigma_{\epsilon+1}^2 > 0$, hence $\sigma_t^2<\frac{1+\epsilon}{\epsilon}\sigma_k^2$. Intuitively, the target distribution cannot be too much stochastic than the behavioral. To ensure this for all $t=1,\dots,T$ and $k=0,\dots,t-1$, it is enough to fix a minimum standard deviation $\sigma_0$ and constrain the search for the $\sigma$ parameter to $[\sigma_0, \frac{1+\epsilon}{\epsilon}\sigma_0]$. This easily generalizes to multivariate Gaussian hyperpolicies with diagonal covariance matrix.
 
 \section{Proofs}\label{app:proof}
 
@@ -727,7 +731,7 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 		&\leq \wc{\mu_t}(\vx_t) + c^{+}\beta_t(\vx_t) - \mu(\vx_t) \label{pp:5}\\
 		&\leq (c^{-} + c^{+})\beta(\vx_t) & \text{for all $t=1,\dots,T$}\label{aux:2}, 
 	\end{align}
-	where (\ref{pp:4}) and (\ref{aux:2}) are from (\ref{aux:1}), while (\ref{pp:5}) is by hypothesis, as $\vx_t=\arg\max_{\vx\in\Xspace}(\wc{\mu_t}(\vx) + c^{+}\beta_t(\vx))$.
+	where (\ref{pp:4}) and (\ref{aux:2}) are from (\ref{aux:1}), while (\ref{pp:5}) is by hypothesis, as $\vx_t \in \arg\max_{\vx\in\Xspace}(\wc{\mu_t}(\vx) + c^{+}\beta_t(\vx))$.
 	Note that the union bound over the elements of $\Xspace$ in (\ref{aux:1}) was necessary for (\ref{pp:4}) as the optimal arm $\vx^*$ may not be unique.
 	Finally, with probability at least $1-\delta$:
 	\begin{align}
@@ -823,7 +827,7 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 	&\leq \wc{\mu_t}(\vx_t) + c^{+}\beta_t(\vx_t) + \frac{LDd}{\tau_t} - \mu(\vx_t) \label{pp:16}\\
 		&\leq (c^{+}+c^{-})\beta_t(\vx_t) + \frac{LDd}{\tau_t}, \label{aux:10}
 	\end{align}
-	where (\ref{pp:15}) is from (\ref{aux:9}) and holds with probability at least $1-\sum_{t=1}^{T}\tau_t^d\delta_t$, (\ref{pp:16}) is by hypothesis, as $\vx_t=\arg\max_{\vx\in\Xspace}(\wc{\mu_t}(\vx) + c^{+}\beta_t(\vx))$, and (\ref{aux:10}) is from (\ref{aux:7}) and holds with probability at least $1-\sum_{t=1}^{T}\delta_t$. Hence, (\ref{aux:10}) holds with probability no less than $1-\sum_{t=1}^{T}\tau_t^d\delta_t - \sum_{t=1}^{T}\delta_t = 1 - \sum_{t=1}^T\delta_t(1+\tau_t^d)$. Let us pick as a discretization schedule $\tau_t = dt^2$. This has no impact whatsoever on the algorithm, as the discretization is only hypothetical. With this $\tau_t$ and the confidence schedule proposed in the statement of the theorem, it is easy to verify that (\ref{aux:10}) holds with probability at least $1-\delta$.
+	where (\ref{pp:15}) is from (\ref{aux:9}) and holds with probability at least $1-\sum_{t=1}^{T}\tau_t^d\delta_t$, (\ref{pp:16}) is by hypothesis, as $\vx_t\in\arg\max_{\vx\in\Xspace}(\wc{\mu_t}(\vx) + c^{+}\beta_t(\vx))$, and (\ref{aux:10}) is from (\ref{aux:7}) and holds with probability at least $1-\sum_{t=1}^{T}\delta_t$. Hence, (\ref{aux:10}) holds with probability no less than $1-\sum_{t=1}^{T}\tau_t^d\delta_t - \sum_{t=1}^{T}\delta_t = 1 - \sum_{t=1}^T\delta_t(1+\tau_t^d)$. Let us pick as a discretization schedule $\tau_t = dt^2$. This has no impact whatsoever on the algorithm, as the discretization is only hypothetical. With this $\tau_t$ and the confidence schedule proposed in the statement of the theorem, it is easy to verify that (\ref{aux:10}) holds with probability at least $1-\delta$.
 	
 	Finally, we can bound the regret. With probability at least $1-\delta$:
 	\begin{align}
@@ -867,7 +871,7 @@ Let us start with the first inequality. Observing that all samples $z_{ik}$ are 
 		&\leq \wc{\mu}_t(\vx_t) + c^{+}\beta_t(\vx_t) + \frac{LDd}{\tau_t} - \mu(\vx_t) \label{pp:24}\\
 		&\leq (c^{+}+c^{-})\beta_t(\vx_t) + \frac{LDd}{\tau_t}, \label{aux:12}
 	\end{align}
-	where (\ref{pp:22}) and (\ref{pp:24}) are from (\ref{aux:11}) and hold simultaneously with probability at least $1-\sum_{t=1}^{T}\delta_t(1+\tau_t^d)$, and (\ref{pp:23}) is by hypothesis, as $\vx_t = \arg\max_{\vx\in\wt{\Xspace}_t}(\wc{\mu}_t(\vx) + c^{+}\beta_t(\vx)$. Note that the latter is true only by virtue of the fact that both $[\vx^*]_t$ and $\vx_t$ belong to $\wt{\Xspace}_t$, as the optimization step of Algorithm \ref{alg:2} is restricted to~$\wt{\Xspace}_t$.
+	where (\ref{pp:22}) and (\ref{pp:24}) are from (\ref{aux:11}) and hold simultaneously with probability at least $1-\sum_{t=1}^{T}\delta_t(1+\tau_t^d)$, and (\ref{pp:23}) is by hypothesis, as $\vx_t \in \arg\max_{\vx\in\wt{\Xspace}_t}(\wc{\mu}_t(\vx) + c^{+}\beta_t(\vx)$. Note that the latter is true only by virtue of the fact that both $[\vx^*]_t$ and $\vx_t$ belong to $\wt{\Xspace}_t$, as the optimization step of Algorithm \ref{alg:2} is restricted to~$\wt{\Xspace}_t$.
 	
 	Finally, we can bound the regret. With probability at least $1-\delta$:
 	\begin{align}
@@ -915,17 +919,11 @@ The proof follows the idea of the variational bound for the KL-divergence propos
         d_{\alpha}(\Psi \| \Phi)^{\alpha-1} & = \int \left( \frac{\Psi}{\Phi} \right)^{\alpha} \mathrm{d}\Phi \notag\\
         & = \int \left( \sum_{l=1}^L \sum_{k=1}^K \frac{\phi_{lk} P_l}{\psi_{lk} Q_k} \frac{\psi_{lk} Q_k}{\Phi} \right)^{\alpha} \mathrm{d}\Phi \notag \\
         & \le \int \sum_{l=1}^L \sum_{k=1}^K \frac{\psi_{lk} Q_k}{\Phi} \left(  \frac{\phi_{lk} P_l}{\psi_{lk} Q_k}  \right)^{\alpha} \mathrm{d}\Phi \label{eq:strangeBound}\\
-        & = \sum_{i=1}^n \sum_{j=1}^m \phi_{lk}^{\alpha} \psi_{lk}^{1-\alpha}  \int \left( \frac{P_l}{Q_k}  \right)^{\alpha} \mathrm{d}Q_k \notag \\
-        & = \sum_{i=1}^n \sum_{j=1}^m \phi_{lk}^{\alpha} \psi_{lk}^{1-\alpha}  d_{\alpha}(P_l \| Q_k)^{\alpha-1}, \notag
+        & = \sum_{l=1}^L \sum_{k=1}^K \phi_{lk}^{\alpha} \psi_{lk}^{1-\alpha}  \int \left( \frac{P_l}{Q_k}  \right)^{\alpha} \mathrm{d}Q_k \notag \\
+        & = \sum_{l=1}^L \sum_{k=1}^K \phi_{lk}^{\alpha} \psi_{lk}^{1-\alpha}  d_{\alpha}(P_l \| Q_k)^{\alpha-1}, \notag
     \end{align}
     where \eqref{eq:strangeBound} is obtained by Jensen inequality observing that $\frac{\psi_{lk} Q_k}{\Phi}$ is a distribution over $\{1,...,L\} \times \{1,...,K\}$.
 \end{proof}
-
-We now consider the case in which $f$ has just one mixture component, \ie $n = 1$. In this case, we have that $\sum_{i=1}^n \psi_{ij}= \psi_j = b_j$, therefore the result reduces to:
-\begin{equation}
-     d_{\alpha} (f \| g)^{\alpha-1} \le  \sum_{j=1}^m \phi_{j}^\alpha b_{j}^{1-\alpha} d_{\alpha} (f \| g_j)^{\alpha-1}.
-\end{equation}
-We can now minimize the bound over the $\phi_j$, subject to $\sum_{j=1}^m \phi_j = 1$, we get the following result.
 
 \armonic*
 \begin{proof}
@@ -937,13 +935,13 @@ We can now minimize the bound over the $\phi_k$, subject to $\sum_{k=1}^K \phi_k
     \begin{equation*}
         \mathcal{L}(\{\phi_k\}_{k=1,2,...,K}, \lambda) = \sum_{k=1}^K \phi_{k}^\alpha \beta_{k}^{1-\alpha} d_{\alpha} (P \| Q_k)^{\alpha-1} - \lambda \left( \sum_{k=1}^K \phi_k -1 \right)
     \end{equation*}
-    We take the partial derivatives \wrt the $\phi_k$ and the Lagrange multiplier $\lambda$.
+    We take the partial derivatives \wrt the $\phi_k$ and the Lagrange multiplier $\lambda$:
     \begin{align*}
         \frac{\partial \mathcal{L}}{\partial \phi_k} = \alpha \phi_k^{\alpha-1} \beta_j^{1-\alpha} d_{\alpha}(P \| Q_k)^{\alpha-1} - \lambda = 0 \implies \phi_k = \frac{\lambda^{\frac{1}{\alpha-1}}  \beta_j}{\alpha^{\frac{1}{\alpha-1}} d_{\alpha}(P \| Q_k)}.
     \end{align*}
     We now replace the expression of $\phi_k$ into the constraint.
     \begin{align*}
-        \sum_{j=1}^K \phi_k = \frac{\lambda^\frac{1}{\alpha-1}}{\alpha^\frac{1}{\alpha-1}}  \sum_{k=1}^L \frac{ \beta_k}{ d_{\alpha}(P \| Q_k)} = 1 \implies \lambda = \frac{\alpha}{\left( \sum_{k=1}^K \frac{ \beta_k}{ d_{\alpha}(P \| Q_k)}\right)^{{\alpha-1}}}.
+        \sum_{k=1}^K \phi_k = \frac{\lambda^\frac{1}{\alpha-1}}{\alpha^\frac{1}{\alpha-1}}  \sum_{k=1}^K \frac{ \beta_k}{ d_{\alpha}(P \| Q_k)} = 1 \implies \lambda = \frac{\alpha}{\left( \sum_{k=1}^K \frac{ \beta_k}{ d_{\alpha}(P \| Q_k)}\right)^{{\alpha-1}}}.
     \end{align*}
     And finally we get the expression for $\phi_k$:
     \begin{equation}
@@ -984,14 +982,14 @@ the structure of the arms induced by the fact that hyperpolicyes share informati
 
 \subsection{River Swim}
 \label{apx:expRS}
-In Figure~\ref{fig:rs_exp}, we report more details and experiments with additional versions of OPTIMIST and OPTIMIST2. We can see that all versions of OPTIMIST perform almost the same and they are all able to reach the global optimum consisting in crossing the river. This is also visible as the probability of performing action right tends to approach 1.
+In Figure~\ref{fig:rs_exp}, we report more details and additional versions of OPTIMIST and OPTIMIST2. We can see that all versions of OPTIMIST perform almost the same and they are all able to reach the global optimum consisting in crossing the river. This is also visible as the probability of performing action right tends to approach 1 while PGPE converges soon to the local optimum corresponding to $p=0$.
 
 \begin{figure*}[h!] 
 \vskip 0.2in
     \centering
     %\includegraphics[width=0.3\linewidth]{plots/LQG_mu_sigma.pdf}
     \includegraphics[width=0.8\linewidth]{plots/riverswim/plot.pdf}
-    \caption{Cumulative regret, Per-step regret, probability of right action and size of the discretization grid for the River Swim, comparing \algoname with two fixed discretizations (20 and 100 arms), OPTIMIST2 with three values of $\kappa$ and PGPE (10 runs, 95\% c.i.).} 
+    \caption{Cumulative regret, per-step regret, probability of right action and size of the discretization grid for the River Swim, comparing \algoname with two fixed discretizations (20 and 100 arms), OPTIMIST2 with three values of $\kappa$ and PGPE (10 runs, 95\% c.i.).} 
     \label{fig:rs_exp} 
   \vskip -0.2in
 \end{figure*}
