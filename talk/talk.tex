@@ -1,0 +1,96 @@
+\documentclass[aspectratio=169, table]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{arydshln}
+\usepackage[abs]{overpic}
+\usepackage{tikz}
+\usetikzlibrary{fadings}
+%\usepackage{enumitem}
+%\usepackage[table]{xcolor} 
+
+\usepackage{empheq}
+
+ \definecolor{redp}{rgb}{0.78, 0.03, 0.08}
+\definecolor{greenp}{rgb}{0.0, 0.51, 0.5}
+\definecolor{yellowp}{rgb}{0.59, 0.44, 0.09}
+\definecolor{greencol}{rgb}{0.0,0.4,0.0}
+\definecolor{fcolor}{rgb}{0.8, 0.4, 0.0}
+
+\newcommand{\enb}[1]{\textcolor{poliblue1}{\textbf{#1}}}
+\newcommand{\eno}[1]{\textcolor{orange}{\textbf{#1}}}
+\definecolor{softblue}{cmyk}{.2, .1, .1, .2}
+\newcommand{\soft}[1]{\textcolor{softblue}{#1}}
+
+\DeclareMathOperator*{\EV}{\mathbb{E}}
+\newcommand{\EVV}[2][\ppvect \in \ppspace]{\EV_{#1}\left[{#2}\right]}
+\newcommand{\norm}[2][\infty]{\left\|#2\right\|_{#1}}
+
+\title{Optimistic Policy Optimization via Multiple Importance Sampling}
+\date[AAA]{\vspace{0.2cm} \\ \small{ 11th June 2019 \\ Thirty-sixth International Conference on Machine Learning, Long Beach, CA, {USA}}}
+\author[M. Papini]{\textbf{Matteo Papini} \quad Alberto Maria Metelli\\
+						\small{Lorenzo Lupo \quad Marcello Restelli}}
+
+\usetheme{polimithx}
+\usetikzlibrary{calc}
+
+\usepackage[customcolors,shade]{hf-tikz}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% BIBLIOGRAPHY
+\usepackage{natbib}
+\bibliographystyle{apalike}
+% make bibliography entries smaller
+\renewcommand\bibfont{\scriptsize}
+% If you have more than one page of references, you want to tell beamer
+% to put the continuation section label from the second slide onwards
+\setbeamertemplate{frametitle continuation}[from second]
+
+%CUSTOM COMMANDS
+
+\usepackage[many]{tcolorbox}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{arrows,shapes}
+\usetikzlibrary{positioning}
+
+\usepackage{bm}
+\newcommand{\mathbr}[1]{\bm{\mathbf{#1}}}
+
+\DeclareMathOperator*{\ev}{\mathbb{E}}
+\DeclareMathOperator*{\Var}{\mathbb{V}\mathrm{ar}}
+\DeclareMathOperator*{\Cov}{\mathbb{C}\mathrm{ov}}
+\DeclareMathOperator*{\esssup}{ess\,sup}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\argsup}{arg\,sup}
+
+
+\newcommand{\Renyi}{R\'{e}nyi }
+
+\begin{document}
+
+\setbeamertemplate{caption}{\raggedright\insertcaption\par}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame} 
+\frametitle{Policy Search} 
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[allowframebreaks,fragile]
+\frametitle{References}
+\bibliography{../biblio.bib}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%Backup Slides
+
+
+\end{document}
