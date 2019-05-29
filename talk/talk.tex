@@ -60,20 +60,32 @@
 \titlepage
 \end{frame}
 
-\begin{frame} 
+\begin{frame}[noframenumbering]
 \frametitle{Policy Optimization} 
+\begin{columns}
+\begin{column}{.65\textwidth}
 \begin{itemize}
 	\item \enb{Parameter space} $\Theta \subseteq \Reals^d$
-	\item A parametric \enb{policy} for each $\vtheta\in\Theta$
-	\item Each inducing a distribution $p_{\vtheta}$ over \enb{trajectories}
-	\item A \enb{return} $R(\tau)$ for every trajectory $\tau$
-	\vfill
-	\begin{center}
-	\Large \enb{Goal:} $\max\limits_{\vtheta\in\Theta} J(\vtheta) = \Exp_{\tau\sim p_{\vtheta}}\left[R(\tau)\right]$
-	\end{center}
-	\vfill
-	\item On-line, iterative optimization
+	\item<2-> A parametric \enb{policy} for each $\vtheta\in\Theta$
+	\item<3-> Each inducing a distribution $p_{\vtheta}$ over \enb{trajectories}
+	\item<4-> A \enb{return} $R(\tau)$ for every trajectory $\tau$
+	\item<5-> {\enb{Goal:} $\max\limits_{\vtheta\in\Theta} J(\vtheta) = \Exp_{\tau\sim p_{\vtheta}}\left[R(\tau)\right]$}
+	\item<6-> Iterative optimization (\eg gradient ascent)
 \end{itemize}
+\end{column}
+\begin{column}{.35\textwidth}
+	\only{
+	\includegraphics[]{animation/spaces1.pdf}}<1>
+	\only{
+	\includegraphics[]{animation/spaces2.pdf}}<2>
+	\only{
+	\includegraphics[]{animation/spaces3.pdf}}<3>
+	\only{
+	\includegraphics[]{animation/spaces4.pdf}}<4>
+	\only{
+	\includegraphics[]{animation/spaces5.pdf}}<5->
+\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame} 
@@ -90,16 +102,25 @@
 \end{frame}
 
 \begin{frame} 
-\frametitle{Policy Optimization as a MAB } 
+\frametitle{Policy Optimization as a \only<2>{Correlated }MAB } 
+\begin{columns}
+\begin{column}{.65\textwidth}
 \begin{itemize}
 	\item \enb{Arms:} parameters $\vtheta$
 	\item \enb{Payoff:} expected return $J(\vtheta)$
-	\item \eno{Continuous MAB}~\citep{kleinberg2013bandits}: we \emph{need} structure
+	\item \eno{Continuous MAB}~\citep{kleinberg2013bandits}\only<1>{: we \emph{need} structure}
+	\item<2-> {\enb{Arm correlation}~\citep{pandey2007multi} through trajectory distributions}
 \end{itemize}
-\vfill
-\centering
-{\Large\enb{Arm correlation}~\citep{pandey2007multi} through trajectory distributions}
-
+\end{column}
+\begin{column}{.65\textwidth}
+\only<1>{
+	\includegraphics[]{animation/spaces6.pdf}
+}
+\only<2>{
+	\includegraphics[]{animation/spaces7.pdf}
+}
+\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame} 
@@ -108,22 +129,49 @@
 	\item A \enb{UCB-like} index~\citep{lai1985asymptotically}:
 	\begin{align*}
 	\large
-		B_t(\vtheta) =
-		\underbrace{\wc{\mu}_t(\vtheta)}_{\substack{\textbf{ESTIMATE:}\\\\\text{a \eno{truncated} \enb{multiple}}\\ \text{ importance sampling estimator~\cite{veach_optimally_1995,bubeck2013bandits}}}}
-		+
-		\underbrace{R_{\max}\left(\sqrt{2}+\frac{4}{3}\right)
-		\sqrt{\frac{d_{2}(p_{\vtheta}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}}}_{\substack{\textbf{EXPLORATION BONUS:}\\\\\text{\enb{distributional} distance} \\ \text{from previous arms}}}
+		B_t(\vtheta) \quad =
+		\underbrace{\wc{J}_t(\vtheta)}_{\substack{\textbf{ESTIMATE}\\\\\text{a \eno{truncated} \enb{multiple}}\\ \text{ importance sampling estimator~\cite{veach_optimally_1995,bubeck2013bandits}}}}
+		\only<1>{\phantom{
+			+\qquad
+			\underbrace{C\,
+				\sqrt{\frac{d_{2}(p_{\vtheta}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}}}_{\substack{\textbf{EXPLORATION BONUS}\\\\\text{\enb{distributional} distance} \\ \text{from previous arms}}}}}
+		\only<2->{
+		+\qquad
+		\underbrace{C\,
+		\sqrt{\frac{d_{2}(p_{\vtheta}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}}}_{\substack{\textbf{EXPLORATION BONUS:}\\\\\text{\enb{distributional} distance} \\ \text{from previous solutions}}}}
 	\end{align*}
+\end{itemize}
+%\only<1-2>{
+%	\begin{align*}
+%		&\wc{\mu}_t(\vtheta) = \sum_{k=0}^{t-1}
+%		\min\left\{M_{t}, \frac{p_{\vtheta}(\tau_k)}
+%		{\sum_{j=0}^{t-1}p_{\vtheta_j}(\tau_k)}\right\}R(\tau_k)
+%		\only<2>{
+%		&\Phi_t = \frac{1}{t}\sum_{k=0}^{t-1}p_{\vtheta_k}
+%	}
+%	\end{align*}
+%}
+\only<1>{
+	\centering
+	\includegraphics[]{animation/spaces8.pdf}
+}
+\only<2>{
+	\centering
+	\includegraphics[]{animation/spaces9.pdf}
+}
+\only<3->{
+\begin{itemize}
 	\item Select $\vtheta_t = \arg\max\limits_{\vtheta\in\Theta} B_t(\vtheta)$
 \end{itemize}
+}
 \end{frame}
 
 \begin{frame} 
 \frametitle{Sublinear Regret} 
 \begin{itemize}
-	\item Recall $\mathop{Regret}(T) = \sum_{t=0}^T J(\vtheta^*) - J(\vtheta_t)$
+	\item $\mathop{Regret}(T) = \sum_{t=0}^T J(\vtheta^*) - J(\vtheta_t)$
 	\vfill
-	\item Consider a \enb{compact}, $d$-dimensional parameter space $\Theta$
+	\item \enb{Compact}, $d$-dimensional parameter space $\Theta$
 	\vfill
 	\item Under \enb{mild assumptions} on the policy class, with high probability:
 	\Large
@@ -138,7 +186,11 @@
 \frametitle{Empirical Results} 
 \begin{columns}
 	\begin{column}{.5\textwidth}
-		\includegraphics[]{river.pdf}
+		\centering
+		{\bf River Swim}
+		\begin{figure}
+			\includegraphics[]{river.pdf}
+		\end{figure}
 	\end{column}
 	\begin{column}{.5\textwidth}
 		\eno{Caveats}

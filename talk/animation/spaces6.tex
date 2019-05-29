@@ -1,0 +1,22 @@
+\documentclass[tikz,border=3.14pt]{standalone}
+\usepackage{../mymacros}
+\usepackage{tikz-3dplot}
+\begin{document}
+\begin{tikzpicture}[]
+\draw[] (0,0,0) ellipse (2 and .75) node[right, shift={(1,1)}]{$\Theta$};
+\draw [fill, color=blue!60!white] (-0.7,-0.3,0) circle (1.5pt) node[above](a){$\vtheta_1$};
+\draw [fill, color=red!60!white] (0.9,0.1,0) circle (1.5pt) node[above](b){$\vtheta_1$};
+\phantom{
+\draw[] (0,-3.5,0) ellipse (2.5 and .75) node[right, shift={(1,1)}]{$\mathcal{T}$};
+\draw[fill, inner color=blue!60!white, outer color=white, draw=none, color=white] (-0.7,-3.5,0) ellipse (1.25 and .4) node[above, shift={(1,.2)}, color=blue!60!white]{$p_{\vtheta}$};
+\draw[dashed, color=blue!60!white] (a) -- (-0.7,-3.5,0);
+\draw[color=blue!60!white] (-0.7,-5,0) node (c) {$J(\vtheta)$};
+\draw[->, dashed, color=blue!60!white] (-0.7,-3.5,0) -- (c);
+}
+\draw[color=blue!60!white] (-0.7,-5,0) node (c) {$J(\vtheta_1)$};
+\draw[->, dashed, color=blue!60!white] (a) -- (c);
+\draw[color=red!60!white] (0.9,-5,0) node (d) {$J(\vtheta_2)$};
+\draw[->, dashed, color=red!60!white] (b) -- (d);
+\draw[fill=black] (-1.5,-1.5,0) rectangle (1.7,-3.5,0) node[pos=.5, color=white]{\bf\Large MAB};
+\end{tikzpicture}
+\end{document}

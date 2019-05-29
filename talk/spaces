@@ -1,0 +1,13 @@
+\documentclass[tikz,border=3.14pt]{standalone}
+\usepackage{tikz-3dplot}
+\usetikzlibrary{arrows.meta}
+\begin{document}
+\tdplotsetmaincoords{70}{30}
+\begin{tikzpicture}[scale=2.0, line cap=round, line join=round, >=Triangle,tdplot_main_coords]
+\draw[->] (0,0,0) -- (3,0,0)node[below]{$x$};
+\draw[->] (0,0,0) -- (0,3,0)node[left]{$y$};
+\draw[->] (0,0,0) -- (0,0,3)node[left]{$z$};
+\draw[color=red] (0,0,0) ellipse (2.5cm and 1.00cm);
+\draw [fill] (0,0,0) circle (1.5pt);
+\end{tikzpicture}
+\end{document}
