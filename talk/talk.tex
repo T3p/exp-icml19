@@ -65,12 +65,12 @@
 \begin{columns}
 \begin{column}{.65\textwidth}
 \begin{itemize}
-	\item \enb{Parameter space} $\Theta \subseteq \Reals^d$
-	\item<2-> A parametric \enb{policy} for each $\vtheta\in\Theta$
-	\item<3-> Each inducing a distribution $p_{\vtheta}$ over \enb{trajectories}
-	\item<4-> A \enb{return} $R(\tau)$ for every trajectory $\tau$
-	\item<5-> {\enb{Goal:} $\max\limits_{\vtheta\in\Theta} J(\vtheta) = \Exp_{\tau\sim p_{\vtheta}}\left[R(\tau)\right]$}
-	\item<6-> Iterative optimization (\eg gradient ascent)
+	\item \enb{Parameter space} $\Theta \subseteq \Reals^d$\vfill
+	\item<2-> A parametric \enb{policy} for each $\vtheta\in\Theta$\vfill
+	\item<3-> Each inducing a distribution $p_{\vtheta}$ over \enb{trajectories}\vfill
+	\item<4-> A \enb{return} $R(\tau)$ for every trajectory $\tau$\vfill
+	\item<5-> {\large\enb{Goal:} $\max\limits_{\vtheta\in\Theta} J(\vtheta) = \Exp_{\tau\sim p_{\vtheta}}\left[R(\tau)\right]$}\vfill
+	\item<6-> Iterative optimization (\eg gradient ascent)\vfill
 \end{itemize}
 \end{column}
 \begin{column}{.35\textwidth}
@@ -91,13 +91,13 @@
 \begin{frame} 
 \frametitle{Exploration in Policy Optimization} 
 \begin{itemize}
-	\item \enb{Exploration-exploitation} trade-off
-	\item \eno{Problem:} the underlying Markov process is often \eno{continuous}
-	\item \enb{Undirected} exploration: entropy bonus~\citep{haarnoja2018soft}
-	\item \enb{Directed} exploration: pseudo-counts~\citep{bellemare2016unifying}
-	\vfill
+	\item<1-> \enb{Exploration-exploitation} trade-off\vfill
+	\item<2-> The underlying Markov process is often \eno{continuous}\vfill
+	\item<3-> \enb{Undirected} exploration: entropy bonus~\citep{haarnoja2018soft}\vfill
+	\item<4-> \enb{Directed} exploration: pseudo-counts~\citep{bellemare2016unifying}\vfill
+	\only<5->{
 	\centering
-	{\Large\eno{Lack} of theoretical guarantees}
+	{\Large\eno{Lack} of theoretical guarantees}}\vfill
 \end{itemize}
 \end{frame}
 
@@ -106,17 +106,23 @@
 \begin{columns}
 \begin{column}{.65\textwidth}
 \begin{itemize}
-	\item \enb{Arms:} parameters $\vtheta$
-	\item \enb{Payoff:} expected return $J(\vtheta)$
-	\item \eno{Continuous MAB}~\citep{kleinberg2013bandits}\only<1>{: we \emph{need} structure}
-	\item<2-> {\enb{Arm correlation}~\citep{pandey2007multi} through trajectory distributions}
+	\item<1-> \enb{Arms:} parameters $\vtheta$\vfill
+	\item<2-> \enb{Payoff:} expected return $J(\vtheta)$\vfill
+	\item<3-> \eno{Continuous MAB}~\citep{kleinberg2013bandits}\only<1>{: we \emph{need} structure}\vfill
+	\item<4-> {\enb{Arm correlation}~\citep{pandey2007multi} through trajectory distributions}\vfill
 \end{itemize}
 \end{column}
 \begin{column}{.65\textwidth}
 \only<1>{
-	\includegraphics[]{animation/spaces6.pdf}
+	\includegraphics[]{animation/spaces10.pdf}
 }
 \only<2>{
+	\includegraphics[]{animation/spaces11.pdf}
+}
+\only<3>{
+	\includegraphics[]{animation/spaces6.pdf}
+}
+\only<4>{
 	\includegraphics[]{animation/spaces7.pdf}
 }
 \end{column}
@@ -169,11 +175,11 @@
 \begin{frame} 
 \frametitle{Sublinear Regret} 
 \begin{itemize}
-	\item $\mathop{Regret}(T) = \sum_{t=0}^T J(\vtheta^*) - J(\vtheta_t)$
+	\item<1-> $\mathop{Regret}(T) = \sum_{t=0}^T J(\vtheta^*) - J(\vtheta_t)$
 	\vfill
-	\item \enb{Compact}, $d$-dimensional parameter space $\Theta$
+	\item<2-> \enb{Compact}, $d$-dimensional parameter space $\Theta$
 	\vfill
-	\item Under \enb{mild assumptions} on the policy class, with high probability:
+	\item<3-> Under \enb{mild assumptions} on the policy class, with high probability:
 	\Large
 	\begin{align*}
 		\mathop{Regret}(T) = \wt{\mathcal{O}}\left(\sqrt{dT}\right)
@@ -193,12 +199,13 @@
 		\end{figure}
 	\end{column}
 	\begin{column}{.5\textwidth}
+		\only<2->{
 		\eno{Caveats}
 		\begin{itemize}
-			\item Easy implementation only for parameter-based exploration
+			\item Easy implementation only for parameter-based exploration~\cite{sehnke2008policy}
 			\item Difficult optimization $\implies$ discretization
 			\item ...
-		\end{itemize}
+		\end{itemize}}
 	\end{column}
 \end{columns}
 \end{frame}
@@ -211,10 +218,10 @@
 
 \begin{minipage}[]{.5\paperwidth}
 	\begin{itemize}
-		\item Poster \textbf{\#103}
-		\item Code: \url{github.com/WolfLo/optimist}
-		\item Contact: matteo.papini@polimi.it
-		\item Web page: \url{t3p.github.io/icml19} 
+		\item[] Poster \textbf{\#103}
+		\item[] Code: \url{github.com/WolfLo/optimist}
+		\item[] Contact: matteo.papini@polimi.it
+		\item[] Web page: \url{t3p.github.io/icml19} 
 	\end{itemize}
 \end{minipage}
 \hspace{2cm}%
