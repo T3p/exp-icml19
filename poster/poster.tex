@@ -1,0 +1,385 @@
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+\documentclass[landscape,a0paper,fontscale=0.35]{baposter}
+
+
+
+% For graphs
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{eso-pic}
+\usepackage{layout}
+\usepackage{fancybox}
+\usepackage{calc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{relsize}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage{bm}
+\usepackage{url}
+\usepackage{xfrac}
+\usepackage{natbib}
+\setcitestyle{round}
+\usepackage{mathtools}
+\usepackage{cancel}
+\usepackage{paralist}
+\usepackage{nicefrac}
+\usepackage[export]{adjustbox} % loads also graphicx
+\usepackage{caption}
+\usepackage{xfrac}
+\usepackage{multicol}
+\newcommand{\figurewidth}{7cm}
+\newcommand{\figureheight}{3cm}
+\usepackage{palatino}
+\usetikzlibrary{calc}
+
+\renewcommand{\sfdefault}{lmss}
+\sffamily
+
+\newcommand{\listhead}[1] {\textsc{\underline{#1}}}
+
+\usepackage{tikz,pgfplots}
+\pgfplotsset{compat=newest}
+\tikzstyle{every picture}+=[remember picture]
+\tikzstyle{na} = [baseline=-.5ex]
+\everymath{\displaystyle}
+\usetikzlibrary{arrows,shapes}
+\usetikzlibrary{positioning}
+
+\usepackage{wasysym}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\usepackage{multirow}
+
+\usepackage{tabu}
+
+\usepackage{xspace}
+\DeclareRobustCommand{\eg}{e.g.,\@\xspace}
+\DeclareRobustCommand{\ie}{i.e.,\@\xspace}
+\DeclareRobustCommand{\wrt}{w.r.t.\@\xspace}
+\DeclareRobustCommand{\wp}{w.p.\@\xspace}
+
+\usepackage{bm}
+\newcommand{\mathbr}[1]{\bm{\mathbf{#1}}}
+
+\usepackage{lettrine}
+\usepackage{xspace}
+
+%=============================================
+% General commands
+%---------------------------------------------
+\newcommand{\transpose}[1]{{#1}^\texttt{T}}
+\DeclareMathOperator*{\EV}{\mathbb{E}}
+\DeclareMathOperator*{\argmax}{\arg\,\max}
+\DeclareMathOperator*{\argmin}{\arg\,\min}
+\DeclareMathOperator*{\arginf}{\arg\,\inf}
+\newcommand{\EVV}[2][x]{\EV_{#1}\left[{#2}\right]}
+\newcommand{\norm}[2][\infty]{\left\|#2\right\|_{#1}}
+\newcommand{\indfun}[1]{\mathds{1}\left(#1\right)}
+\newcommand{\realspace}{\mathbb R}		% realspace
+\newcommand{\natspace}{\mathbb N}		% naturalspace
+\newcommand{\pdfunc}[1]{p\left(#1\right)}	% density function
+\newcommand{\prob}[1]{Pr\left(#1\right)}	% probability
+\newcommand{\funoper}[1]{\left[#1\right]}	% function operator
+\newcommand{\apx}[1]{\widetilde{#1}}		% approximation symbol
+\newcommand{\e}{\boldsymbol{e}} 		% unit vector
+\newcommand{\texsub}[1]{\textsc{\tiny #1}}
+
+%=============================================
+%%Custom commands
+\DeclareMathOperator*{\ev}{\mathbb{E}}
+\DeclareMathOperator*{\Var}{\mathbb{V}\mathrm{ar}}
+\DeclareMathOperator*{\Cov}{\mathbb{C}\mathrm{ov}}
+\DeclareMathOperator*{\esssup}{ess\,sup}
+\newcommand{\Renyi}{R\'{e}nyi }
+\newcommand{\de}{\,\mathrm{d}}
+\newcommand{\vtheta}{\bm{\theta}}
+\newcommand{\vrho}{\bm{\rho}}
+\newcommand{\vmu}{\bm{\mu}}
+\newcommand{\vsigma}{\bm{\sigma}}
+\newcommand{\gradHyJ}{\nabla_{\vrho}J(\vrho)}
+\newcommand{\hyscore}[1][\vtheta]{\nabla_{\vrho}\log\nu_{\vrho}(#1)}
+\newcommand{\hyscoreprime}[1][\vtheta]{\nabla_{\vrho'}\log\nu_{\vrho'}}
+\newcommand{\gradHyJApp}{\widehat{\nabla}_{\vrho}J(\vrho)}
+\newcommand{\gradHyJAppPrime}{\widehat{\nabla}_{\vrho'}J(\vrho')}
+\newcommand{\ess}{\mathrm{ESS}}
+\newcommand{\wt}[1]{\widetilde{#1}}
+\newcommand{\wh}[1]{\widehat{#1}}
+
+%Colors
+\definecolor{darkcyan}{rgb}{0.0, 0.55, 0.55}
+\definecolor{darkcerulean}{rgb}{0.03, 0.27, 0.49}
+\definecolor{crimson}{rgb}{0.86, 0.08, 0.24}
+\definecolor{limegreen}{rgb}{0.2, 0.8, 0.2}
+\colorlet{fcolor}{darkcerulean}
+\colorlet{errcolor}{darkcyan}
+\definecolor{projcolor}{named}{black}
+\colorlet{dotcolor}{fcolor}
+\colorlet{boundcolor}{violet}
+\definecolor{newdotcolor}{named}{green}
+\definecolor{arrowcolor}{named}{blue}
+\definecolor{distcolor}{rgb}{0.36, 0.11, 0.63}
+
+\usetikzlibrary{tikzmark}
+
+%Decorations
+\newcommand{\bad}[1]{\textcolor{crimson}{\textbf{#1}}}
+\newcommand{\good}[1]{\textcolor{limegreen}{\textbf{#1}}}
+
+%Fake items
+\newcommand{\tabitem}[1]{~~\llap{\textbullet}~~ #1 \hfill\mbox{}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Some math symbols used in the text
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Multicol Settings
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength{\columnsep}{1.5em}
+\setlength{\columnseprule}{0mm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Save space in lists. Use this after the opening of the list
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\compresslist}{%
+\setlength{\itemsep}{1pt}%
+\setlength{\parskip}{0pt}%
+\setlength{\parsep}{0pt}%
+}
+
+\newcommand{\mildcompresslist}{%
+\setlength{\itemsep}{2pt}%
+\setlength{\parskip}{1pt}%
+\setlength{\parsep}{1pt}%
+}
+
+\captionsetup{justification=raggedright,singlelinecheck=false}
+
+%Reduce linespace in biblio
+\setlength{\bibsep}{1.5pt}
+
+\usepackage[many]{tcolorbox}
+\usetikzlibrary{decorations.pathreplacing}
+
+\usepackage{stackengine}
+\usepackage{scalerel}
+\newcommand\dangersign[1][2ex]{%
+	\renewcommand\stacktype{L}%
+	\scaleto{\stackon[1.5pt]{\color{crimson}$\triangle$}{\tiny \bfseries{!}}}{#1}%
+}
+
+\definecolor{amethyst}{rgb}{0.6, 0.4, 0.8}
+%\newcommand{\firstletter}[1]{{\fcolorbox{black}{black}{\scalebox{2}{\fontsize{24pt}{0pt}\selectfont \textcolor{white}{\textbf{#1}}}}}}
+
+%Transparent boxes
+\makeatletter 
+\renewcommand{\baposter@box@drawbackground@plain}[2]{\tikzset{box colors/.style={fill=#1,fill opacity=1}} \fill[box colors] \baposterBoxGetShape;}
+\makeatother
+
+%Plot
+\usepgfplotslibrary{fillbetween}
+\def \firstmode {4}
+\def \secondmode {10}
+
+\def \p {6.2}
+\def \newp {9.25}
+\def \firstx {7.22}
+\def \secondx {8.23}
+\pgfplotsset{ticks=none,
+	domain=-1:15,
+	/pgf/declare function={
+		f(\x) = 3+.5*exp(-((\x-\firstmode)/2)^2) + 4*exp(-((\x-\secondmode)/2)^2) - exp(\x - 14) - 2*exp(-\x);
+	},
+	/pgf/declare function={
+		err(\x) = 0.5+0.2*(\x-\p)^2;
+	},
+	/pgf/declare function={
+		bound(\x) = f(\x) - err(\x) - .5;
+	},
+	layers/my layer set/.define layer set={
+		background,
+		pre main,
+		main,
+		foreground
+	}{},
+	% activate the newly created layer set
+	set layers=my layer set,
+}
+
+%\newcommand*\firstletter[1]{\tikz[baseline=(char.base)]{
+%            \node[shape=circle,draw,inner sep=2pt] (char) {\scalebox{2}{\fontsize{24pt}{0pt}\selectfont \textcolor{white}{\textbf{#1}}}};}}
+%\newcommand\firstletter[1]{\tikz{
+%            \node[shape=circle,draw] (char) {#1};}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Begin of Document
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Here starts the poster
+%%%---------------------------------------------------------------------------
+%%% Format it to your taste with the options
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\background{%
+}
+
+
+% Define some colors
+\definecolor{blue900}{HTML}{0D47A1}
+\definecolor{blue800}{HTML}{1565C0}
+\definecolor{lightblue}{rgb}{0.145,0.6666,1}
+
+% \begin{tikzpicture}
+%  	\pgfmathsetseed{100000}
+%  	\foreach \i in {1,...,300}
+%		\node[circle,draw=none,fill=violet!15,minimum size=50 + rand * 30]
+%        () at (rand * \paperwidth + \paperwidth, rand * \paperheight + \paperheight) {};
+%  \end{tikzpicture}
+
+\begin{poster}%
+  % Poster Options
+  {
+  % Show grid to help with alignment
+  columns=4,
+  grid=false,
+  % Column spacing
+  colspacing=1em,
+  % Color style
+  bgColorOne=white,
+  bgColorTwo=white,
+  borderColor=blue900,
+  headerColorOne=blue800,
+  headerColorTwo=blue800,
+  headerFontColor=white,
+  boxColorOne=white,
+  boxColorTwo=lightblue,
+  % Format of textbox
+  textborder=roundedleft,
+  % Format of text header
+  eyecatcher=true,
+  headerborder=closed,
+  headerheight=0.095\textheight,
+%  textfont=\sc, An example of changing the text font
+  headershape=roundedright,
+  headershade=shadelr,
+  headerfont=\large\bf\textsc, %Sans Serif
+  textfont={\setlength{\parindent}{1.5em}},
+  boxshade=plain,
+%  background=shade-tb,
+  background=user,
+  linewidth=2pt
+  }
+  % Eye Catcher
+  % {\includegraphics[height=9em]{./pics/airlab_logo_reflect.png}} 
+  {\hspace{0.5cm} \includegraphics[height=7.0em]{./pics/polilogo/logoPoliBlue_poster.png} \hspace{2cm}}
+%   {\hspace{3.5cm}}
+  % Title
+  {\bf\textsc{Optimistic Policy Optimization via Multiple Importance Sampling}\vspace{0.1em}}
+  % Authors
+  {\textsc{Matteo Papini, Alberto M. Metelli, Lorenzo Lupo and Marcello Restelli}\\ 
+  {\normalsize \texttt{\{matteo.papini, albertomaria.metelli, marcello.restelli\}@polimi.it, lorenzo.lupo@mail.polimi.it}}
+  }
+  % University logo
+  {% The makebox allows the title to flow into the logo, this is a hack because of the L shaped logo.
+    %\includegraphics[height=9.0em]{./pics/PoliMI.pdf}%\hspace{.5cm}
+    {\includegraphics[height=7.0em]{../talk/qr.png}}
+  }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Now define the boxes that make up the poster
+%%%---------------------------------------------------------------------------
+%%% Each box has a name and can be placed absolutely or relatively.
+%%% The only inconvenience is that you can only specify a relative position 
+%%% towards an already declared box. So if you have a box attached to the 
+%%% bottom, one to the top and a third one which should be in between, you 
+%%% have to specify the top and bottom boxes before you specify the middle 
+%%% box.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headerbox{Motivation and Idea}{name=problem,column=0,row=0,span=1}{
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headerbox{Policy Optimization}{name=polopt,column=0,row=1,span=1, below=problem}{
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headerbox{Multiple Importance Sampling}{name=mis,column=0,row=2,span=1, below=polopt, above=bottom}{
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headerbox{Robust Multiple Importance Sampling Estimation}{name=robust,column=1,row=0,span=2}{
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headerbox{Algorithm}{name=ucb,column=1,row=1,span=2, below=robust}{
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headerbox{Regret Analysis}{name=regret,column=1,row=2,span=2, below=ucb, above=bottom}{
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headerbox{Implementation}{name=imp,column=3,row=0,span=1}{
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headerbox{Experiments}{name=exp,column=3,row=1,span=1, below=imp}{
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headerbox{References}{name=ref,column=3,row=2,span=1, below=exp, above=bottom}{
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\tiny
+	\setlength{\bibsep}{0pt plus 0.3ex}
+	\bibliographystyle{abbrvnat}
+	\begingroup
+	\renewcommand{\section}[2]{}%
+	\bibliography{poster.bib}
+	\endgroup
+}
+
+\end{poster}
+
+
+
+\end{document}

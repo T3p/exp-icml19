@@ -88,7 +88,9 @@
 	\only{
 	\includegraphics[]{animation/spaces4.pdf}}<4>
 	\only{
-	\includegraphics[]{animation/spaces5.pdf}}<5->
+	\includegraphics[]{animation/spaces5.pdf}}<5>
+	\only{
+	\includegraphics[]{animation/spaces13.pdf}}<6->
 \end{overlayarea}
 \end{column}
 \end{columns}
@@ -108,13 +110,15 @@
 \begin{overlayarea}{\textwidth}{.25\textheight}
 \centering
 \vspace{-40pt}
-\only<5->
-{\Large \enb{If only this was a Multi-Armed Bandit...}}
+\only<5>
+{\Large \enb{If only this were a Multi-Armed Bandit...}}
+\only<6->
+{\Large \enb{If only this were a} \eno{Correlated} \enb{Multi-Armed Bandit...}}
 \end{overlayarea}
 \end{frame}
 
 \begin{frame} 
-\frametitle{Policy Optimization as a \only<4->{Correlated }MAB } 
+\frametitle{Policy Optimization as a Correlated MAB } 
 \begin{columns}
 \begin{column}{.65\textwidth}
 \begin{overlayarea}{\textwidth}{.75\textheight}
@@ -124,6 +128,7 @@
 	\item<2-> \enb{Payoff:} expected return $J(\vtheta)$\vfill
 	\item<3-> \eno{Continuous MAB}~\citep{kleinberg2013bandits}\only<1>{: we \emph{need} structure}\vfill
 	\item<4-> {\enb{Arm correlation}~\citep{pandey2007multi} through trajectory distributions}\vfill
+	\item<5-> \enb{Importance Sampling (IS)}
 \end{itemize}
 \end{overlayarea}
 \end{column}
@@ -140,6 +145,9 @@
 }
 \only<4>{
 	\includegraphics[]{animation/spaces7.pdf}
+}
+\only<5>{
+	\includegraphics[]{animation/spaces12.pdf}
 }
 \end{overlayarea}
 \end{column}
@@ -163,7 +171,7 @@
 		\only<2->{
 		+\qquad
 		\underbrace{C\,
-		\sqrt{\frac{d_{2}(p_{\vtheta}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}}}_{\substack{\textbf{EXPLORATION BONUS:}\\\\\text{\enb{distributional} distance} \\ \text{from previous solutions}}}}
+		\sqrt{\frac{{\color{orange!80!black}d_{2}(p_{\vtheta}\|\Phi_{t})}\log\frac{1}{\delta_t}}{t}}}_{\substack{\textbf{EXPLORATION BONUS:}\\\\\text{\enb{distributional} distance} \\ \text{from previous solutions}}}}
 	\end{align*}
 \end{itemize}
 %\only<1-2>{
