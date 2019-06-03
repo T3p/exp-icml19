@@ -33,6 +33,7 @@
 \newcommand{\figureheight}{3cm}
 \usepackage{palatino}
 \usetikzlibrary{calc}
+\usepackage{mymacros}
 
 \renewcommand{\sfdefault}{lmss}
 \sffamily
@@ -71,43 +72,9 @@
 %=============================================
 % General commands
 %---------------------------------------------
-\newcommand{\transpose}[1]{{#1}^\texttt{T}}
-\DeclareMathOperator*{\EV}{\mathbb{E}}
-\DeclareMathOperator*{\argmax}{\arg\,\max}
-\DeclareMathOperator*{\argmin}{\arg\,\min}
-\DeclareMathOperator*{\arginf}{\arg\,\inf}
-\newcommand{\EVV}[2][x]{\EV_{#1}\left[{#2}\right]}
-\newcommand{\norm}[2][\infty]{\left\|#2\right\|_{#1}}
-\newcommand{\indfun}[1]{\mathds{1}\left(#1\right)}
-\newcommand{\realspace}{\mathbb R}		% realspace
-\newcommand{\natspace}{\mathbb N}		% naturalspace
-\newcommand{\pdfunc}[1]{p\left(#1\right)}	% density function
-\newcommand{\prob}[1]{Pr\left(#1\right)}	% probability
-\newcommand{\funoper}[1]{\left[#1\right]}	% function operator
-\newcommand{\apx}[1]{\widetilde{#1}}		% approximation symbol
-\newcommand{\e}{\boldsymbol{e}} 		% unit vector
-\newcommand{\texsub}[1]{\textsc{\tiny #1}}
 
 %=============================================
 %%Custom commands
-\DeclareMathOperator*{\ev}{\mathbb{E}}
-\DeclareMathOperator*{\Var}{\mathbb{V}\mathrm{ar}}
-\DeclareMathOperator*{\Cov}{\mathbb{C}\mathrm{ov}}
-\DeclareMathOperator*{\esssup}{ess\,sup}
-\newcommand{\Renyi}{R\'{e}nyi }
-\newcommand{\de}{\,\mathrm{d}}
-\newcommand{\vtheta}{\bm{\theta}}
-\newcommand{\vrho}{\bm{\rho}}
-\newcommand{\vmu}{\bm{\mu}}
-\newcommand{\vsigma}{\bm{\sigma}}
-\newcommand{\gradHyJ}{\nabla_{\vrho}J(\vrho)}
-\newcommand{\hyscore}[1][\vtheta]{\nabla_{\vrho}\log\nu_{\vrho}(#1)}
-\newcommand{\hyscoreprime}[1][\vtheta]{\nabla_{\vrho'}\log\nu_{\vrho'}}
-\newcommand{\gradHyJApp}{\widehat{\nabla}_{\vrho}J(\vrho)}
-\newcommand{\gradHyJAppPrime}{\widehat{\nabla}_{\vrho'}J(\vrho')}
-\newcommand{\ess}{\mathrm{ESS}}
-\newcommand{\wt}[1]{\widetilde{#1}}
-\newcommand{\wh}[1]{\widehat{#1}}
 
 %Colors
 \definecolor{darkcyan}{rgb}{0.0, 0.55, 0.55}
@@ -122,12 +89,19 @@
 \definecolor{newdotcolor}{named}{green}
 \definecolor{arrowcolor}{named}{blue}
 \definecolor{distcolor}{rgb}{0.36, 0.11, 0.63}
+\definecolor{poliblue1}{RGB}{93,138,168} 
+\definecolor{poliblue2}{RGB}{41,76,113}
+\definecolor{poliblue3}{RGB}{25,43,67}
+\definecolor{orangep}{RGB}{251,146,116}
 
 \usetikzlibrary{tikzmark}
 
 %Decorations
 \newcommand{\bad}[1]{\textcolor{crimson}{\textbf{#1}}}
 \newcommand{\good}[1]{\textcolor{limegreen}{\textbf{#1}}}
+
+\newcommand{\enb}[1]{\textcolor{poliblue1}{\textbf{#1}}}
+\newcommand{\eno}[1]{\textcolor{orangep}{\textbf{#1}}}
 
 %Fake items
 \newcommand{\tabitem}[1]{~~\llap{\textbullet}~~ #1 \hfill\mbox{}}
@@ -305,6 +279,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \headerbox{Motivation and Idea}{name=problem,column=0,row=0,span=1}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\noindent\:\textbf{Problem:}
+	\begin{itemize}
+		\item \textbf{Policy Optimization (PO)} methods \eno{neglect exploration}
+		\item Existing exploration strategies are \eno{undirected}
+		\item Lack of \enb{provably efficient} solutions
+	\end{itemize}
+
+	\noindent\:\textbf{Idea:} Frame PO as a \textbf{Multi-Armed Bandit (MAB)} over parameter space \emph{with a lot of structure}
+	
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -312,6 +295,21 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \headerbox{Policy Optimization}{name=polopt,column=0,row=1,span=1, below=problem}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\noindent\: \textbf{Vanilla:}
+	\begin{itemize}
+		\item \eno{Continuous} MDP $\left\langle\Sspace,\Aspace,\Tran,\Rew,\gamma,\init\right\rangle$
+		\item \textbf{Trajectory} $\tau = s_0, a_0, r_1, s_1, \dots r_H$
+		\item Return $\Rew(\tau) = \sum_{h=0}^{H-1}\gamma^h r_{h+1}$
+		\item \enb{Parametric} policy $\pi_{\vtheta}:\Sspace\to\Aspace$ with $\vtheta\in\Theta$
+		\item Induced \textbf{trajectory distribution} $p_{\vtheta}(\tau)$
+		\item \textbf{Performance} $J(\vtheta) = \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
+		\item Find $\vtheta^*=\arg\max_{\vtheta\in\Theta} J(\vtheta)$
+	\end{itemize}
+\noindent\: \textbf{Parameter-based exploration~\citep{sehnke2008policy}:}
+\begin{itemize}
+	\item \enb{Hyperpolicy} $\nu_{\vxi}(\vtheta)$ with $\vxi\in\Xi$ \quad(\eg Gaussian)
+	\item Find $\vxi^* = \arg\max_{\vxi\in\Xi}\mathbb{E}_{\vtheta\sim\nu_{\vxi}}\left[J(\vtheta)\right]$
+\end{itemize}
 
 }
 
@@ -320,6 +318,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \headerbox{Multiple Importance Sampling}{name=mis,column=0,row=2,span=1, below=polopt, above=bottom}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\begin{itemize}
+		\item Samples from many \textbf{behavioral distributions}:\\ $z_0 \sim q_0, z_1 \sim q_1, \dots, z_K \sim q_K$
+		\item \textbf{Target distribution} $p$
+		\item Estimate $\mu=\mathbb{E}_{z\sim p}\left[f(z)\right]$ from available samples
+		\item \textbf{Mixture} of behaviorals: $\vphi(z) = \frac{1}{K}\sum_{k=1}^K q_k(z)$
+		\item \enb{Balance Heuristic (BH)}~\citep{veach_optimally_1995}:
+		\begin{align*}
+		\wh{\mu}_{\text{BH}} \coloneqq \frac{1}{K}\sum_{k=1}^K\frac{p(z_{k})}{\vphi(z_k)}f(z_{k})\qquad\text{(unbiased)}
+		\end{align*}
+%		\item Unbiased: $\mathbb{E}[\wh{\mu}_{\text{BH}}] = \mu$
+		\item Possibly \eno{high variance}:
+			\begin{align*}
+				&\Var\left[\wh{\mu}_{\text{BH}}\right] \leq \norm[\infty]{f}^2\frac{d_2(P\|\Phi)}{K} \leq 
+				\frac{\norm[\infty]{f}^2} {\sum_{k=1}^K \frac{1}{ d_{2}(p \| q_k)}} \\
+				&d_{2}(p\|q) \coloneqq \int_{\mathcal{Z}}\left(\frac{p(z)}{q(z)}\right)^{2}\de z \qquad \text{(exp. Renyi divergence)}
+			\end{align*}
+	\end{itemize}
 	
 }
 
