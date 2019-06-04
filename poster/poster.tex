@@ -34,6 +34,7 @@
 \usepackage{palatino}
 \usetikzlibrary{calc}
 \usepackage{mymacros}
+\usepackage{mathabx}
 
 \renewcommand{\sfdefault}{lmss}
 \sffamily
@@ -286,8 +287,11 @@
 		\item Lack of \enb{provably efficient} solutions
 	\end{itemize}
 
-	\noindent\:\textbf{Idea:} Frame PO as a \textbf{Multi-Armed Bandit (MAB)} over parameter space \emph{with a lot of structure}
-	
+	\noindent\:\textbf{Idea:} 
+	\begin{itemize}
+		\item Frame PO as a \textbf{Multi-Armed Bandit (MAB)} over parameter space \emph{with \enb{arm correlation}}
+		\item Apply \textbf{Optimism in Face of Uncertainty (OFU)}
+	\end{itemize}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -295,17 +299,17 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \headerbox{Policy Optimization}{name=polopt,column=0,row=1,span=1, below=problem}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	\noindent\: \textbf{Vanilla:}
+	\noindent\: \textbf{Vanilla action-based PO~\citep{peters2008reinforcement}}
 	\begin{itemize}
 		\item \eno{Continuous} MDP $\left\langle\Sspace,\Aspace,\Tran,\Rew,\gamma,\init\right\rangle$
-		\item \textbf{Trajectory} $\tau = s_0, a_0, r_1, s_1, \dots r_H$
+		\item \textbf{Trajectory} $\tau = s_0, a_0, r_1, s_1, \dots r_H \quad\in\quad \mathcal{T}$
 		\item Return $\Rew(\tau) = \sum_{h=0}^{H-1}\gamma^h r_{h+1}$
 		\item \enb{Parametric} policy $\pi_{\vtheta}:\Sspace\to\Aspace$ with $\vtheta\in\Theta$
 		\item Induced \textbf{trajectory distribution} $p_{\vtheta}(\tau)$
 		\item \textbf{Performance} $J(\vtheta) = \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
 		\item Find $\vtheta^*=\arg\max_{\vtheta\in\Theta} J(\vtheta)$
 	\end{itemize}
-\noindent\: \textbf{Parameter-based exploration~\citep{sehnke2008policy}:}
+\noindent\: \textbf{Parameter-based PO~\citep{sehnke2008policy}:}
 \begin{itemize}
 	\item \enb{Hyperpolicy} $\nu_{\vxi}(\vtheta)$ with $\vxi\in\Xi$ \quad(\eg Gaussian)
 	\item Find $\vxi^* = \arg\max_{\vxi\in\Xi}\mathbb{E}_{\vtheta\sim\nu_{\vxi}}\left[J(\vtheta)\right]$
@@ -316,46 +320,76 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\headerbox{Multiple Importance Sampling}{name=mis,column=0,row=2,span=1, below=polopt, above=bottom}{
+\headerbox{Policy Optimization as Correlated MAB}{name=ucb,column=0,row=2,span=1, below=polopt}{
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\noindent\begin{tabular}{ lccc } 
+		\hline
+		& \textbf{Correlated MAB} & \textbf{PO} & \textbf{PB-PO} \\ 
+		Arm & $\vx \in \Xspace$ & $\vtheta \in \Theta$ & $\vxi \in \Xi$ \\
+		Outcome & $z \in \mathcal{Z}$ & $\tau \in \mathcal{T}$ & $\vtheta \in \Theta$\\
+		Induced distribution  & $p_{\vx}(z)$ & $p_{\vtheta}(\tau)$ & $\nu_{\vxi}(\vtheta)$ \\
+		Payoff & $f(z)$ & $\Rew(\tau)$ & $J(\vtheta)$ \\
+		\hline
+	\end{tabular}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headerbox{Multiple Importance Sampling}{name=mis,column=1,row=0,span=1}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\begin{itemize}
-		\item Samples from many \textbf{behavioral distributions}:\\ $z_0 \sim q_0, z_1 \sim q_1, \dots, z_K \sim q_K$
-		\item \textbf{Target distribution} $p$
-		\item Estimate $\mu=\mathbb{E}_{z\sim p}\left[f(z)\right]$ from available samples
-		\item \textbf{Mixture} of behaviorals: $\vphi(z) = \frac{1}{K}\sum_{k=1}^K q_k(z)$
+		\item Samples from several \textbf{behavioral} distributions:\\ 
+		$z_0 \sim q_0, z_1 \sim q_1, \dots, z_K \sim q_K$
+%		\item \textbf{Target distribution} $p$
+		\item Estimate $\mu\coloneqq\mathbb{E}_{z\sim p}\left[f(z)\right]$ under \textbf{target} distribution $p$
+%		\item \textbf{Mixture} of behaviorals: $\vphi(z) = \frac{1}{K}\sum_{k=1}^K q_k(z)$
 		\item \enb{Balance Heuristic (BH)}~\citep{veach_optimally_1995}:
 		\begin{align*}
-		\wh{\mu}_{\text{BH}} \coloneqq \frac{1}{K}\sum_{k=1}^K\frac{p(z_{k})}{\vphi(z_k)}f(z_{k})\qquad\text{(unbiased)}
+		&\wh{\mu}_{\text{BH}} \coloneqq \frac{1}{K}\sum_{k=1}^K\underbrace{\frac{p(z_{k})}{\Phi(z_k)}}_{\mathclap{\text{Importance Weight (IW)}}}f(z_{k}),
+		&\qquad\underbrace{\Phi(z) = \frac{1}{K}\sum_{k=1}^K q_k(z)}_{\text{mixture}}
 		\end{align*}
 %		\item Unbiased: $\mathbb{E}[\wh{\mu}_{\text{BH}}] = \mu$
-		\item Possibly \eno{high variance}:
+		\item \enb{Unbiased}, but possibly \eno{high-variance}:
 			\begin{align*}
 				&\Var\left[\wh{\mu}_{\text{BH}}\right] \leq \norm[\infty]{f}^2\frac{d_2(P\|\Phi)}{K} \leq 
-				\frac{\norm[\infty]{f}^2} {\sum_{k=1}^K \frac{1}{ d_{2}(p \| q_k)}} \\
-				&d_{2}(p\|q) \coloneqq \int_{\mathcal{Z}}\left(\frac{p(z)}{q(z)}\right)^{2}\de z \qquad \text{(exp. Renyi divergence)}
+				\norm[\infty]{f}^2\frac{1} {\sum_{k=1}^K \frac{1}{ d_{2}(p \| q_k)}} \\
+				&\quad d_{2}(p\|q) \coloneqq \int_{\mathcal{Z}}\left(\frac{p(z)}{q(z)}\right)^{2}\de z \qquad \text{(R\'enyi divergence)}
 			\end{align*}
 	\end{itemize}
-	
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\headerbox{Robust Multiple Importance Sampling Estimation}{name=robust,column=1,row=0,span=2}{
+\headerbox{Robust Estimator}{name=robust,column=2,row=0,span=1, bottomaligned=mis}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	
+	\begin{itemize}
+		\item Importance Sampling estimators are \eno{heavy-tailed}~\citep{metelli2018policy}
+		\item This prevents the formation of \emph{exponential} \textbf{Upper Confidence Bounds (UCB)}
+		\item Robust estimation via \enb{adaptive truncation}~\citep{bubeck2012regret}:
+		\vspace*{-.25cm}
+		\begin{align*}\label{eq:truncatedmise}
+			&\widecheck{\mu}_{\text{BH}} \coloneqq \frac{1}{K} \sum_{k=1}^K\min \left\{\underbrace{\sqrt{\frac{K d_{2}\left( p \| \Phi  \right)}{\log \frac{1}{\delta}}}}_{\mathclap{\text{truncation}}},  \underbrace{\vphantom{\sqrt{\frac{K d_{2}\left( p \| \Phi  \right)}{\log \frac{1}{\delta}}}}\frac{p(z_{k})}{\Phi(z_k)}}_{\text{IW}} \right\} f(z_{k})
+		\end{align*}
+		\item Thanks to truncation, with probability at least $1-2\delta$:
+		\begin{align*}
+			\left|\widecheck{\mu}_{\text{BH}} - \mu\right| \leq \|f\|_{\infty} \left(\sqrt{2} + \frac{4}{3} \right)  \sqrt{\frac{ d_{2}\left( p \| \Phi  \right) \log  \frac{1}{\delta}  }{K}}
+		\end{align*}
+	\end{itemize}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\headerbox{Algorithm}{name=ucb,column=1,row=1,span=2, below=robust}{
+\headerbox{OPTIMIST Algorithm}{name=mab,column=1,row=1,span=2, below=robust}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \headerbox{Regret Analysis}{name=regret,column=1,row=2,span=2, below=ucb, above=bottom}{
