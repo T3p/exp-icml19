@@ -36,6 +36,12 @@
 \usepackage{mymacros}
 \usepackage{mathabx}
 \usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
 
 \renewcommand{\sfdefault}{lmss}
 \sffamily
@@ -140,6 +146,7 @@
 
 \usepackage[many]{tcolorbox}
 \usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{backgrounds}
 
 \usepackage{stackengine}
 \usepackage{scalerel}
@@ -247,17 +254,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \headerbox{Motivation and Idea}{name=problem,column=0,row=0,span=1}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	\noindent\:\textbf{Problem:}
+	\noindent\:\bad{Problem:}
 	\begin{itemize}
+	\compresslist
 		\item \textbf{Policy Optimization (PO)} methods \eno{neglect exploration}
 		\item Existing exploration strategies are \eno{undirected}
 		\item Lack of \enb{provably efficient} solutions
 	\end{itemize}
 
-	\noindent\:\textbf{Idea:}
+	\noindent\:\good{Idea:}
 	\begin{itemize}
+	\compresslist
 		\item Frame PO as a continuous \textbf{Multi-Armed Bandit (MAB)}
-		\item Use \textbf{Multiple Importance Sampling (MIS)} to exploit natural arm correlation
+		\item Use \textbf{Multiple Importance Sampling (MIS)} to exploit natural \textbf{arm correlation}
 		\item Apply \textbf{Optimism in Face of Uncertainty (OFU)}
 	\end{itemize}
 }
@@ -267,48 +276,116 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \headerbox{Policy Optimization}{name=polopt,column=0,row=1,span=1, below=problem}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	\noindent\: \textbf{Vanilla action-based PO~\citep{peters2008reinforcement}}
 	\begin{itemize}
+	\compresslist
 		\item \eno{Continuous} MDP $\left\langle\Sspace,\Aspace,\Tran,\Rew,\gamma,\init\right\rangle$
 		\item \textbf{Trajectories} $\tau = s_0, a_0, r_1, s_1, \dots r_H \quad\in\quad \mathcal{T}$
 		\item Return $\Rew(\tau) = \sum_{h=0}^{H-1}\gamma^h r_{h+1}$
-		\item \enb{Parametric} policy $\pi_{\vtheta}:\Sspace\to\Aspace$ with $\vtheta\in\Theta$
-		\item Induced \textbf{trajectory distribution} $p_{\vtheta}(\tau)$
-		%\item \textbf{Performance} $J(\vtheta) = \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
-		\item Find $\vtheta^*=\arg\max_{\vtheta\in\Theta} J(\vtheta)\coloneqq \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
 	\end{itemize}
-\noindent\: \textbf{Parameter-based PO~\citep{sehnke2008policy}:}
-\begin{itemize}
-	\item \enb{Hyperpolicy} $\nu_{\vxi}(\vtheta)$ with $\vxi\in\Xi$ \quad(\eg Gaussian)
-	\item Find $\vxi^* = \arg\max_{\vxi\in\Xi}J(\vxi) \coloneqq \mathbb{E}_{\vtheta\sim\nu_{\vxi}}\left[J(\vtheta)\right]$
-\end{itemize}
-
+	\centering
+	
+	\tikzstyle{background rectangle}=[thick, draw=blue!50]
+	\noindent \begin{tikzpicture}[show background rectangle]
+		\node[align=justify, text width=0.9\textwidth, inner sep=0.8em]{
+		\vspace{-0.65cm}
+	\begin{center}
+	\citep{peters2008reinforcement}
+	\noindent\begin{minipage}[t]{0.52\linewidth}
+		\hspace{-0.2cm}\includegraphics[scale=0.9]{ab}
+	\end{minipage}%
+	\noindent\begin{minipage}[t]{0.48\linewidth}
+	\vspace{-2cm}
+	%\begin{itemize}[leftmargin=*]
+	%\compresslist
+		\centerline{\enb{Parametric Policy}}\vspace{-0.4cm}
+		$$\pi_{\vtheta} \text{ with }\vtheta\in\Theta$$
+	\begin{itemize}[leftmargin=*]
+		\item Induced \textbf{trajectory distribution} $p_{\vtheta}(\tau)$
+	\end{itemize}
+	\end{minipage}
+	$$\vtheta^*=\arg\max_{\vtheta\in\Theta} J(\vtheta)\coloneqq \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$$
+	\end{center}
+%	\begin{itemize}[leftmargin=*]
+%	\mildcompresslist
+%		\item \enb{Parametric Policy} $\pi_{\vtheta}:\Sspace\to\Aspace$ with $\vtheta\in\Theta$
+%		\item Induced \textbf{trajectory distribution} $p_{\vtheta}(\tau)$
+%		%\item \textbf{Performance} $J(\vtheta) = \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
+%		\item Find 
+%	\end{itemize}
+%	
+%	\begin{minipage}[t]{0.65\linewidth}
+%	\begin{itemize}[leftmargin=*]
+%	\mildcompresslist
+%		\item \enb{Parametric Policy} $\pi_{\vtheta}:\Sspace\to\Aspace$ with $\vtheta\in\Theta$
+%		\item Induced \textbf{trajectory distribution} $p_{\vtheta}(\tau)$
+%		%\item \textbf{Performance} $J(\vtheta) = \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
+%		\item Find $\vtheta^*=\arg\max_{\vtheta\in\Theta} J(\vtheta)\coloneqq \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
+%	\end{itemize}
+%	\end{minipage}%
+%	\hfill
+%	\begin{minipage}[t]{0.34\linewidth}
+%		
+%	\end{minipage}	
+	};
+	\node[overlay, fill=white, draw=white, above] at (current bounding box.north) {\textcolor{blue}{\textbf{Action-based PO}}};
+	\end{tikzpicture} \\
+	\vspace{0.2cm}
+	\tikzstyle{background rectangle}=[thick, draw=red!50]
+	\noindent \begin{tikzpicture}[show background rectangle]
+		\node[align=justify, text width=0.9\textwidth, inner sep=0.8em]{
+		\vspace{-0.65cm}
+	\begin{center}
+	\citep{sehnke2008policy}\\
+	\vspace{-0.2cm}
+	\noindent\begin{minipage}[t]{0.52\linewidth}
+		\hspace{-0.2cm}\includegraphics[scale=0.9]{pb}
+	\end{minipage}%
+	\noindent\begin{minipage}[t]{0.48\linewidth}
+	\vspace{0.5cm}
+	%\begin{itemize}[leftmargin=*]
+	%\compresslist
+		\centerline{\enb{Parametric Hyperpolicy}}\vspace{-0.4cm}
+		$$\nu_{\vxi} \text{ with } \vxi\in\Xi$$
+	%\end{itemize}
+	\end{minipage}
+	$$\vxi^* = \arg\max_{\vxi\in\Xi}J(\vxi) \coloneqq \mathbb{E}_{\vtheta\sim\nu_{\vxi}}\left[J(\vtheta)\right]$$
+	\end{center}};
+	\node[overlay, fill=white, draw=white, above] at (current bounding box.north) {\textcolor{red}{\textbf{Parameter-based PO}}};
+	\end{tikzpicture}	
+%	\noindent\: \textcolor{blue}{\textbf{Action-based PO}}\\ \citep{peters2008reinforcement}
+%	%\centerline{\includegraphics[scale=1]{ab}}
+%	\begin{itemize}
+%	\mildcompresslist
+%		\item \enb{Parametric Policy} $\pi_{\vtheta}:\Sspace\to\Aspace$ with $\vtheta\in\Theta$ (\eg Gaussian)
+%		\item Induced \textbf{trajectory distribution} $p_{\vtheta}(\tau)$
+%		%\item \textbf{Performance} $J(\vtheta) = \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
+%		\item Find $\vtheta^*=\arg\max_{\vtheta\in\Theta} J(\vtheta)\coloneqq \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
+%	\end{itemize}
+%	\centering
+%\noindent\: \textcolor{red}{\textbf{Parameter-based PO}}\\ \citep{sehnke2008policy}
+%%\centerline{\includegraphics[scale=1]{pb}}
+%\begin{itemize}
+%\mildcompresslist
+%	\item \enb{Parametric Hyperpolicy} $\nu_{\vxi}(\vtheta)$ with $\vxi\in\Xi$ (\eg Gaussian)
+%	\item Find $\vxi^* = \arg\max_{\vxi\in\Xi}J(\vxi) \coloneqq \mathbb{E}_{\vtheta\sim\nu_{\vxi}}\left[J(\vtheta)\right]$
+%\end{itemize}
+\vspace{-0.4cm}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\headerbox{Policy Optimization as Correlated MAB}{name=ucb,column=0,row=2,span=1, below=polopt, above=bottom}{
+\headerbox{Policy Optimization as Correlated MAB}{name=ucb,column=0,row=2,span=1, above=bottom}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\begin{itemize}
+	\compresslist
 		\item (Hyper)parameters as arms $\implies$ \eno{continuous} MAB
 		\item Arms \enb{correlate} through common outcome space
 	\end{itemize}
-	\noindent\begin{tabular}{ lccc } 
-		\hline
-		& \textbf{Correlated MAB} & \textbf{PO} & \textbf{PB-PO} \\ 
-		Arm & $\vx \in \Xspace$ & $\vtheta \in \Theta$ & $\vxi \in \Xi$ \\
-		Outcome & $z \in \mathcal{Z}$ & $\tau \in \mathcal{T}$ & $\vtheta \in \Theta$\\
-		Induced distribution  & $p_{\vx}(z)$ & $p_{\vtheta}(\tau)$ & $\nu_{\vxi}(\vtheta)$ \\
-		Payoff & $f(z)$ & $\Rew(\tau)$ & $J(\vtheta)$ \\
-		Objective & $\mu(\vx) = \mathop{E}_{z\sim p_{\vx}}[f(z)]$ & $J(\vtheta)$ & $J(\vxi)$ \\
-		\hline
-	\end{tabular}
-\vfill
-		\begin{minipage}{.4\textwidth}
+		\begin{minipage}{.45\textwidth}
 			\includegraphics[width=\textwidth]{plots/spaces7.pdf}
 		\end{minipage}\hfill%
-		\begin{minipage}{.5\textwidth}
+		\begin{minipage}{.54\textwidth}
 		\noindent\: MAB jargon:
 		\begin{itemize}
 			\item $\vx^* \in \arg\max_{\vx\in\Xspace} \mu(\vx)$
@@ -324,6 +401,7 @@
 \headerbox{Multiple Importance Sampling (MIS)}{name=mis,column=1,row=0,span=1}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\begin{itemize}
+	\compresslist
 		\item Samples from several \textbf{behavioral} distributions:\\ 
 		$z_0 \sim q_0, z_1 \sim q_1, \dots, z_K \sim q_K$
 %		\item \textbf{Target distribution} $p$
@@ -351,6 +429,7 @@
 \headerbox{Robust MIS Estimator}{name=robust,column=2,row=0,span=1, bottomaligned=mis}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\begin{itemize}
+	\compresslist
 		\item Importance Sampling estimators are \eno{heavy-tailed}~\citep{metelli2018policy}
 		\item This prevents the formation of \emph{exponential} \textbf{Upper Confidence Bounds (UCB)}
 		\item Robust estimation via \enb{adaptive truncation}~\citep{bubeck2013bandits}:
@@ -372,11 +451,14 @@
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \noindent \:A \textbf{UCB}-like algorithm based on the \textbf{Optimism in Face of Uncertainty} principle:
 \begin{itemize}
+\compresslist
 	\item Select \emph{confidence schedule $(\delta_t)_{t=0}^T$}
 	\item Select initial arm $\vx_0$ at random, draw outcome $z_0\sim p_{\vx_0}$ and observe payoff $f(z_0)$
 	\item For each iteration $t$ from $1$ to $T$:
 \begin{itemize}
+\compresslist
 	\item Define \enb{Upper Confidence Bound:}
+	\vspace{-0.5cm}
 	\Large
 	\begin{align*}
 		&B_t(\vx,\delta_t) &\coloneqq 
@@ -398,15 +480,16 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\headerbox{Regret Analysis}{name=regret,column=1,row=2,span=2, below=ucb, above=bottom}{
+\headerbox{Regret Analysis}{name=regret,column=1,row=2,span=2, below=ucb}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\begin{itemize}
+	\compresslist
 		\item \enb{Discrete} arm set $\Xspace = \{\vx_1,\dots,\vx_K\}$
 		\begin{itemize}
+		\compresslist
 			\item Assumptions: \emph{uniformly} bounded R\'enyi divergence $d_{2}(p_{\vx}\|\Phi) \leq v$
 			\item Confidence schedule: $\delta_t = {3\delta}\big/({t^2\pi^2K})$
 			%\item With probability at least $1-\delta$:
-			\large
 			\begin{align*}
 			\Reg(T) \leq \Delta_0
 			+ 	\left(4\sqrt{2}+\frac{10}{3}\right)\norm[\infty]{f}
@@ -418,10 +501,10 @@
 		
 		\item \enb{Compact} arm space $\Xspace \subseteq [-D,D]^d$
 		\begin{itemize}
+		\compresslist
 			\item Assumptions: \emph{uniformly} bounded R\'enyi divergence $d_{2}(p_{\vx}\|\Phi) \leq v$, $L$-Lipschitz objective $\mu$
 			\item Confidence schedule: $\delta_t = {6\delta}\big/({\pi^2t^2(1+d^dt^{2d})})$
 			%\item With probability at least $1-\delta$:
-			\large
 			\begin{align*}
 			\Reg(T) &\leq\Delta_0 
 			+ \frac{\pi^2LD}{6}
@@ -432,6 +515,36 @@
 			\end{align*}
 		\end{itemize}
 	\end{itemize}
+}
+
+%\set headershape=roundedright,
+\headerbox{}{name=pomab,column=1,row=3,span=2, above=bottom, boxheaderheight=0.1em, headershape=rectangle}{
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%	\noindent\begin{tabular}{ lccc } 
+%		\hline
+%		& \textbf{Correlated MAB} & \textbf{PO} & \textbf{PB-PO} \\ 
+%		Arm & $\vx \in \Xspace$ & $\vtheta \in \Theta$ & $\vxi \in \Xi$ \\
+%		Outcome & $z \in \mathcal{Z}$ & $\tau \in \mathcal{T}$ & $\vtheta \in \Theta$\\
+%		Induced distribution  & $p_{\vx}(z)$ & $p_{\vtheta}(\tau)$ & $\nu_{\vxi}(\vtheta)$ \\
+%		Payoff & $f(z)$ & $\Rew(\tau)$ & $J(\vtheta)$ \\
+%		Objective & $\mu(\vx) = \mathop{E}_{z\sim p_{\vx}}[f(z)]$ & $J(\vtheta)$ & $J(\vxi)$ \\
+%		\hline
+%	\end{tabular}
+%	
+	\begin{tabular}{ L{3cm} C{2cm} C{2cm} C{3.5cm} C{2cm} C{3.5cm}} 
+		& Arm & Outcome & Induced distribution & Payoff & Objective \\
+		\hline
+		\textbf{Correlated MAB} & $\vx \in \Xspace$ & $z \in \mathcal{Z}$ & $p_{\vx}(z)$ & $f(z)$ & $\mu(\vx) = \mathop{E}_{z\sim p_{\vx}}[f(z)]$ \\
+		\textbf{PO} & $\vtheta \in \Theta$ & $\tau \in \mathcal{T}$ & $p_{\vtheta}(\tau)$ & $\Rew(\tau)$ & $J(\vtheta)$ \\
+		\textbf{PB-PO} & $\vxi \in \Xi$ & $\vtheta \in \Theta$ & $\nu_{\vxi}(\vtheta)$ & $J(\vtheta)$ & $J(\vxi)$ \\
+		\hline
+	\end{tabular}
+
+	\begin{tikzpicture}[overlay]
+		\fill[white] (-1.2,-0.5) rectangle (-0.2,2.2);
+		\draw[blue900, line width=2pt] (-1.2,-0.175) -- (-0.2,-0.175);
+		\draw[blue900, line width=2pt] (-1.09,2.17) -- (-0.2,2.17);
+	\end{tikzpicture}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
