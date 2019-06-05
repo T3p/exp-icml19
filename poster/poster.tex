@@ -35,6 +35,7 @@
 \usetikzlibrary{calc}
 \usepackage{mymacros}
 \usepackage{mathabx}
+\usepackage{multicol}
 
 \renewcommand{\sfdefault}{lmss}
 \sffamily
@@ -155,40 +156,6 @@
 \renewcommand{\baposter@box@drawbackground@plain}[2]{\tikzset{box colors/.style={fill=#1,fill opacity=1}} \fill[box colors] \baposterBoxGetShape;}
 \makeatother
 
-%Plot
-\usepgfplotslibrary{fillbetween}
-\def \firstmode {4}
-\def \secondmode {10}
-
-\def \p {6.2}
-\def \newp {9.25}
-\def \firstx {7.22}
-\def \secondx {8.23}
-\pgfplotsset{ticks=none,
-	domain=-1:15,
-	/pgf/declare function={
-		f(\x) = 3+.5*exp(-((\x-\firstmode)/2)^2) + 4*exp(-((\x-\secondmode)/2)^2) - exp(\x - 14) - 2*exp(-\x);
-	},
-	/pgf/declare function={
-		err(\x) = 0.5+0.2*(\x-\p)^2;
-	},
-	/pgf/declare function={
-		bound(\x) = f(\x) - err(\x) - .5;
-	},
-	layers/my layer set/.define layer set={
-		background,
-		pre main,
-		main,
-		foreground
-	}{},
-	% activate the newly created layer set
-	set layers=my layer set,
-}
-
-%\newcommand*\firstletter[1]{\tikz[baseline=(char.base)]{
-%            \node[shape=circle,draw,inner sep=2pt] (char) {\scalebox{2}{\fontsize{24pt}{0pt}\selectfont \textcolor{white}{\textbf{#1}}}};}}
-%\newcommand\firstletter[1]{\tikz{
-%            \node[shape=circle,draw] (char) {#1};}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Begin of Document
@@ -287,9 +254,10 @@
 		\item Lack of \enb{provably efficient} solutions
 	\end{itemize}
 
-	\noindent\:\textbf{Idea:} 
+	\noindent\:\textbf{Idea:}
 	\begin{itemize}
-		\item Frame PO as a \textbf{Multi-Armed Bandit (MAB)} over parameter space \emph{with \enb{arm correlation}}
+		\item Frame PO as a continuous \textbf{Multi-Armed Bandit (MAB)}
+		\item Use \textbf{Multiple Importance Sampling (MIS)} to exploit natural arm correlation
 		\item Apply \textbf{Optimism in Face of Uncertainty (OFU)}
 	\end{itemize}
 }
@@ -302,17 +270,17 @@
 	\noindent\: \textbf{Vanilla action-based PO~\citep{peters2008reinforcement}}
 	\begin{itemize}
 		\item \eno{Continuous} MDP $\left\langle\Sspace,\Aspace,\Tran,\Rew,\gamma,\init\right\rangle$
-		\item \textbf{Trajectory} $\tau = s_0, a_0, r_1, s_1, \dots r_H \quad\in\quad \mathcal{T}$
+		\item \textbf{Trajectories} $\tau = s_0, a_0, r_1, s_1, \dots r_H \quad\in\quad \mathcal{T}$
 		\item Return $\Rew(\tau) = \sum_{h=0}^{H-1}\gamma^h r_{h+1}$
 		\item \enb{Parametric} policy $\pi_{\vtheta}:\Sspace\to\Aspace$ with $\vtheta\in\Theta$
 		\item Induced \textbf{trajectory distribution} $p_{\vtheta}(\tau)$
-		\item \textbf{Performance} $J(\vtheta) = \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
-		\item Find $\vtheta^*=\arg\max_{\vtheta\in\Theta} J(\vtheta)$
+		%\item \textbf{Performance} $J(\vtheta) = \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
+		\item Find $\vtheta^*=\arg\max_{\vtheta\in\Theta} J(\vtheta)\coloneqq \mathbb{E}_{\tau\sim p_{\vtheta}}[\Rew(\tau)]$
 	\end{itemize}
 \noindent\: \textbf{Parameter-based PO~\citep{sehnke2008policy}:}
 \begin{itemize}
 	\item \enb{Hyperpolicy} $\nu_{\vxi}(\vtheta)$ with $\vxi\in\Xi$ \quad(\eg Gaussian)
-	\item Find $\vxi^* = \arg\max_{\vxi\in\Xi}\mathbb{E}_{\vtheta\sim\nu_{\vxi}}\left[J(\vtheta)\right]$
+	\item Find $\vxi^* = \arg\max_{\vxi\in\Xi}J(\vxi) \coloneqq \mathbb{E}_{\vtheta\sim\nu_{\vxi}}\left[J(\vtheta)\right]$
 \end{itemize}
 
 }
@@ -320,8 +288,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\headerbox{Policy Optimization as Correlated MAB}{name=ucb,column=0,row=2,span=1, below=polopt}{
+\headerbox{Policy Optimization as Correlated MAB}{name=ucb,column=0,row=2,span=1, below=polopt, above=bottom}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\begin{itemize}
+		\item (Hyper)parameters as arms $\implies$ \eno{continuous} MAB
+		\item Arms \enb{correlate} through common outcome space
+	\end{itemize}
 	\noindent\begin{tabular}{ lccc } 
 		\hline
 		& \textbf{Correlated MAB} & \textbf{PO} & \textbf{PB-PO} \\ 
@@ -329,14 +301,27 @@
 		Outcome & $z \in \mathcal{Z}$ & $\tau \in \mathcal{T}$ & $\vtheta \in \Theta$\\
 		Induced distribution  & $p_{\vx}(z)$ & $p_{\vtheta}(\tau)$ & $\nu_{\vxi}(\vtheta)$ \\
 		Payoff & $f(z)$ & $\Rew(\tau)$ & $J(\vtheta)$ \\
+		Objective & $\mu(\vx) = \mathop{E}_{z\sim p_{\vx}}[f(z)]$ & $J(\vtheta)$ & $J(\vxi)$ \\
 		\hline
 	\end{tabular}
+\vfill
+		\begin{minipage}{.4\textwidth}
+			\includegraphics[width=\textwidth]{plots/spaces7.pdf}
+		\end{minipage}\hfill%
+		\begin{minipage}{.5\textwidth}
+		\noindent\: MAB jargon:
+		\begin{itemize}
+			\item $\vx^* \in \arg\max_{\vx\in\Xspace} \mu(\vx)$
+			\item Gap $\Delta_t = \mu(\vx^*) - \mu(\vx_t)$
+			\item $\mathop{Regret}(T) = \sum_{t=0}^{T}\Delta_t$
+		\end{itemize}
+		\end{minipage}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\headerbox{Multiple Importance Sampling}{name=mis,column=1,row=0,span=1}{
+\headerbox{Multiple Importance Sampling (MIS)}{name=mis,column=1,row=0,span=1}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\begin{itemize}
 		\item Samples from several \textbf{behavioral} distributions:\\ 
@@ -363,12 +348,12 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\headerbox{Robust Estimator}{name=robust,column=2,row=0,span=1, bottomaligned=mis}{
+\headerbox{Robust MIS Estimator}{name=robust,column=2,row=0,span=1, bottomaligned=mis}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\begin{itemize}
 		\item Importance Sampling estimators are \eno{heavy-tailed}~\citep{metelli2018policy}
 		\item This prevents the formation of \emph{exponential} \textbf{Upper Confidence Bounds (UCB)}
-		\item Robust estimation via \enb{adaptive truncation}~\citep{bubeck2012regret}:
+		\item Robust estimation via \enb{adaptive truncation}~\citep{bubeck2013bandits}:
 		\vspace*{-.25cm}
 		\begin{align*}\label{eq:truncatedmise}
 			&\widecheck{\mu}_{\text{BH}} \coloneqq \frac{1}{K} \sum_{k=1}^K\min \left\{\underbrace{\sqrt{\frac{K d_{2}\left( p \| \Phi  \right)}{\log \frac{1}{\delta}}}}_{\mathclap{\text{truncation}}},  \underbrace{\vphantom{\sqrt{\frac{K d_{2}\left( p \| \Phi  \right)}{\log \frac{1}{\delta}}}}\frac{p(z_{k})}{\Phi(z_k)}}_{\text{IW}} \right\} f(z_{k})
@@ -383,8 +368,29 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\headerbox{OPTIMIST Algorithm}{name=mab,column=1,row=1,span=2, below=robust}{
+\headerbox{OPTIMIST Algorithm}{name=ucb,column=1,row=1,span=2, below=robust}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\noindent \:A \textbf{UCB}-like algorithm based on the \textbf{Optimism in Face of Uncertainty} principle:
+\begin{itemize}
+	\item Select \emph{confidence schedule $(\delta_t)_{t=0}^T$}
+	\item Select initial arm $\vx_0$ at random, draw outcome $z_0\sim p_{\vx_0}$ and observe payoff $f(z_0)$
+	\item For each iteration $t$ from $1$ to $T$:
+\begin{itemize}
+	\item Define \enb{Upper Confidence Bound:}
+	\Large
+	\begin{align*}
+		&B_t(\vx,\delta_t) &\coloneqq 
+		&\underbrace{
+			\vphantom{\norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)
+				\sqrt{\frac{d_{1+\epsilon}(p_{\vx}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}}}
+			\wc{\mu}_t(\vx)}_{\text{Robust MIS Estimator}}
+		+ 
+		&\underbrace{\norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)
+		\sqrt{\frac{d_{1+\epsilon}(p_{\vx}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}}}_{\text{Exploration Bonus}}
+	\end{align*}
+	\item \normalsize Select arm $\vx_{t} = \arg\max_{\vx\in\Xspace} B_t(\vx,\delta_t)$, draw outcome $z_t\sim p_{\vx_t}$ and observe payoff $f(z_t)$
+\end{itemize}
+\end{itemize}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -394,7 +400,38 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \headerbox{Regret Analysis}{name=regret,column=1,row=2,span=2, below=ucb, above=bottom}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	
+	\begin{itemize}
+		\item \enb{Discrete} arm set $\Xspace = \{\vx_1,\dots,\vx_K\}$
+		\begin{itemize}
+			\item Assumptions: \emph{uniformly} bounded R\'enyi divergence $d_{2}(p_{\vx}\|\Phi) \leq v$
+			\item Confidence schedule: $\delta_t = {3\delta}\big/({t^2\pi^2K})$
+			%\item With probability at least $1-\delta$:
+			\large
+			\begin{align*}
+			\Reg(T) \leq \Delta_0
+			+ 	\left(4\sqrt{2}+\frac{10}{3}\right)\norm[\infty]{f}
+			\sqrt{T
+				v
+				\left(2\log T + \log \frac{\pi^2K}{3\delta}\right)} = \widetilde{\mathcal{O}}(\sqrt{T})
+			\end{align*}
+		\end{itemize}
+		
+		\item \enb{Compact} arm space $\Xspace \subseteq [-D,D]^d$
+		\begin{itemize}
+			\item Assumptions: \emph{uniformly} bounded R\'enyi divergence $d_{2}(p_{\vx}\|\Phi) \leq v$, $L$-Lipschitz objective $\mu$
+			\item Confidence schedule: $\delta_t = {6\delta}\big/({\pi^2t^2(1+d^dt^{2d})})$
+			%\item With probability at least $1-\delta$:
+			\large
+			\begin{align*}
+			\Reg(T) &\leq\Delta_0 
+			+ \frac{\pi^2LD}{6}
+			+ 	\left(4\sqrt{2}+\frac{10}{3}\right)\norm[\infty]{f}
+			\sqrt{Tv
+				\left(2(d+1)\log T + d\log d + \log \frac{\pi^2}{3\delta}\right)}
+			 = {\widetilde{\mathcal{O}}\left(\sqrt{dT}\right)}
+			\end{align*}
+		\end{itemize}
+	\end{itemize}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -402,12 +439,47 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \headerbox{Implementation}{name=imp,column=3,row=0,span=1}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\begin{itemize}
+		\item \eno{Trajectory distributions} $p_{\vtheta}$ are difficult to compute\\ $\implies$ \enb{parameter based exploration}
+		\begin{itemize}
+			\item Analytic hyperpolicy $\nu_{\vxi}$ (\eg Gaussian)
+			\item Closed-form R\'enyi divergence $d_2$
+		\end{itemize}
+		\item \eno{Difficult to optimize} the UCB index on a compact space\\
+		 $\implies$ \enb{adaptive discretization}
+		\begin{itemize}
+			\item Use finer and finer grid of $\left\lceil t^{\nicefrac{1}{\kappa}}\right\rceil^d$ points
+			\item Confidence schedule: $\delta_t = {6\delta}\big/({\pi^2t^2(1+ t^{\nicefrac{d}{\kappa}})})$
+			\item Meta-parameter $\kappa\geq 2$ allows to trade-off regret $\widetilde{\mathcal{O}}(dT^{1-\frac{1}{\kappa}})$ with time $\mathcal{O}(t^{1+\frac{d}{\kappa}})$ per iteration.
+			\item $k=2$ recovers the $\widetilde{\mathcal{O}}(\sqrt{dT})$ regret at the cost of \eno{exponential} time
+			\item $k=d$ yields \enb{sublinear} regret in \enb{polynomial} time
+		\end{itemize}
+	\end{itemize}
 	
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \headerbox{Experiments}{name=exp,column=3,row=1,span=1, below=imp}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\begin{center}
+			\textbf{Linear-Quadratic Regulator} (Regret)
+		
+		\begin{minipage}{.85\textwidth}
+			\includegraphics[width=\textwidth]{plots/lqg_mu/plot.pdf}
+		\end{minipage}
+		
+		\textbf{River Swim} (Return)
+		
+		\begin{minipage}{.85\textwidth}
+			\includegraphics[width=\textwidth]{plots/riverswim/plot_main.pdf}
+		\end{minipage}
+		
+		\textbf{Mountain Car} (Return)
+		
+		\begin{minipage}{.85\textwidth}
+			\includegraphics[width=\textwidth]{plots/mc/plot.pdf}
+		\end{minipage}
+	\end{center}
 
 }
 

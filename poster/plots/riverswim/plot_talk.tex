@@ -1,0 +1,103 @@
+\documentclass{standalone} 
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{amsmath}
+
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+
+\usepgfplotslibrary{groupplots}
+\usetikzlibrary{matrix}
+\usepgfplotslibrary{fillbetween}
+\usetikzlibrary{pgfplots.colorbrewer}
+\usetikzlibrary{plotmarks}
+
+\pgfplotsset{every tick label/.append style={font=\small\rmfamily}}
+\pgfplotsset{every axis/.append style={font=\small\rmfamily, ylabel near ticks, xlabel near ticks}}
+
+
+\pgfplotsset{
+        % define a `cycle list' for marker
+     	cycle list/.define={my marks}{
+          solid, every mark/.append style={solid,fill=\pgfkeysvalueof{/pgfplots/mark list fill}},mark=*\\
+          densely dashed, every mark/.append style={solid,fill=\pgfkeysvalueof{/pgfplots/mark list fill}},mark=triangle*\\
+          densely dotted, every mark/.append style={solid,fill=\pgfkeysvalueof{/pgfplots/mark list fill}},mark=square*\\
+          densely dashdotted, every mark/.append style={solid,fill=\pgfkeysvalueof{/pgfplots/mark list fill}},mark=diamond*\\
+          densely dash dot dot, every mark/.append style={solid,fill=\pgfkeysvalueof{/pgfplots/mark list fill}},mark=|\\
+          solid, every mark/.append style={solid,fill=\pgfkeysvalueof{/pgfplots/mark list fill}},mark=x\\
+          %every mark/.append style={solid,fill=\pgfkeysvalueof{/pgfplots/mark list fill}},mark=star\\
+        },
+    }
+
+\pgfplotstableread[col sep = comma]{./OPTIMIST_disc_20.csv}\optdisc
+\pgfplotstableread[col sep = comma]{./OPTIMIST_disc_100.csv}\optdiscc
+\pgfplotstableread[col sep = comma]{./OPTIMIST_cont_k2.csv}\optcontd
+\pgfplotstableread[col sep = comma]{./OPTIMIST_cont_k3.csv}\optcontt
+\pgfplotstableread[col sep = comma]{./OPTIMIST_cont_k4.csv}\optcontq
+\pgfplotstableread[col sep = comma]{./PGPE.csv}\pgpe
+
+
+\renewcommand{\rmdefault}{ptm}
+\newcommand{\mathbr}[1]{\bm{\mathbf{#1}}}
+
+\newcommand\drawplot[6]{
+	\def\todraw{#1}\ifx\todraw\empty
+		\addplot[draw=none] coordinates {(1,1)};
+	\else
+		\addplot table[x=iteration, y={#2}, each nth point={#6}]{#5};\label{plots:#1}
+		%\addlegendentry{#1}
+		\def\temp{#3}\ifx\temp\empty
+		\else
+			\addplot[name path=up, draw=none, forget plot, each nth point={#6}] table[x=iteration, y={#3}]{#5};
+    		\addplot[name path=low, draw=none, forget plot, each nth point={#6}] table[x=iteration, y={#4}]{#5};
+    		\addplot[/pgfplots/refstyle={plots:#1}, fill opacity=0.2, forget plot, each nth point={#6}] fill between[of=up and low];
+		\fi
+	\fi
+}
+
+
+\begin{document}
+
+   
+\begin{tikzpicture}[line width=1.5pt, mark size=1.5pt, mark repeat={5}]
+    		\begin{groupplot}[cycle list/Dark2-6,
+    					group style={
+                      		  group name=myplot,
+                      		  horizontal sep=2cm,
+                      		  group size= 1 by 1},
+            				mark list fill={.!75!white},
+            				cycle multiindex* list={
+                				Dark2-6 \nextlist
+                				my marks \nextlist
+                				very thick \nextlist},
+                      		  height=5cm,
+                      		  width=7cm,  
+                      		  %ylabel style={yshift=-0.1cm},
+                      		  xlabel style={yshift=0.1cm},
+                      		  yticklabel style={
+        						/pgf/number format/fixed,
+        						/pgf/number format/precision=5
+							  },
+							  xtick={0,1000,2000,3000,4000,5000},
+							  legend style={thin, draw=gray, at={(0.95,0.32)},anchor=south east},
+                      		  grid=both,
+							  grid style={gray!10},   
+      						  every tick/.style={gray!60},
+                      		  ]
+        		\nextgroupplot[title={}, 
+        					   xlabel={Episodes},
+        					   ylabel={Cumulative Return}]
+        			
+        			%\drawplot{OPTIMIST discrete 20}{ReturnMean_mean}{ReturnMean_up}{ReturnMean_low}{\optdisc}{4}
+        			\drawplot{OPTIMIST}{ReturnMean_mean}{ReturnMean_up}{ReturnMean_low}{\optcontd}{4}
+        			%\drawplot{}{}{}{}{}{}
+        			\drawplot{PGPE}{ReturnMean_mean}{ReturnMean_up}{ReturnMean_low}{\pgpe}{1}
+        			\legend{OPTIMIST,PGPE};
+        			
+			\end{groupplot}
+	
+    					
+\end{tikzpicture}
+
+\end{document}
