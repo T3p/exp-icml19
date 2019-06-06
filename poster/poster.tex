@@ -490,7 +490,7 @@ F  }
 %				\sqrt{\frac{d_{1+\epsilon}(p_{\vx}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}}}
 	\item Define \enb{Upper Confidence Bound:}
 	\Large
-	\vspace{-0.5cm}
+	\vspace{-0.25cm}
 	\begin{align*}
 		&B_t(\vx,\delta_t) &\coloneqq 
 		&\underbrace{
@@ -504,16 +504,15 @@ F  }
 			$\norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)
 			\sqrt{\frac{d_{1+\epsilon}(p_{\vx}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}}
 		$};}}_{\textcolor{green!70!black}{\bf Exploration\,Bonus}}
-	\end{align*}\normalsize\vspace{-0.3cm}
-	\item \normalsize Select arm $\vx_{t} = \arg\max_{\vx\in\Xspace} B_t(\vx,\delta_t)$
-	\item \normalsize Draw outcome $z_t\sim p_{\vx_t}$ and observe payoff $f(z_t)$
+	\end{align*}\normalsize\vspace{-0.15cm}
+	\item \normalsize Select arm $\vx_{t} = \arg\max_{\vx\in\Xspace} B_t(\vx,\delta_t)$, draw outcome $z_t\sim p_{\vx_t}$ and observe payoff $f(z_t)$
 \end{itemize}
 \end{itemize}
 \tikz[overlay]{
 	\path[->, greenp, ultra thick, dashed] (BON1.south) edge[bend left] (BON2.north);
 	\path[->, bluep, ultra thick, dashed] (EST1.south) edge[bend right] (EST2.north);
 }
-\vspace{-0.5cm}
+\vspace{-0.3cm}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
