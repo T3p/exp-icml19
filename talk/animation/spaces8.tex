@@ -6,21 +6,29 @@
 \tikzfading[name=fade out,
 inner color=transparent!0, outer color=transparent!100]
 
+\definecolor{poliblue1}{RGB}{93,138,168} 
+\definecolor{poliblue2}{RGB}{41,76,113}
+\definecolor{poliblue3}{RGB}{25,43,67}
+\definecolor{orangep}{RGB}{251,146,116}
+\definecolor{redp}{RGB}{245,86,91}
+\definecolor{greenp}{RGB}{73,165,150}
+\definecolor{waterp}{RGB}{134,195,180}
+
 \begin{document}
 \begin{tikzpicture}[]
 \draw[] (0,-3.5,0) ellipse (2.5 and .75) node[right, shift={(1.5,1)}]{$\mathcal{T}$};
-\draw[fill, inner color=blue!60!white, outer color=white, draw=none, color=white] (-0.7,-3.5,0) ellipse (0.5 and .2) node[above, shift={(-.1,.1)}, color=blue!60!white]{$p_{\vtheta_1}$};
+\draw[fill, inner color=poliblue1, outer color=white, draw=none, color=white] (-0.7,-3.5,0) ellipse (0.5 and .2) node[above, shift={(-.1,.1)}, color=poliblue1]{$p_{\vtheta_1}$};
 
-\draw[fill,color=red!60!white, path fading = fade out, draw=none] (-0.5,-3.7,0) ellipse (0.5 and .2);
-\draw[color=red!60!white] (-0.8,-3.8,0) node{$p_{\vtheta_2}$};
+\draw[fill,color=redp, path fading = fade out, draw=none] (-0.5,-3.7,0) ellipse (0.5 and .2);
+\draw[color=redp] (-0.8,-3.8,0) node{$p_{\vtheta_2}$};
 
-\draw[fill,color=orange!60!white, path fading = fade out, draw=none] (-0.2,-3.5,0) ellipse (0.5 and .2);
-\draw[color=orange!60!white] (0.1,-3.2,0) node{$p_{\vtheta_{t-1}}$};
+\draw[fill,color=orangep, path fading = fade out, draw=none] (-0.2,-3.5,0) ellipse (0.5 and .2);
+\draw[color=orangep] (0.1,-3.2,0) node{$p_{\vtheta_{t-1}}$};
 
-\draw[fill,color=black!60!white, path fading = fade out, draw=none] (1.,-3.7,0) ellipse (1 and .3);
-\draw[color=black!60!white] (1.2,-3.4,0) node{$p_{\vtheta}$};
+\draw[fill,color=waterp!80!black, path fading = fade out, draw=none] (1.,-3.7,0) ellipse (1 and .3);
+\draw[waterp!80!black] (1.2,-3.4,0) node{$p_{\vtheta}$};
 
-\draw[line width = 1.5pt, color=green!70!black,-latex] (-0.4,-3.2,0) arc[start angle=180,end angle=0, x radius = 0.8 cm , y radius =1 cm] node[shift={(-0.75,1.2)}]{\bf MIS};
+\draw[line width = 1.5pt, color=greenp,-latex] (-0.4,-3.2,0) arc[start angle=180,end angle=0, x radius = 0.8 cm , y radius =1 cm] node[shift={(-0.75,1.2)}]{\bf MIS};
 
 \end{tikzpicture}
 \end{document}
