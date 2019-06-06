@@ -85,6 +85,7 @@
 %%Custom commands
 
 %Colors
+\definecolor{vert3}{RGB}{20,200,66} % vert S
 \definecolor{darkcyan}{rgb}{0.0, 0.55, 0.55}
 \definecolor{darkcerulean}{rgb}{0.03, 0.27, 0.49}
 \definecolor{crimson}{rgb}{0.86, 0.08, 0.24}
@@ -101,6 +102,12 @@
 \definecolor{poliblue2}{RGB}{41,76,113}
 \definecolor{poliblue3}{RGB}{25,43,67}
 \definecolor{orangep}{RGB}{251,146,116}
+\colorlet{redp}{red!20} % vert S
+\colorlet{greenp}{vert3!20} % vert S\usepackage[framemethod=tikz]{mdframed}
+\colorlet{bluep}{blue!12} % vert S
+\colorlet{blueg}{blue!70!green!90!white}
+\definecolor{yellowp}{rgb}{0.93, 0.93, 0.42}
+%\colorlet{orangep}{orange!40}
 
 \usetikzlibrary{tikzmark}
 
@@ -109,6 +116,7 @@
 \newcommand{\good}[1]{\textcolor{limegreen}{\textbf{#1}}}
 
 \newcommand{\enb}[1]{\textcolor{poliblue1}{\textbf{#1}}}
+\newcommand{\eng}[1]{\textcolor{vert3}{\textbf{#1}}}
 \newcommand{\eno}[1]{\textcolor{orangep}{\textbf{#1}}}
 
 %Fake items
@@ -239,7 +247,7 @@
   {% The makebox allows the title to flow into the logo, this is a hack because of the L shaped logo.
     %\includegraphics[height=9.0em]{./pics/PoliMI.pdf}%\hspace{.5cm}
     {\includegraphics[height=7.0em]{../talk/qr.png}}
-  }
+F  }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Now define the boxes that make up the poster
 %%%---------------------------------------------------------------------------
@@ -403,21 +411,26 @@
 	\begin{itemize}
 	\compresslist
 		\item Samples from several \textbf{behavioral} distributions:\\ 
-		$z_0 \sim q_0, z_1 \sim q_1, \dots, z_K \sim q_K$
+		$z_0 \sim q_0, z_1 \sim q_1, \dots, z_{K-1} \sim q_{K-1}$
 %		\item \textbf{Target distribution} $p$
 		\item Estimate $\mu\coloneqq\mathbb{E}_{z\sim p}\left[f(z)\right]$ under \textbf{target} distribution $p$
 %		\item \textbf{Mixture} of behaviorals: $\vphi(z) = \frac{1}{K}\sum_{k=1}^K q_k(z)$
 		\item \enb{Balance Heuristic (BH)}~\citep{veach_optimally_1995}:
 		\begin{align*}
-		&\wh{\mu}_{\text{BH}} \coloneqq \frac{1}{K}\sum_{k=1}^K\underbrace{\frac{p(z_{k})}{\Phi(z_k)}}_{\mathclap{\text{Importance Weight (IW)}}}f(z_{k}),
-		&\qquad\underbrace{\Phi(z) = \frac{1}{K}\sum_{k=1}^K q_k(z)}_{\text{mixture}}
+		&\wh{\mu}_{\text{BH}} \coloneqq \frac{1}{K}\sum_{k=0}^{K-1}
+		\underbrace{
+		\tikz[baseline]{\node[anchor=base,fill=orangep, inner sep=2pt](IW1){
+			$\frac{p(z_{k})}{\Phi_K(z_k)}$
+		};}}_{\mathclap{\textcolor{orangep!90!black}{\bf Importance\,Weight (IW)}}}
+		f(z_{k}),
+		&\quad\underbrace{\Phi_K(z) = \frac{1}{K}\sum_{k=0}^{K-1} q_k(z)}_{\text{mixture}}
 		\end{align*}
 %		\item Unbiased: $\mathbb{E}[\wh{\mu}_{\text{BH}}] = \mu$
 		\item \enb{Unbiased}, but possibly \eno{high-variance}:
 			\begin{align*}
-				&\Var\left[\wh{\mu}_{\text{BH}}\right] \leq \norm[\infty]{f}^2\frac{d_2(P\|\Phi)}{K} \leq 
-				\norm[\infty]{f}^2\frac{1} {\sum_{k=1}^K \frac{1}{ d_{2}(p \| q_k)}} \\
-				&\quad d_{2}(p\|q) \coloneqq \int_{\mathcal{Z}}\left(\frac{p(z)}{q(z)}\right)^{2}\de z \qquad \text{(R\'enyi divergence)}
+				&\Var\left[\wh{\mu}_{\text{BH}}\right] \leq \norm[\infty]{f}^2\frac{d_2(P\|\Phi_K)}{K} \leq 
+				\norm[\infty]{f}^2\frac{1} {\sum_{k=0}^{K-1} \frac{1}{ d_{2}(p \| q_k)}} \\
+				&\quad d_{2}(p\|q) \coloneqq \int_{\mathcal{Z}}q(z)\left(\frac{p(z)}{q(z)}\right)^{2}\de z \qquad \textcolor{vert3}{\textbf{(R\'enyi divergence)}}
 			\end{align*}
 	\end{itemize}
 }
@@ -432,14 +445,27 @@
 	\compresslist
 		\item Importance Sampling estimators are \eno{heavy-tailed}~\citep{metelli2018policy}
 		\item This prevents the formation of \emph{exponential} \textbf{Upper Confidence Bounds (UCB)}
-		\item Robust estimation via \enb{adaptive truncation}~\citep{bubeck2013bandits}:
+		\item \enb{Robust estimation} via \eng{adaptive truncation}~\citep{bubeck2013bandits}:
 		\vspace*{-.25cm}
 		\begin{align*}\label{eq:truncatedmise}
-			&\widecheck{\mu}_{\text{BH}} \coloneqq \frac{1}{K} \sum_{k=1}^K\min \left\{\underbrace{\sqrt{\frac{K d_{2}\left( p \| \Phi  \right)}{\log \frac{1}{\delta}}}}_{\mathclap{\text{truncation}}},  \underbrace{\vphantom{\sqrt{\frac{K d_{2}\left( p \| \Phi  \right)}{\log \frac{1}{\delta}}}}\frac{p(z_{k})}{\Phi(z_k)}}_{\text{IW}} \right\} f(z_{k})
+		&\tikz[baseline]{\node[anchor=base,fill=bluep, inner sep=4pt](EST1){
+			$\widecheck{\mu}_{\text{BH}}$};} 
+			\coloneqq \frac{1}{K} \sum_{k=0}^{K-1}\min \left\{\underbrace{
+			\tikz[baseline]{\node[anchor=base,fill=greenp, inner sep=2pt](TR1){
+				$\sqrt{\frac{K d_{2}\left( p \| \Phi_K  \right)}{\log \frac{1}{\delta}}}
+			$};}}_{\mathclap{\textcolor{green!70!black}{\bf truncation}}},  
+			\underbrace{
+			\tikz[baseline]{\node[anchor=base,fill=orangep, inner sep=2pt](IW2){
+				$\vphantom{\sqrt{\frac{K d_{2}\left( p \| \Phi  \right)}{\log \frac{1}{\delta}}}}\frac{p(z_{k})}{\Phi_K(z_k)}
+			$};}}_{\textcolor{orangep!90!black}{\bf IW}} \right\} f(z_{k})
 		\end{align*}
 		\item Thanks to truncation, with probability at least $1-2\delta$:
+		\vspace*{-5pt}
 		\begin{align*}
-			\left|\widecheck{\mu}_{\text{BH}} - \mu\right| \leq \|f\|_{\infty} \left(\sqrt{2} + \frac{4}{3} \right)  \sqrt{\frac{ d_{2}\left( p \| \Phi  \right) \log  \frac{1}{\delta}  }{K}}
+		\tikz[baseline]{\node[anchor=base,fill=greenp, inner sep=1pt](BON1){
+				$
+			\left|\widecheck{\mu}_{\text{BH}} - \mu\right| \leq 
+			\|f\|_{\infty} \left(\sqrt{2} + \frac{4}{3} \right)  \sqrt{\frac{ d_{2}\left( p \| \Phi_K  \right) \log  \frac{1}{\delta}  }{K}}$};}
 		\end{align*}
 	\end{itemize}
 }
@@ -463,16 +489,27 @@
 	\begin{align*}
 		&B_t(\vx,\delta_t) &\coloneqq 
 		&\underbrace{
-			\vphantom{\norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)
+			\tikz[baseline]{\node[anchor=base,fill=bluep, inner sep=2pt](EST2){
+			$\vphantom{\norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)
 				\sqrt{\frac{d_{1+\epsilon}(p_{\vx}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}}}
-			\wc{\mu}_t(\vx)}_{\text{Robust MIS Estimator}}
+			\wc{\mu}_t(\vx)
+		$};}}_{\textcolor{blue!70!black}{\bf Robust\,MIS\,Estimator}}
 		+ 
-		&\underbrace{\norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)
-		\sqrt{\frac{d_{1+\epsilon}(p_{\vx}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}}}_{\text{Exploration Bonus}}
+		&\underbrace{
+			\tikz[baseline]{\node[anchor=base,fill=greenp, inner sep=2pt](BON2){
+			$\norm[\infty]{f}\left(\sqrt{2}+\frac{4}{3}\right)
+			\sqrt{\frac{d_{1+\epsilon}(p_{\vx}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}}
+		$};}}_{\textcolor{green!70!black}{\bf Exploration\,Bonus}}
 	\end{align*}
 	\item \normalsize Select arm $\vx_{t} = \arg\max_{\vx\in\Xspace} B_t(\vx,\delta_t)$, draw outcome $z_t\sim p_{\vx_t}$ and observe payoff $f(z_t)$
 \end{itemize}
 \end{itemize}
+
+\tikz[overlay]{
+	\path[->, greenp, ultra thick, dashed] (BON1.south) edge[bend left] (BON2.north);
+	\path[->, bluep, ultra thick, dashed] (EST1.south) edge[bend right] (EST2.north);
+}
+
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -495,10 +532,13 @@
 			+ 	\left(4\sqrt{2}+\frac{10}{3}\right)\norm[\infty]{f}
 			\sqrt{T
 				v
-				\left(2\log T + \log \frac{\pi^2K}{3\delta}\right)} = \widetilde{\mathcal{O}}(\sqrt{T})
+				\left(2\log T + \log \frac{\pi^2K}{3\delta}\right)} = 
+			\tikz[baseline]{\node[anchor=base,fill=yellowp, inner sep=3pt](REG1){
+			$\widetilde{\mathcal{O}}(\sqrt{T})$};}
 			\end{align*}
 		\end{itemize}
 		
+		\vspace*{-.3cm}
 		\item \enb{Compact} arm space $\Xspace \subseteq [-D,D]^d$
 		\begin{itemize}
 		\compresslist
@@ -511,7 +551,10 @@
 			+ 	\left(4\sqrt{2}+\frac{10}{3}\right)\norm[\infty]{f}
 			\sqrt{Tv
 				\left(2(d+1)\log T + d\log d + \log \frac{\pi^2}{3\delta}\right)}
-			 = {\widetilde{\mathcal{O}}\left(\sqrt{dT}\right)}
+			 = 
+			 \tikz[baseline]{\node[anchor=base,fill=yellowp, inner sep=3pt](REG1){
+			 		$
+			 {\widetilde{\mathcal{O}}\left(\sqrt{dT}\right)}$};}
 			\end{align*}
 		\end{itemize}
 	\end{itemize}
@@ -553,18 +596,22 @@
 \headerbox{Implementation}{name=imp,column=3,row=0,span=1}{
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	\begin{itemize}
-		\item \eno{Trajectory distributions} $p_{\vtheta}$ are difficult to compute\\ $\implies$ \enb{parameter based exploration}
+		\item \eno{Trajectory distributions} $p_{\vtheta}$ are difficult to compute\\ $\implies$ \enb{parameter-based PO}
 		\begin{itemize}
 			\item Analytic hyperpolicy $\nu_{\vxi}$ (\eg Gaussian)
 			\item Closed-form R\'enyi divergence $d_2$
 		\end{itemize}
+		\vspace{-.25cm}
 		\item \eno{Difficult to optimize} the UCB index on a compact space\\
-		 $\implies$ \enb{adaptive discretization}
+		 $\implies$ \enb{adaptive discretization} \textbf{(OPTIMIST2)}
 		\begin{itemize}
 			\item Use finer and finer grid of $\left\lceil t^{\nicefrac{1}{\kappa}}\right\rceil^d$ points
 			\item Confidence schedule: $\delta_t = {6\delta}\big/({\pi^2t^2(1+ t^{\nicefrac{d}{\kappa}})})$
-			\item Meta-parameter $\kappa\geq 2$ allows to trade-off regret $\widetilde{\mathcal{O}}(dT^{1-\frac{1}{\kappa}})$ with time $\mathcal{O}(t^{1+\frac{d}{\kappa}})$ per iteration.
-			\item $k=2$ recovers the $\widetilde{\mathcal{O}}(\sqrt{dT})$ regret at the cost of \eno{exponential} time
+			\item Meta-parameter $\kappa\geq 2$ allows to trade-off regret 
+			\tikz[baseline]{\node[anchor=base,fill=yellowp, inner sep=3pt](REG1){
+			$\widetilde{\mathcal{O}}(dT^{1-\frac{1}{\kappa}})$};} with time $\mathcal{O}(t^{1+\frac{d}{\kappa}})$ per iteration.
+			\item $k=2$ recovers the \tikz[baseline]{\node[anchor=base,fill=yellowp, inner sep=3pt](REG1){
+					$\widetilde{\mathcal{O}}(\sqrt{dT})$};} regret at the cost of \eno{exponential} time
 			\item $k=d$ yields \enb{sublinear} regret in \enb{polynomial} time
 		\end{itemize}
 	\end{itemize}
