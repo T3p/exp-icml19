@@ -376,16 +376,32 @@ F  }
 		\item (Hyper)parameters as arms $\implies$ \eno{continuous} MAB
 		\item Arms \enb{correlate} through common outcome space
 	\end{itemize}
-		\begin{minipage}{.45\textwidth}
+		\begin{minipage}{.42\textwidth}
 			\includegraphics[width=\textwidth]{plots/spaces7.pdf}
 		\end{minipage}\hfill%
-		\begin{minipage}{.54\textwidth}
-		\noindent\: MAB jargon:
-		\begin{itemize}
+		\begin{minipage}{.56\textwidth}
+	\tikzstyle{background rectangle}=[thick, draw=black!50]
+	\noindent \begin{tikzpicture}[show background rectangle]
+		\node[align=justify, text width=0.82\textwidth, inner sep=0.8em]{
+		\vspace{-0.3cm}
+		\begin{itemize}[leftmargin=*]
+		\compresslist
 			\item $\vx^* \in \arg\max_{\vx\in\Xspace} \mu(\vx)$
 			\item Gap $\Delta_t = \mu(\vx^*) - \mu(\vx_t)$
 			\item $\mathop{Regret}(T) = \sum_{t=0}^{T}\Delta_t$
 		\end{itemize}
+		%_{\vx_0,\vx_1,...,\vx_T \in \Xspace}
+		\textcolor{black}{\textbf{Goal}}: $\min_{\vx_0,...,\vx_T \in \Xspace} \mathop{Regret}(T)$
+	};
+	\node[overlay, fill=white, draw=white, above] at (current bounding box.north) {\textcolor{black}{\textbf{MAB jargon}}};
+	
+	\end{tikzpicture} 		
+%		\noindent\: MAB jargon:
+%		\begin{itemize}
+%			\item $\vx^* \in \arg\max_{\vx\in\Xspace} \mu(\vx)$
+%			\item Gap $\Delta_t = \mu(\vx^*) - \mu(\vx_t)$
+%			\item $\mathop{Regret}(T) = \sum_{t=0}^{T}\Delta_t$
+%		\end{itemize}
 		\end{minipage}
 }
 
