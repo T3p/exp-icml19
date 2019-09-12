@@ -1,0 +1,47 @@
+\mode<presentation>
+
+% Requirement
+%\RequirePackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\RequirePackage{tikz}
+\PassOptionsToPackage{usenames,dvipsnames,svgnames,table}{xcolor}
+\usefonttheme[onlymath]{serif}
+
+\definecolor{poliblue1}{RGB}{93,138,168} 
+\definecolor{poliblue2}{RGB}{41,76,113}
+\definecolor{poliblue3}{RGB}{25,43,67}
+\definecolor{orangep}{RGB}{251,146,116}
+\graphicspath{{./logo/}}
+
+% Settings
+\useinnertheme{polimithx}
+\useoutertheme{polimithx}
+\usecolortheme{polimi}
+
+\setbeamertemplate{navigation symbols}{} 
+
+% Items
+
+\setbeamertemplate{items}[square]
+\setbeamertemplate{itemize subitem}[circle]
+
+% \setbeamertemplate{itemize item}{\tiny$\blacksquare$}
+% \setbeamertemplate{itemize subitem}{$\bullet$}
+\setbeamertemplate{itemize subsubitem}{$-$}
+% 
+% \setbeamertemplate{enumerate item}{\insertenumlabel.}
+% \setbeamertemplate{enumerate subitem}{\insertsubenumlabel.}
+% \setbeamertemplate{enumerate subsubitem}{\insertsubsubenumlabel.}
+
+
+\setbeamertemplate{sections/subsections in toc}[square]
+
+% Transparency
+\setbeamercovered{transparent}
+
+% Beamer bug workaround: only rounded blocks are centered, so use them instead
+% of square blocks.
+\setbeamertemplate{blocks}[rounded][shadow=true] 
+
+%%%% All settings %%%%
+
+\mode<all>
