@@ -349,7 +349,7 @@
 	\vspace{1.5cm}
 	\[
 	\only<1>{
-		\widehat{J}_t(\vtheta) = \frac{1}{t}\sum_{k=0}^{t-1}\underbrace{\frac{p_{\vtheta}(\tau_k)}{\Phi_t(\tau_k)}}_{\textbf{MIS weight}}R(\tau_k), \qquad \underbrace{\Phi_t(\tau) = \frac{1}{\tau}\sum_{k=0}^{t-1}p_{\vtheta_k}(\tau)}_{\textbf{mixture}}
+		\widehat{J}_t(\vtheta) = \frac{1}{t}\sum_{k=0}^{t-1}\underbrace{\frac{p_{\vtheta}(\tau_k)}{\Phi_t(\tau_k)}}_{\textbf{MIS weight}}R(\tau_k), \qquad \underbrace{\Phi_t(\tau) = \frac{1}{t}\sum_{k=0}^{t-1}p_{\vtheta_k}(\tau)}_{\textbf{mixture}}
 	}
 	\only<2>{
 	\wc{J}_t(\vtheta) = \frac{1}{t}\sum_{k=0}^{t-1}{\color{poliblue1}\min\left\{M_t, \frac{p_{\vtheta}(\tau_k)}{\Phi_t(\tau_k)}\right\}}R(\tau_k), \qquad \underbrace{M_t = \sqrt{\frac{td_{2}(p_{\vtheta}\|\Phi_t)}{\log(1/\delta_t)}}}_{\textbf{threshold}}
