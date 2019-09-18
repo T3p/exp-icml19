@@ -27,7 +27,7 @@
 \newcommand{\soft}[1]{\textcolor{softblue}{#1}}
 
 \title{Optimistic Policy Optimization via Multiple Importance Sampling}
-\date[AAA]{\vspace{0.2cm} \\ \small{ 19-20th September 2019 \\ Markets, Algorithms, Prediction and Learning Workshop, Politecnico di Milano, Milano, Italy}}
+\date[AAA]{\vspace{0.2cm} \\ \small{ 19th September 2019 \\ Markets, Algorithms, Prediction and Learning Workshop, Politecnico di Milano, Milano, Italy}}
 \author[M. Papini]{\textbf{Matteo Papini} \quad Alberto Maria Metelli\\
 						{Lorenzo Lupo \quad Marcello Restelli}}
 
@@ -63,22 +63,17 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Reinforcement Learning} 
+\frametitle{Reinforcement Learning~\citep{sutton2018reinforcement}} 
 \begin{center}
-	\includegraphics[width=.6\linewidth]{rl.jpg}
+	\includegraphics[width=.65\linewidth]{rl.jpg}
 \end{center}
-\begin{columns}
-	\begin{column}{.7\textwidth}
 		\begin{itemize}
-			\item Policy $\pi:\Sspace\to\Delta(\Aspace)$
-			\item Trajectories $\tau = (s_0, a_0, r_1, s_1,\dots)$
-			\item Return $R(\tau) = \sum_{t=0}^{T-1}\gamma^t r_{t+1}$
-			\item Goal: $\max\limits_{\pi} \mathbb{E}_{\pi}\left[R(\tau)\right]$
+			\setlength{\itemsep}{8pt}
+			\item<2-> Policy $\pi:\Sspace\to\Delta(\Aspace)$
+			\item<3-> Trajectories $\tau = (s_0, a_0, r_1, s_1,\dots)$
+			\item<4-> Return $R(\tau) = \sum_{t=0}^{T-1}\gamma^t r_{t+1}$
+			\item<5-> Goal: $\max\limits_{\pi} \mathbb{E}_{\pi}\left[R(\tau)\right]$
 		\end{itemize}
-	\end{column}
-	\begin{column}{.3\textwidth}
-\end{column}
-\end{columns}
 \end{frame}
 
 \begin{frame}
@@ -90,7 +85,7 @@
 \begin{frame}
 \frametitle{Continuous Reinforcement Learning}
 \begin{columns}
-		\begin{column}{.4\textwidth}
+		\begin{column}{.5\textwidth}
 			\includegraphics[width=\textwidth]{robots.jpeg}
 		\end{column}
 	\hfill
@@ -106,7 +101,7 @@
 \begin{column}{.65\textwidth}
 \begin{overlayarea}{\textwidth}{\textheight}
 \begin{itemize}
-	\setlength{\itemsep}{20pt}
+	\setlength{\itemsep}{25pt}
 	\item \enb{Parameter space} $\Theta \subseteq \Reals^d$
 	\item<2-> A \enb{parametric policy} $\pi_{\vtheta}$ for each $\vtheta\in\Theta$
 	\item<3-> Each inducing a distribution $p_{\vtheta}$ over \enb{trajectories}
@@ -134,78 +129,107 @@
 
 \begin{frame}
 \frametitle{Policy Gradient Methods}
+\begin{overlayarea}{\textwidth}{\textheight}
 \begin{itemize}
-	\item \enb{Gradient ascent} on $J(\vtheta)$
-	\item Popular algorithms: REINFORCE~\cite{williams1992simple},
-	PGPE~\cite{sehnke2008policy},
-	TRPO~\cite{schulman2015trust}, PPO~\cite{schulman2017proximal}
+	\setlength{\itemsep}{15pt}
+	\item<1-> \enb{Gradient ascent} on $J(\vtheta)$
+	\item<2-> Popular algorithms: {\bf REINFORCE}~\citep{williams1992simple},
+	{\bf PGPE}~\citep{sehnke2008policy},
+	{\bf TRPO}~\citep{schulman2015trust}, {\bf PPO}~\citep{schulman2017proximal}
 \end{itemize}
-\vspace{.5cm}
+\vspace{15pt}
+\only<3->{
 \begin{columns}
-	\begin{column}{.4\textwidth}
-		\includegraphics[width=\textwidth]{dota.jpg}
+	\begin{column}{.5\textwidth}
 		\centering
-		OpenAI Five, 2018
+		\includegraphics[width=.8\textwidth]{dota.jpg}
+		\\
+		\emph{Dota 2~\citep{OpenAI_dota}}
 	\end{column}
-	\hfill
-	\begin{column}{.55\textwidth}
-		\vspace{.5cm}
-		\includegraphics[width=\textwidth]{hand.jpg}
+	\begin{column}{.5\textwidth}
 		\centering
-		Learning Dexterous In-Hand Manipulation, OpenAI, 2019
+		\includegraphics[width=.8\textwidth]{hand.jpg}
+		\\ 
+		\emph{Manipulation ~\citep{andrychowicz2018learning}}
 	\end{column}
 \end{columns}
+}
+\end{overlayarea}
 \end{frame}
 
 \begin{frame} 
 \frametitle{Exploration in Policy Optimization}
-\begin{overlayarea}{\textwidth}{.75\textheight}
+\begin{columns}
+\begin{column}{.65\textwidth}
+\begin{overlayarea}{\textwidth}{\textheight}
+\vspace{.5cm}
 \begin{itemize}
 	\setlength{\itemsep}{20pt}
-	\item<1-> Policy Gradient struggles in presence of \eno{sparse rewards}~\citep{kakade2002approximately}
+	\item<1-> Policy Gradient fails with \eno{sparse rewards}~\citep{kakade2002approximately}
 	\item <2-> Non-convex objective $\implies$ \eno{local minima}
 	\end{itemize}
 	\vspace{1cm}	
 	\only<3->{
-	Remedy: inject stochasticity (\eg entropy bonus~\citep{haarnoja2018soft})\vfill
+	\enb{Entropy bonus}~\citep{haarnoja2018soft}:
+	\vspace{10pt}
 	\begin{itemize}
-		\setlength{\itemsep}{20pt}
+		\setlength{\itemsep}{8pt}
 		\item<4-> \emph{Undirected}
 		\item<5-> \eno{Unsafe}
-		\item<6-> Lack of theoretical understanding
+		\item<6-> Little theoretical understanding~\citep{ahmed2018understanding}
 	\end{itemize}
 }
 \end{overlayarea}
+\end{column}
+\begin{column}{.35\textwidth}
+\begin{overlayarea}{\textwidth}{\textheight}
+\vspace{.2\textheight}
+\includegraphics[width=\textwidth]{dunes.jpg}
+\end{overlayarea}
+\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Multi Armed Bandit (MAB)}
 	\begin{columns}
-		\begin{column}{.6\textwidth}
+		\begin{column}{.65\textwidth}
+			\begin{overlayarea}{\textwidth}{\textheight}
+			\vspace{.5cm}
 			\begin{itemize}
 				\setlength{\itemsep}{20pt}
 				\item<1-> Arms $a \in \Aspace$
 				\item<2-> Expected payoff $\mu(a)$
 				\item<3-> Goal: $\min \Reg(T) = \sum\limits_{t=1}^T[\mu(a^*) - \mu(a_t)]$
-			\end{itemize}
+				\item<4-> Wide literature on \enb{directed exploration}~\citep{bubeck2012regret,lattimore2019bandit}	
+		\end{itemize}
+		\end{overlayarea}
 		\end{column}
-		\begin{column}{.4\textwidth}
+		\begin{column}{.35\textwidth}
+			\begin{overlayarea}{\textwidth}{\textheight}
+			\vspace{.2\textheight}
 			\includegraphics[width=\textwidth]{slot.jpg}
+			\end{overlayarea}
 	\end{column}
 	\end{columns}
-	
 \end{frame}
 
 \begin{frame}
 \frametitle{Optimism in Face of Uncertainty}
 \begin{itemize}
-	\item<2-> OFU strategy (\eg UCB~\cite{lai1985asymptotically}):
+	\item<2-> OFU strategy (\eg UCB~\citep{lai1985asymptotically}):
 \end{itemize}
 	\[
 	a_t\hspace{.5cm} =\hspace{.5cm} \arg\max_{a\in\Aspace}\hspace{.5cm} \underbrace{\vphantom{C\sqrt{\frac{\log(\frac{1}{\delta})}{\#a}}}\widehat{\mu}(a)}_{\textbf{ESTIMATE}} \hspace{.5cm}
+	%
+	\only<1>{\phantom{+\hspace{.5cm} \underbrace{C\sqrt{\frac{\log(\frac{1}{\delta})}{\#a}}}_{\textbf{EXPLORATION BONUS}}}
+	}
+	%
 	\only<2->{+\hspace{.5cm} \underbrace{C\sqrt{\frac{\log(\frac{1}{\delta})}{\#a}}}_{\textbf{EXPLORATION BONUS}}}
 	\]
+\vspace{20pt}
 \begin{itemize}
+	\setlength{\itemsep}{20pt}
 	\item<3-> Idea: be \enb{optimistic} about unknown arms
 	\item<4-> Can be applied to RL~(\eg~\cite{jaksch2010near})
 \end{itemize}
@@ -220,7 +244,7 @@
 	\setlength{\itemsep}{20pt}
 	\item<1-> \enb{Arms:} parameters $\vtheta$\vfill
 	\item<2-> \enb{Payoff:} expected return $J(\vtheta)$\vfill
-	\item<3-> \eno{Continuous MAB}: \emph{need} structure~\citep{kleinberg2013bandits}
+	\item<3-> \eno{Continuous MAB}: we \emph{need} structure~\citep{kleinberg2013bandits}
 	\vspace{.5cm}
 	\[
 		\vtheta_t\hspace{.2cm} =\hspace{.2cm} \arg\max_{\vtheta\in\Theta}\hspace{.5cm} \vphantom{C\sqrt{\frac{\log(\frac{1}{\delta})}{\#a}}}\textcolor{orangep}{\widehat{J}(\vtheta_t)} \hspace{.5cm}+\hspace{.2cm} C\sqrt{\frac{\log(\frac{1}{\delta})}{\textcolor{orangep}{\#\vtheta}}}
@@ -267,6 +291,7 @@
 			\setlength{\itemsep}{20pt}
 			\item<2-> Arms correlate through overlapping trajectory distributions
 			\item<3> Use \textbf{\textcolor{greenp}{Importance Sampling (IS)}} to transfer information
+			\vspace{20pt}
 			\[
 				J(\textcolor{redp}{\vtheta_B}) = \mathop{\mathbb{E}}\limits_{\tau\sim \textcolor{poliblue1}{p_{\vtheta_A}}}\left[
 					\frac{\textcolor{redp}{p_{\vtheta_B}}(\tau)}{\textcolor{poliblue1}{p_{\vtheta_A}}(\tau)}R(\tau)
@@ -280,7 +305,7 @@
 
 
 \begin{frame} 
-\frametitle{The OPTIMIST index} 
+\frametitle{The OPTIMIST index~\citep{papini2019optimistic}} 
 \begin{overlayarea}{\textwidth}{.5\textheight}
 \begin{itemize}
 	\setlength{\itemsep}{20pt}
@@ -300,6 +325,7 @@
 	\end{align*}
 \end{itemize}
 \end{overlayarea}
+\vspace{-10pt}
 \begin{overlayarea}{\textwidth}{.25\textheight}
 \only<1>{
 	\hspace{.3\textwidth}
@@ -316,16 +342,17 @@
 \frametitle{Robust Multiple Importance Sampling Estimator}
 \begin{itemize}
 	\setlength{\itemsep}{20pt}
-	\item<1-> Use \eno{Multiple} Importance Sampling (MIS)~\cite{veach_optimally_1995} to reuse \emph{all} past experience
-	\item<2-> Use \enb{dynamic truncation} to prevent \eno{heavy-tails}~\cite{bubeck2013bandits,metelli2018policy}
+	\item<1-> Use \enb{Multiple} Importance Sampling (MIS)~\citep{veach_optimally_1995} to reuse \emph{all} past experience
+	\item<2-> Use \enb{dynamic truncation} to prevent \eno{heavy-tails}~\citep{bubeck2013bandits,metelli2018policy}
 \end{itemize}
 \begin{overlayarea}{\textwidth}{\textheight}
+	\vspace{1.5cm}
 	\[
 	\only<1>{
 		\widehat{J}_t(\vtheta) = \frac{1}{t}\sum_{k=0}^{t-1}\underbrace{\frac{p_{\vtheta}(\tau_k)}{\Phi_t(\tau_k)}}_{\textbf{MIS weight}}R(\tau_k), \qquad \underbrace{\Phi_t(\tau) = \frac{1}{\tau}\sum_{k=0}^{t-1}p_{\vtheta_k}(\tau)}_{\textbf{mixture}}
 	}
 	\only<2>{
-	\wc{J}_t(\vtheta) = \frac{1}{t}\sum_{k=0}^{t-1}\min\left\{M_t, \frac{p_{\vtheta}(\tau_k)}{\Phi_t(\tau_k)}\right\}R(\tau_k), \qquad \underbrace{M_t = \sqrt{\frac{td_{2}(p_{\vtheta}\|\Phi_t)}{\log(1/\delta_t)}}}_{\textbf{threshold}}
+	\wc{J}_t(\vtheta) = \frac{1}{t}\sum_{k=0}^{t-1}{\color{poliblue1}\min\left\{M_t, \frac{p_{\vtheta}(\tau_k)}{\Phi_t(\tau_k)}\right\}}R(\tau_k), \qquad \underbrace{M_t = \sqrt{\frac{td_{2}(p_{\vtheta}\|\Phi_t)}{\log(1/\delta_t)}}}_{\textbf{threshold}}
 	}
 	\]
 \end{overlayarea}
@@ -334,13 +361,17 @@
 \begin{frame}
 \frametitle{Exploration Bonus}
 \begin{itemize}
-	\item<1-> Measure novelty with the \emph{exponentiated} \Renyi divergence~\cite{cortes2010learning}
+	\item<1-> Measure novelty with the \emph{exponentiated} \enb{\Renyi 
+	divergence}~\citep{cortes2010learning, metelli2018policy}
+	\vspace{5pt}
 	\[
 		d_2(p_{\vtheta}\| \Phi_t) = \int \left(\frac{\de p_{\vtheta}}{\de \Phi_t}\right)^2 \de \Phi_t
 	\]
-	\item Used to \enb{upper bound} the true value (OFU):
+	\vspace{10pt}
+	\item<2-> Used to \enb{upper bound} the true value (OFU):
+	\vspace{5pt}
 	\[
-		J(\vtheta) \leq \wc{J}_t(\vtheta) + C\,
+		J(\vtheta)\quad \leq\quad \wc{J}_t(\vtheta)\quad + \quad C\,
 		\sqrt{\frac{d_{2}(p_{\vtheta}\|\Phi_{t})\log\frac{1}{\delta_t}}{t}} \qquad \text{with high probability}
 	\] 
 \end{itemize}
@@ -368,9 +399,10 @@
 \frametitle{OPTIMIST in Practice}
 \begin{itemize}
 	\setlength{\itemsep}{20pt}
-	\item Easy implementation only for \emph{parameter-based exploration}~\cite{sehnke2008policy}
-	\item Difficult index optimization $\implies$ \eno{discretization}
-	\item Computational time can be traded-off with regret
+	\item<1-> Easy implementation only for \emph{parameter-based exploration}~\cite{sehnke2008policy}
+	\item<2-> Difficult index optimization $\implies$ \eno{discretization}
+	\item<3-> Computational time can be traded-off with regret
+	\vspace{20pt}
 	\[
 		\wt{\mathcal{O}}\left(dT^{(1-\epsilon/d)}\right) \text{ regret } \implies \mathcal{O}\left(t^{(1+\epsilon)}\right) \text{ time }
 	\]
@@ -379,21 +411,28 @@
 
 \begin{frame}
 \frametitle{Empirical Results} 
+\vspace{.5cm}
 \begin{columns}
 	\begin{column}{.5\textwidth}
+		\begin{overlayarea}{\textwidth}{\textheight}
 		\centering
 		{\bf River Swim}
 		\begin{figure}
 			\includegraphics[width=\textwidth]{river.pdf}
 		\end{figure}
+	\end{overlayarea}	
 	\end{column}
 \hfill
-	\begin{column}{.45\textwidth}
+	\begin{column}{.5\textwidth}
+		\begin{overlayarea}{\textwidth}{\textheight}
 		\centering
+		\only<2->{
 		{\bf Mountain Car}
 		\begin{figure}
-			\includegraphics[width=\textwidth]{MC_mu.pdf}
+			\includegraphics[width=\textwidth]{mc.pdf}
 		\end{figure}
+	}
+	\end{overlayarea}
 	\end{column}
 \end{columns}
 \end{frame}
@@ -402,44 +441,65 @@
 \frametitle{Future Work}
 \begin{itemize}
 	\setlength{\itemsep}{20pt}
-	\item Extend to action-based exploration
-	\item Improve index optimization
-	\item Posterior sampling~\cite{thompson1933likelihood}
+	\item<1-> Extend to action-based exploration
+	\item<2-> Improve index optimization
+	\item<3-> Posterior sampling~\citep{thompson1933likelihood}
 \end{itemize}
 \end{frame}
 
+
 \begin{frame}
-\frametitle{The Abstract Problem~\cite{chu2019probability}}
-	\begin{itemize}
-		\setlength{\itemsep}{20pt}
-		\item Outcome space $\mathcal{Z}$ 
-		\item Decision set: $\mathcal{P}\in\Delta(\mathcal{Z})$
-		\item Payoff $f:\mathcal{Z}\to\Reals$
-		\item $\max\limits_{p\in\mathcal{P}}\mathbb{E}_{z\sim p}\left[f(z)\right]$
-	\end{itemize}
+\frametitle{The Abstract Problem~\citep{chu2019probability}}
+\begin{columns}
+	\begin{column}{.65\textwidth}
+		\begin{overlayarea}{\textwidth}{\textheight}
+			\vspace{1cm}
+			\begin{itemize}
+			\setlength{\itemsep}{20pt}
+			\item<1-> Outcome space $\mathcal{Z}$ 
+			\item<2-> Decision set $\mathcal{P}\in\Delta(\mathcal{Z})$
+			\item<3-> Payoff $f:\mathcal{Z}\to\Reals$
+			\item<4-> $\max\limits_{p\in\mathcal{P}}\mathbb{E}_{z\sim p}\left[f(z)\right]$
+		\end{itemize}
+		\end{overlayarea}
+	\end{column}
+	\begin{column}{.35\textwidth}
+		\begin{overlayarea}{\textwidth}{\textheight}
+			\vspace{.2\textheight}
+			\includegraphics[width=\textwidth]{dice.png}
+		\end{overlayarea}
+	\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame}[plain]
 %\frametitle{Thanks} 
 \begin{center}
-	\huge{\enb{Thank You for Your Attention!}}
+	\huge{\enb{Thank you for your attention!}}
 \end{center}
-
-	\begin{itemize}
-		\setlength{\itemsep}{20pt}
-		\item[] Papini, Matteo, Alberto Maria Metelli, Lorenzo Lupo, and Marcello Restelli. "Optimistic Policy Optimization via Multiple Importance Sampling." In International Conference on Machine Learning, pp. 4989-4999. 2019.
-		\item[] Code: \url{github.com/WolfLo/optimist}
-		\item[] Contact: matteo.papini@polimi.it
-		\item[] Web page: \url{t3p.github.io/icml19} 
-	\end{itemize}
-	%\includegraphics[width=\textwidth]{qr.png}
+		\vspace{.5cm}
+		\emph{Papini, Matteo, Alberto Maria Metelli, Lorenzo Lupo, and Marcello Restelli. "Optimistic Policy Optimization via Multiple Importance Sampling." In International Conference on Machine Learning, pp. 4989-4999. 2019.}
+		\vspace{.5cm}
+		\begin{columns}
+			\begin{column}{.75\textwidth}
+			\begin{itemize}
+				\setlength{\itemsep}{20pt}
+				\item[] Code: \url{github.com/WolfLo/optimist}
+				\item[] Contact: matteo.papini@polimi.it
+				\item[] Web page: \url{t3p.github.io/icml19} 
+			\end{itemize}	
+			\end{column}
+			\begin{column}{.25\textwidth}
+				\includegraphics[width=\textwidth]{qr.png} 
+			\end{column}
+		\end{columns}
 \end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}[allowframebreaks,fragile]
 \frametitle{References}
-\bibliographystyle{abbrv}
+\bibliographystyle{plainnat}
 \bibliography{../biblio.bib}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
